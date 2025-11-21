@@ -6,21 +6,41 @@
     <title>Thiruvalla Assembly Constituency</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="app">
         <header class="header">
-            <h1>Thiruvalla Assembly Constituency</h1>
-            <div class="stats">
-                <div class="stat-item">
-                    <span class="stat-label">Total Wards</span>
-                    <span class="stat-value" id="total-wards">0</span>
+            <div class="header-top">
+                <h1>Thiruvalla Assembly Constituency</h1>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Wards</span>
+                        <span class="stat-value" id="total-wards">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div id="breadcrumbs" class="breadcrumbs"></div>
+                <div class="download-controls">
+                    <select id="download-level">
+                        <option value="AC">AC Boundary</option>
+                        <option value="MANDAL">Organizational Mandal</option>
+                        <option value="PANCHAYAT">Panchayat</option>
+                        <option value="WARD">Ward</option>
+                    </select>
+                    <button id="preview-btn" class="btn-secondary">Preview</button>
+                    <button id="download-btn" class="btn-primary">Download Map</button>
                 </div>
             </div>
         </header>
         <main>
-            <div id="map"></div>
+            <div id="map">
+                <div id="legend" class="map-legend hidden"></div>
+            </div>
             <div id="info-panel" class="info-panel hidden">
                 <div class="panel-header">
                     <h2>Ward Details</h2>
