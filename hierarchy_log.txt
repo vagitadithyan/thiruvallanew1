@@ -1,0 +1,1755 @@
+🔄 Generating COMPLETE hierarchy with fuzzy matching...
+======================================================================
+
+📂 Reading CSV data...
+✅ Found 30 org districts
+
+======================================================================
+📍 DISTRICT: Alappuzha North
+======================================================================
+
+  📌 AC: Alappuzha
+    🔹 Mandal: Alappuzha
+      ❌ Alappuzha (file not found)
+      ❌ Aryad (file not found)
+    🔹 Mandal: Mararikkulam
+      ❌ Mannanchery (file not found)
+      ❌ Mararikkulam North (file not found)
+      ❌ Mararikkulam South (file not found)
+
+  📌 AC: Ambalappuzha
+    🔹 Mandal: Ambalappuzha
+      ❌ Ambalappuzha North (file not found)
+      ❌ Ambalappuzha South (file not found)
+      ❌ Punnapra South (file not found)
+      ❌ Purakkad (file not found)
+    🔹 Mandal: Mullakkal
+      ❌ Punnapra North (file not found)
+
+  📌 AC: Aroor
+    🔹 Mandal: Aroor
+      ❌ Aroor (file not found)
+      ❌ Ezhupunna (file not found)
+      ❌ Kodamthuruth (file not found)
+      ❌ Kuthiathode (file not found)
+      ❌ Thuravoor (file not found)
+    🔹 Mandal: Panavally
+      ❌ Arookutty (file not found)
+      ❌ Chennam Pallippuram (file not found)
+      ❌ Panavally (file not found)
+      ❌ Perumbalam (file not found)
+      ❌ Thycattussery (file not found)
+
+  📌 AC: Cherthala
+    🔹 Mandal: Cherthala
+      ❌ Cherthala (file not found)
+      ❌ Kadakkarapally (file not found)
+      ❌ Pattanakkad (file not found)
+      ❌ Vayalar (file not found)
+    🔹 Mandal: Muhamma
+      ❌ Cherthala South (file not found)
+      ❌ Kanjikkuzhy (file not found)
+      ❌ Muhamma (file not found)
+      ❌ Thanneermukkam (file not found)
+
+  📌 AC: Kuttanad
+    🔹 Mandal: Kuttanadu
+      ❌ Kainakary (file not found)
+      ❌ Kavalam (file not found)
+      ❌ Muttar (file not found)
+      ❌ Neelamperoor (file not found)
+      ❌ Pulincunnu (file not found)
+      ❌ Ramankary (file not found)
+      ❌ Veliyanad (file not found)
+    🔹 Mandal: Thakazhy
+      ❌ Champakkulam (file not found)
+      ❌ Edathua (file not found)
+      ❌ Nedumudi (file not found)
+      ❌ Thakazhy (file not found)
+      ❌ Thalavady (file not found)
+      ❌ Veeyapuram (file not found)
+
+======================================================================
+📍 DISTRICT: Alappuzha South
+======================================================================
+
+  📌 AC: Chenganur
+    🔹 Mandal: Chengannur
+      ❌ Ala (file not found)
+      ❌ Chengannur (file not found)
+      ❌ Mulakkuzha (file not found)
+      ❌ Pandanad (file not found)
+      ❌ Thiruvanvandoor (file not found)
+      ❌ Venmony (file not found)
+    🔹 Mandal: Mannar
+      ❌ Budhannur (file not found)
+      ❌ Chennithala Thripperuthura (file not found)
+      ❌ Cheriyanad (file not found)
+      ❌ Mannar (file not found)
+      ❌ Puliyur (file not found)
+
+  📌 AC: Haripad
+    🔹 Mandal: Haripad
+      ❌ Cheruthana (file not found)
+      ❌ Harippad (file not found)
+      ❌ Karuvatta (file not found)
+      ❌ Kumarapuram (file not found)
+      ❌ Pallippad (file not found)
+    🔹 Mandal: Karthikappalli
+      ❌ Aarattupuzha (file not found)
+      ❌ Cheppad (file not found)
+      ❌ Chingoli (file not found)
+      ❌ Karthikapally (file not found)
+      ❌ Muthukulam (file not found)
+      ❌ Thrikkunnappuzha (file not found)
+
+  📌 AC: Kayamkulam
+    🔹 Mandal: Chettikulangara
+      ❌ Bharanikkavu (file not found)
+      ❌ Chettikulangara (file not found)
+      ❌ Krishnapuram (file not found)
+    🔹 Mandal: Kayamkulam
+      ❌ Devikulangara (file not found)
+      ❌ Kandalloor (file not found)
+      ❌ Kayamkulam (file not found)
+      ❌ Pathiyoor (file not found)
+
+  📌 AC: Mavelikkara (SC)
+    🔹 Mandal: Charummoodu
+      ❌ Chunakkara (file not found)
+      ❌ Palamel (file not found)
+      ❌ Vallikunnam (file not found)
+    🔹 Mandal: Mavelikkara
+      ❌ Mavelikkara (file not found)
+      ❌ Mavelikkara - Thamarakkulam (file not found)
+      ❌ Mavelikkara Thekkekkara (file not found)
+      ❌ Nooranad (file not found)
+      ❌ Thazhakkara (file not found)
+
+======================================================================
+📍 DISTRICT: Ernakulam City
+======================================================================
+
+  📌 AC: Eranakulam
+    🔹 Mandal: Ernakulam North
+      ❌ Cheranallur (file not found)
+
+  📌 AC: Kochi
+    🔹 Mandal: Kochi
+      ❌ Chellanam (file not found)
+      ❌ Kumbalanghy (file not found)
+    🔹 Mandal: Mattancherry
+      ❌ Kochi (file not found)
+
+  📌 AC: Thrikkakara
+    🔹 Mandal: Thrikkakara
+      ❌ Thrikkakara (file not found)
+
+  📌 AC: Thripunithura
+    🔹 Mandal: Palluruthy
+      ❌ Kumbalam (file not found)
+      ❌ Maradu (file not found)
+    🔹 Mandal: Thrippunithura
+      ❌ Thrippunithura (file not found)
+      ❌ Udayamperoor (file not found)
+
+  📌 AC: Vypen
+    🔹 Mandal: Cherayi
+      ❌ Edavanakad (file not found)
+      ❌ Kuzhuppilly (file not found)
+      ❌ Nayarambalam (file not found)
+      ❌ Pallippuram (file not found)
+    🔹 Mandal: Vypin
+      ❌ Elamkunnapuzha (file not found)
+      ❌ Kadamakkudy (file not found)
+      ❌ Mulavukadu (file not found)
+      ❌ Njarakkal (file not found)
+
+======================================================================
+📍 DISTRICT: Ernakulam East
+======================================================================
+
+  📌 AC: Kothamangalam
+    🔹 Mandal: Kavalangad
+      ❌ Kavalangad (file not found)
+      ❌ Keerampara (file not found)
+      ❌ Kuttampuzha (file not found)
+      ❌ Pallarimangalam (file not found)
+      ❌ Varapetty (file not found)
+    🔹 Mandal: Kothamangalam
+      ❌ Kothamangalam (file not found)
+      ❌ Kottapady (file not found)
+      ❌ Nellikuzhy (file not found)
+      ❌ Pindimana (file not found)
+
+  📌 AC: Kunnathunad (SC)
+    🔹 Mandal: Kolenchery
+      ❌ Aikkaranadu (file not found)
+      ❌ Poothrikka (file not found)
+      ❌ Thiruvaniyoor (file not found)
+      ❌ Vadavucode- Puthencruz (file not found)
+    🔹 Mandal: Kunnathunadu
+      ❌ Kizhakkambalam (file not found)
+      ❌ Kunnathunad (file not found)
+      ❌ Mazhuvannur (file not found)
+      ❌ Vazhakkulam (file not found)
+
+  📌 AC: Muvattupuzha
+    🔹 Mandal: Muvattupuzha
+      ❌ Arakkuzha (file not found)
+      ❌ Marady (file not found)
+      ❌ Muvattupuzha (file not found)
+      ❌ Paipra (file not found)
+      ❌ Palakuzha (file not found)
+      ❌ Valakom (file not found)
+    🔹 Mandal: Vazhakkulam
+      ❌ Avoly (file not found)
+      ❌ Ayavana (file not found)
+      ❌ Kalloorkad (file not found)
+      ❌ Manjallur (file not found)
+      ❌ Paingottoor (file not found)
+      ❌ Pothanikkad (file not found)
+
+  📌 AC: Piravom
+    🔹 Mandal: Chottanikara
+      ❌ Amballur (file not found)
+      ❌ Chottanikara (file not found)
+      ❌ Edakkattuvayal (file not found)
+      ❌ Maneedu (file not found)
+      ❌ Mulamthuruthy (file not found)
+    🔹 Mandal: Piravom
+      ❌ Elanji (file not found)
+      ❌ Kothattukulam (file not found)
+      ❌ Pampakuda (file not found)
+      ❌ Piravom (file not found)
+      ❌ Ramamangalam (file not found)
+      ❌ Thirumaradi (file not found)
+
+======================================================================
+📍 DISTRICT: Ernakulam North
+======================================================================
+
+  📌 AC: Aluva
+    🔹 Mandal: Aluva
+      ❌ Aluva (file not found)
+      ❌ Choornikkara (file not found)
+      ❌ Edathala (file not found)
+      ❌ Keezhmadu (file not found)
+    🔹 Mandal: Nedumbassery
+      ❌ Chengamanadu (file not found)
+      ❌ Kanjoor (file not found)
+      ❌ Nedumbassery (file not found)
+      ❌ Sreemoolanagaram (file not found)
+
+  📌 AC: Angamaly
+    🔹 Mandal: Angamaly
+      ❌ Angamaly (file not found)
+      ❌ Karukutty (file not found)
+      ❌ Mookkanoor (file not found)
+      ❌ Parakkadavu (file not found)
+    🔹 Mandal: Aroor
+      ❌ Thuravoor (file not found)
+    🔹 Mandal: Kalady
+      ❌ Ayyampuzha (file not found)
+      ❌ Kalady (file not found)
+      ❌ Malayattoor- Neeleeswaram (file not found)
+      ❌ Manjapra (file not found)
+
+  📌 AC: Kalamassery
+    🔹 Mandal: Kalamassery
+      ❌ Eloor (file not found)
+      ❌ Kadungalloor (file not found)
+      ❌ Kalamassery (file not found)
+    🔹 Mandal: Karumalloor
+      ❌ Alangad (file not found)
+      ❌ Karumalloor (file not found)
+      ❌ Kunnukara (file not found)
+
+  📌 AC: Paravur
+    🔹 Mandal: Paravoor
+      ❌ North Paravur (file not found)
+    🔹 Mandal: Paravur
+      ❌ Ezhikkara (file not found)
+      ❌ Kottuvally (file not found)
+      ❌ Varapuzha (file not found)
+    🔹 Mandal: Vadakkekara
+      ❌ Chendamangalam (file not found)
+      ❌ Chittattukara (file not found)
+      ❌ Puthenvelikara (file not found)
+      ❌ Vadakkekara (file not found)
+
+  📌 AC: Perumbavoor
+    🔹 Mandal: Kuruppampady
+      ❌ Asamannur (file not found)
+      ❌ Mudakkuzha (file not found)
+      ❌ Rayamangalam (file not found)
+      ❌ Vengoor (file not found)
+    🔹 Mandal: Perumbavoor
+      ❌ Koovappady (file not found)
+      ❌ Okkal (file not found)
+      ❌ Perumbavoor (file not found)
+      ❌ Vengola (file not found)
+
+======================================================================
+📍 DISTRICT: Idukki North
+======================================================================
+
+  📌 AC: Devikulam (SC)
+    🔹 Mandal: Adimali
+      ❌ Adimali (file not found)
+      ❌ Baisonvalley (file not found)
+      ❌ Mankulam (file not found)
+      ❌ Pallivasal (file not found)
+      ❌ Vellathooval (file not found)
+    🔹 Mandal: Devikulam
+      ❌ Chinnakanal (file not found)
+      ❌ Devikulam (file not found)
+      ❌ Edamalakudy (file not found)
+      ❌ Kanthalloor (file not found)
+      ❌ Marayoor (file not found)
+      ❌ Munnar (file not found)
+      ❌ Vattavada (file not found)
+
+  📌 AC: Thodupuzha
+    🔹 Mandal: Thodupuzha
+      ❌ Karimkunnam (file not found)
+      ❌ Kumaramangalam (file not found)
+      ❌ Manakkad (file not found)
+      ❌ Muttom (file not found)
+      ❌ Purapuzha (file not found)
+      ❌ Thodupuzha (file not found)
+    🔹 Mandal: Vannappuram
+      ❌ Alakode (file not found)
+      ❌ Edavetty (file not found)
+      ❌ Karimannoor (file not found)
+      ❌ Kodikulam (file not found)
+      ❌ Udumbannoor (file not found)
+      ❌ Vannappuram (file not found)
+      ❌ Velliyamattom (file not found)
+
+======================================================================
+📍 DISTRICT: Idukki South
+======================================================================
+
+  📌 AC: Idukki
+    🔹 Mandal: Idukki
+      ❌ Arakulam (file not found)
+      ❌ Idukki-Kanjikuzhy (file not found)
+      ❌ Konnathady (file not found)
+      ❌ Kudayathoor (file not found)
+      ❌ Vathikudy (file not found)
+      ❌ Vazhathope (file not found)
+    🔹 Mandal: Kattappana
+      ❌ Kamakshy (file not found)
+      ❌ Kanchiyar (file not found)
+      ❌ Kattappana (file not found)
+      ❌ Mariyapuram (file not found)
+
+  📌 AC: Peerumade
+    🔹 Mandal: Elappara
+      ❌ Ayyappancoil (file not found)
+      ❌ Elappara (file not found)
+      ❌ Kokkayar (file not found)
+      ❌ Peruvanthanam (file not found)
+      ❌ Upputhara (file not found)
+    🔹 Mandal: Peermade
+      ❌ Chakkupallam (file not found)
+      ❌ Kumily (file not found)
+      ❌ Peermade (file not found)
+      ❌ Vandiperiyar (file not found)
+
+  📌 AC: Udumbanchola
+    🔹 Mandal: Udumbanchola
+      ❌ Nedumkandom (file not found)
+      ❌ Rajakkad (file not found)
+      ❌ Rajakumary (file not found)
+      ❌ Santhanpara (file not found)
+      ❌ Senapathy (file not found)
+      ❌ Udumbanchola (file not found)
+    🔹 Mandal: Vandanmedu
+      ❌ Erattayar (file not found)
+      ❌ Karunapuram (file not found)
+      ❌ Pampadumpara (file not found)
+      ❌ Vandanmedu (file not found)
+
+======================================================================
+📍 DISTRICT: Kannur North
+======================================================================
+
+  📌 AC: Azhikode
+    🔹 Mandal: Azhikode
+      ❌ Azheekode (file not found)
+      ❌ Kannur (file not found)
+    🔹 Mandal: Chirakkal
+      ❌ Chirakkal (file not found)
+      ❌ Narath (file not found)
+      ❌ Pappinissery (file not found)
+      ❌ Valapattanam (file not found)
+
+  📌 AC: Irikkur
+    🔹 Mandal: Alakkode
+      ❌ Alakode (file not found)
+      ❌ Chengalayi (file not found)
+      ❌ Naduvil (file not found)
+      ❌ Udayagiri (file not found)
+    🔹 Mandal: Irikkur
+      ❌ Eruvessy (file not found)
+      ❌ Irikkur (file not found)
+      ❌ Payyavoor (file not found)
+      ❌ Sreekandapuram (file not found)
+      ❌ Ulikkal (file not found)
+
+  📌 AC: Kalliasseri
+    🔹 Mandal: Kalliassery
+      ❌ Cherukunnu (file not found)
+      ❌ Kalliassery (file not found)
+      ❌ Kannapuram (file not found)
+      ❌ Mattool (file not found)
+      ❌ Pattuvam (file not found)
+    🔹 Mandal: Madayi
+      ❌ Cheruthazham (file not found)
+      ❌ Ezhome (file not found)
+      ❌ Kadannappalli- Panappuzha (file not found)
+      ❌ Kunhimangalam (file not found)
+      ❌ Madayi (file not found)
+
+  📌 AC: Kannur
+    🔹 Mandal: Edakkad
+      ❌ Munderi (file not found)
+
+  📌 AC: Payyannur
+    🔹 Mandal: Payyannur
+      ❌ Karivellur- Peralam (file not found)
+      ❌ Payyannur (file not found)
+      ❌ Ramanthali (file not found)
+    🔹 Mandal: Peringome
+      ❌ Cherupuzha (file not found)
+      ❌ Eramam- Kuttoor (file not found)
+      ❌ Kankole- Alapadamba (file not found)
+      ❌ Peringome Vayakkara (file not found)
+
+  📌 AC: Taliparamba
+    🔹 Mandal: Mayyil
+      ❌ Anthoor (file not found)
+      ❌ Kolachery (file not found)
+      ❌ Kuttiattoor (file not found)
+      ❌ Malappattam (file not found)
+      ❌ Mayyil (file not found)
+    🔹 Mandal: Taliparamba
+      ❌ Chapparapadavu (file not found)
+      ❌ Kurumathoor (file not found)
+      ❌ Pariyaram (file not found)
+      ❌ Taliparamba (file not found)
+
+======================================================================
+📍 DISTRICT: Kannur South
+======================================================================
+
+  📌 AC: Dharmadam
+    🔹 Mandal: Chakkarakkal
+      ❌ Ancharakandy (file not found)
+      ❌ Chembilode (file not found)
+      ❌ Peralassery (file not found)
+      ❌ Vengad (file not found)
+    🔹 Mandal: Dharmadom
+      ❌ Dharmadam (file not found)
+      ❌ Kadambur (file not found)
+      ❌ Muzhappilangad (file not found)
+      ❌ Pinarayi (file not found)
+
+  📌 AC: Kuthuparamba
+    🔹 Mandal: Kuthuparamba
+      ❌ Koothuparamba (file not found)
+      ❌ Kottayam (file not found)
+      ❌ Mokeri (file not found)
+      ❌ Pattiam (file not found)
+    🔹 Mandal: Panoor
+      ❌ Kunnothuparamba (file not found)
+      ❌ Panoor (file not found)
+      ❌ Thripangottoor (file not found)
+
+  📌 AC: Mattannur
+    🔹 Mandal: Chittariparamba
+      ❌ Chittariparamba (file not found)
+      ❌ Kolayad (file not found)
+      ❌ Malur (file not found)
+      ❌ Mangattidam (file not found)
+    🔹 Mandal: Mattannur
+      ❌ Keezhallur (file not found)
+      ❌ Koodali (file not found)
+      ❌ Padiyoor Kalliad (file not found)
+      ❌ Thillankeri (file not found)
+
+  📌 AC: Peravoor
+    🔹 Mandal: Iritty
+      ❌ Aralam (file not found)
+      ❌ Ayyankunnu (file not found)
+      ❌ Iritty (file not found)
+      ❌ Payam (file not found)
+    🔹 Mandal: Peravoor
+      ❌ Kanichar (file not found)
+      ❌ Kelakam (file not found)
+      ❌ Kottiyoor (file not found)
+      ❌ Muzhakkunnu (file not found)
+      ❌ Peravoor (file not found)
+
+  📌 AC: Thalassery
+    🔹 Mandal: Kathiroor
+      ❌ Chockli (file not found)
+      ❌ Eranholi (file not found)
+      ❌ Kadirur (file not found)
+      ❌ Panniyannur (file not found)
+    🔹 Mandal: Thalassery
+      ❌ New Mahe (file not found)
+      ❌ Thalassery (file not found)
+
+======================================================================
+📍 DISTRICT: Kasaragod
+======================================================================
+
+  📌 AC: Kanhangad
+    🔹 Mandal: Kanhangad
+      ✅ Ajanur (24 wards)
+      ✅ Kanhangad (47 wards)
+      ✅ Madikai (16 wards)
+    ✅ Mandal boundary created (87 geometries)
+    🔹 Mandal: Vellarikundu
+      ✅ Balal (17 wards)
+      ✅ Kallar (15 wards)
+      ✅ Kinanoor - Karindalam (19 wards)
+      ✅ Kodom -Belur (21 wards)
+      ✅ Panathady (17 wards)
+    ✅ Mandal boundary created (89 geometries)
+  ✅ AC boundary created (176 geometries)
+
+  📌 AC: Kasargod
+    🔹 Mandal: Badiadka
+      ✅ Badiadka (19 wards)
+      ❌ Bellur (file not found)
+      ✅ Chengala (24 wards)
+      ✅ Karadka (16 wards)
+      ✅ Kumbadaje (14 wards)
+    ✅ Mandal boundary created (73 geometries)
+    🔹 Mandal: Kasaragod
+      ✅ Kasaragod (39 wards)
+      ✅ Madhur (24 wards)
+      ✅ Mogralputhur (17 wards)
+    ✅ Mandal boundary created (80 geometries)
+  ✅ AC boundary created (153 geometries)
+
+  📌 AC: Manjeshwaram
+    🔹 Mandal: Kumbla
+      ✅ Enmakaje (18 wards)
+      ✅ Kumbla (24 wards)
+      ✅ Mangalpady (24 wards)
+      ✅ Puthige (16 wards)
+    ✅ Mandal boundary created (82 geometries)
+    🔹 Mandal: Manjeshwar
+      ✅ Manjeshwar (24 wards)
+      ✅ Meenja (17 wards)
+      ✅ Paivalike (21 wards)
+      ✅ Vorkady (18 wards)
+    ✅ Mandal boundary created (80 geometries)
+  ✅ AC boundary created (162 geometries)
+
+  📌 AC: Thrikaripur
+    🔹 Mandal: Nileshwaram
+      ✅ Cheruvathur (18 wards)
+      ✅ East Eleri (19 wards)
+      ✅ Kayyur -  Cheemeni (17 wards)
+      ✅ Nileshwar (34 wards)
+      ✅ West Eleri (19 wards)
+    ✅ Mandal boundary created (107 geometries)
+    🔹 Mandal: Trikaripur
+      ✅ Padne (16 wards)
+      ✅ Pilicode (18 wards)
+      ✅ Trikaripur (23 wards)
+      ✅ Valiyaparamba (14 wards)
+    ✅ Mandal boundary created (71 geometries)
+  ✅ AC boundary created (178 geometries)
+
+  📌 AC: Udma
+    🔹 Mandal: Muliyar
+      ✅ Bedadka (19 wards)
+      ✅ Delampady (17 wards)
+      ✅ Kuttikkol (17 wards)
+      ✅ Muliyar (18 wards)
+    ✅ Mandal boundary created (71 geometries)
+    🔹 Mandal: Udma
+      ✅ Chemnad (24 wards)
+      ✅ Pallikkara (24 wards)
+      ✅ Pullur-Periya (19 wards)
+      ✅ Udma (23 wards)
+    ✅ Mandal boundary created (90 geometries)
+  ✅ AC boundary created (161 geometries)
+✅ District saved: data/complete_hierarchy/kasaragod.json (830 geometries)
+
+======================================================================
+📍 DISTRICT: Kollam East
+======================================================================
+
+  📌 AC: Chadayamangalam
+    🔹 Mandal: Chadayamangalam
+      ❌ Chadayamangalam (file not found)
+      ❌ Elamadu (file not found)
+      ❌ Kadakkal (file not found)
+      ❌ Nilamel (file not found)
+    🔹 Mandal: Chithara
+      ❌ Alayaman (file not found)
+      ❌ Chithara (file not found)
+      ❌ Ittiva (file not found)
+      ❌ Kummil (file not found)
+    🔹 Mandal: Kuravilangadu
+      ❌ Velinalloor (file not found)
+
+  📌 AC: Kottarakkara
+    🔹 Mandal: Kottarakkara
+      ❌ Kottarakkara (file not found)
+      ❌ Mylom (file not found)
+      ❌ Ummannoor (file not found)
+      ❌ Veliyam (file not found)
+    🔹 Mandal: Neduvathur
+      ❌ Ezhukone (file not found)
+      ❌ Kareepra (file not found)
+      ❌ Kulakkada (file not found)
+      ❌ Neduvathur (file not found)
+
+  📌 AC: Kunnathur (SC)
+    🔹 Mandal: Kunnathur
+      ❌ Kunnathur (file not found)
+      ❌ Pavithreswaram (file not found)
+      ❌ Poruvazhi (file not found)
+      ❌ Sooranad North (file not found)
+      ❌ Sooranad South (file not found)
+    🔹 Mandal: Sasthamcotta
+      ❌ East Kallada (file not found)
+      ❌ Mandrothuruthu (file not found)
+      ❌ Mynagappally (file not found)
+      ❌ Sasthamcotta (file not found)
+      ❌ West Kallada (file not found)
+
+  📌 AC: Pathanapuram
+    🔹 Mandal: Kunnikkodu
+      ❌ Melila (file not found)
+      ❌ Thalavoor (file not found)
+      ❌ Vettikavala (file not found)
+      ❌ Vilakkudy (file not found)
+    🔹 Mandal: Pathanapuram
+      ❌ Pathanapuram (file not found)
+      ❌ Pattazhi (file not found)
+      ❌ Pattazhi Vadakkekara (file not found)
+      ❌ Piravanthur (file not found)
+
+  📌 AC: Punaloor
+    🔹 Mandal: Anchal
+      ❌ Anchal (file not found)
+      ❌ Edamulakkal (file not found)
+      ❌ Kulathupuzha (file not found)
+      ❌ Yeroor (file not found)
+    🔹 Mandal: Punalur
+      ❌ Aryankavu (file not found)
+      ❌ Karavaloor (file not found)
+      ❌ Punalur (file not found)
+      ❌ Thenmala (file not found)
+
+======================================================================
+📍 DISTRICT: Kollam West
+======================================================================
+
+  📌 AC: Chathannoor
+    🔹 Mandal: Chathannoor
+      ❌ Adichanalloor (file not found)
+      ❌ Chathannur (file not found)
+      ❌ Chirakkara (file not found)
+      ❌ Pooyappally (file not found)
+    🔹 Mandal: Paravoor
+      ❌ Kalluvathukkal (file not found)
+      ❌ Poothakkulam (file not found)
+    🔹 Mandal: Paravur
+      ❌ Paravoor (file not found)
+
+  📌 AC: Chavara
+    🔹 Mandal: Chavara
+      ❌ Chavara (file not found)
+      ❌ Kollam (file not found)
+      ❌ Neendakara (file not found)
+    🔹 Mandal: Panmana
+      ❌ Panmana (file not found)
+      ❌ Thekkumbhagam (file not found)
+      ❌ Thevalakkara (file not found)
+
+  📌 AC: Eravipuram
+    🔹 Mandal: Eravipuram
+      ❌ Mayyanad (file not found)
+
+  📌 AC: Karunagappally
+    🔹 Mandal: Karunagappally
+      ❌ Alappad (file not found)
+      ❌ Clappana (file not found)
+      ❌ Karunagappally (file not found)
+      ❌ Kulasekharapuram (file not found)
+    🔹 Mandal: Oachira
+      ❌ Oachira (file not found)
+      ❌ Thazhava (file not found)
+      ❌ Thodiyoor (file not found)
+
+  📌 AC: Kollam
+    🔹 Mandal: Thrikkadavoor
+      ❌ Panayam (file not found)
+      ❌ Thrikkaruva (file not found)
+
+  📌 AC: Kundara
+    🔹 Mandal: Kundara
+      ❌ Elampalloor (file not found)
+      ❌ Kundara (file not found)
+      ❌ Perayam (file not found)
+      ❌ Perinad (file not found)
+    🔹 Mandal: Mukhathala
+      ❌ Kottamkara (file not found)
+      ❌ Nedumpana (file not found)
+      ❌ Thrikkovilvattom (file not found)
+
+======================================================================
+📍 DISTRICT: Kottayam East
+======================================================================
+
+  📌 AC: Changanassery
+    🔹 Mandal: Changanassery
+      ❌ Changanassery (file not found)
+      ❌ Paippadu (file not found)
+      ❌ Thrikkodithanam (file not found)
+    🔹 Mandal: Madappally
+      ❌ Kurichy (file not found)
+      ❌ Madappally (file not found)
+      ❌ Vazhappally (file not found)
+
+  📌 AC: Kanjirappally
+    🔹 Mandal: Kanjirappally
+      ❌ Chirakkadavu (file not found)
+      ❌ Kanjirappally (file not found)
+      ❌ Manimala (file not found)
+      ❌ Vellavoor (file not found)
+    🔹 Mandal: Vazhoor
+      ❌ Kangazha (file not found)
+      ❌ Karukachal (file not found)
+      ❌ Nedumkunnam (file not found)
+      ❌ Pallickathodu (file not found)
+      ❌ Vazhoor (file not found)
+
+  📌 AC: Poonjar
+    🔹 Mandal: Mundakkayam
+      ❌ Erumely (file not found)
+      ❌ Koottickal (file not found)
+      ❌ Koruthode (file not found)
+      ❌ Mundakayam (file not found)
+      ❌ Parathodu (file not found)
+    🔹 Mandal: Poonjar
+      ❌ Erattupetta (file not found)
+      ❌ Poonjar (file not found)
+      ❌ Poonjar Thekkekkara (file not found)
+      ❌ Teekoy (file not found)
+      ❌ Thidanadu (file not found)
+
+  📌 AC: Puthuppally
+    🔹 Mandal: Ayarkunnam
+      ❌ Akalakkunnam (file not found)
+      ❌ Ayarkunnam (file not found)
+      ❌ Kooroppada (file not found)
+      ❌ Manarcadu (file not found)
+    🔹 Mandal: Puthuppally
+      ❌ Meenadom (file not found)
+      ❌ Pampady (file not found)
+      ❌ Puthuppally (file not found)
+      ❌ Vakathanam (file not found)
+
+======================================================================
+📍 DISTRICT: Kottayam West
+======================================================================
+
+  📌 AC: Ettumanoor
+    🔹 Mandal: Ettumanoor
+      ❌ Athirampuzha (file not found)
+      ❌ Ettumanoor (file not found)
+      ❌ Neendoor (file not found)
+    🔹 Mandal: Kumarakom
+      ❌ Arpookkara (file not found)
+      ❌ Aymanam (file not found)
+      ❌ Kumarakom (file not found)
+      ❌ Thiruvarppu (file not found)
+
+  📌 AC: Kaduthuruthy
+    🔹 Mandal: Kaduthuruthy
+      ❌ Kadaplamattom (file not found)
+      ❌ Kaduthuruthy (file not found)
+      ❌ Kanakkary (file not found)
+      ❌ Kidangoor (file not found)
+      ❌ Manjoor (file not found)
+    🔹 Mandal: Kuravilangadu
+      ❌ Kuravilangadu (file not found)
+      ❌ Marangattupally (file not found)
+      ❌ Mulakkulam (file not found)
+      ❌ Njeezhoor (file not found)
+      ❌ Uzhavoor (file not found)
+      ❌ Veliyannoor (file not found)
+
+  📌 AC: Kottayam
+    🔹 Mandal: Kottayam
+      ❌ Kottayam (file not found)
+    🔹 Mandal: Panachikadu
+      ❌ Panachikadu (file not found)
+      ❌ Vijayapuram (file not found)
+
+  📌 AC: Pala
+    🔹 Mandal: Bharananganam
+      ❌ Bharananganam (file not found)
+      ❌ Elikkulam (file not found)
+      ❌ Meenachil (file not found)
+      ❌ Melukavu (file not found)
+      ❌ Moonnilavu (file not found)
+      ❌ Thalanadu (file not found)
+      ❌ Thalappalam (file not found)
+    🔹 Mandal: Pala
+      ❌ Kadanadu (file not found)
+      ❌ Karoor (file not found)
+      ❌ Kozhuvanal (file not found)
+      ❌ Mutholy (file not found)
+      ❌ Palai (file not found)
+      ❌ Ramapuram (file not found)
+
+  📌 AC: Vaikom (SC)
+    🔹 Mandal: Thalayolaparambu
+      ❌ Chempu (file not found)
+      ❌ Maravanthuruthu (file not found)
+      ❌ Thalayolaparambu (file not found)
+      ❌ Udayanapuram (file not found)
+      ❌ Velloor (file not found)
+    🔹 Mandal: Vaikom
+      ❌ Kallara (file not found)
+      ❌ T V Puram (file not found)
+      ❌ Thalayazham (file not found)
+      ❌ Vaikom (file not found)
+      ❌ Vechoor (file not found)
+
+======================================================================
+📍 DISTRICT: Kozhikode City
+======================================================================
+
+  📌 AC: Beypore
+    🔹 Mandal: Ramanattukara
+      ❌ Faroke (file not found)
+      ❌ Kadalundi (file not found)
+      ❌ Ramanattukara (file not found)
+
+  📌 AC: Elathur
+    🔹 Mandal: Elathur
+      ❌ Kozhikkode (file not found)
+
+  📌 AC: Kunnamangalam
+    🔹 Mandal: Edarikkodu
+      ❌ Perumanna (file not found)
+    🔹 Mandal: Kunnamangalam
+      ❌ Chathamangalam (file not found)
+      ❌ Kunnamangalam (file not found)
+      ❌ Mavoor (file not found)
+    🔹 Mandal: Olavanna
+      ❌ Olavanna (file not found)
+      ❌ Peruvayal (file not found)
+
+======================================================================
+📍 DISTRICT: Kozhikode North
+======================================================================
+
+  📌 AC: Koyilandy
+    🔹 Mandal: Koyilandy
+      ❌ Chemanchery (file not found)
+      ❌ Chengottukave (file not found)
+      ❌ Koilandy (file not found)
+    🔹 Mandal: Payyoli
+      ❌ Moodadi (file not found)
+      ❌ Payyoli (file not found)
+      ❌ Thikkodi (file not found)
+
+  📌 AC: Kuttiady
+    🔹 Mandal: Kuttiady
+      ❌ Kunnummal (file not found)
+      ❌ Kuttiady (file not found)
+      ❌ Purameri (file not found)
+      ❌ Velom (file not found)
+    🔹 Mandal: Villiappally
+      ❌ Ayancheri (file not found)
+      ❌ Maniyur (file not found)
+      ❌ Thiruvallur (file not found)
+      ❌ Villiappally (file not found)
+
+  📌 AC: Nadapuram
+    🔹 Mandal: Nadapuram
+      ❌ Chekkiad (file not found)
+      ❌ Edacheri (file not found)
+      ❌ Nadapuram (file not found)
+      ❌ Thuneri (file not found)
+      ❌ Valayam (file not found)
+    🔹 Mandal: Naripatta
+      ❌ Kavilumpara (file not found)
+      ❌ Kayakkodi (file not found)
+      ❌ Maruthonkara (file not found)
+      ❌ Naripatta (file not found)
+      ❌ Vanimel (file not found)
+
+  📌 AC: Perambra
+    🔹 Mandal: Meppayur
+      ❌ Arikkulam (file not found)
+      ❌ Keezhariyur (file not found)
+      ❌ Meppayur (file not found)
+      ❌ Nochad (file not found)
+      ❌ Thurayur (file not found)
+    🔹 Mandal: Perambra
+      ❌ Chakkittappara (file not found)
+      ❌ Changaroth (file not found)
+      ❌ Cheruvannur (file not found)
+      ❌ Koothali (file not found)
+      ❌ Perambra (file not found)
+
+  📌 AC: Vatakara
+    🔹 Mandal: Onchiyam
+      ❌ Azhiyur (file not found)
+      ❌ Eramala (file not found)
+      ❌ Onchiyam (file not found)
+    🔹 Mandal: Vadakara
+      ❌ Chorode (file not found)
+      ❌ Vadakara (file not found)
+
+======================================================================
+📍 DISTRICT: Kozhikode Rural
+======================================================================
+
+  📌 AC: Balussery (SC)
+    🔹 Mandal: Balussery
+      ❌ Atholi (file not found)
+      ❌ Balussery (file not found)
+      ❌ Panangad (file not found)
+      ❌ Unnikulam (file not found)
+    🔹 Mandal: Ulliyeri
+      ❌ Kayanna (file not found)
+      ❌ Koorachundu (file not found)
+      ❌ Kottur (file not found)
+      ❌ Naduvannur (file not found)
+      ❌ Ulliyeri (file not found)
+
+  📌 AC: Elathur
+    🔹 Mandal: Chelannur
+      ❌ Chelannur (file not found)
+      ❌ Kakkur (file not found)
+      ❌ Kuruvattur (file not found)
+      ❌ Nanmanda (file not found)
+    🔹 Mandal: Elathur
+      ❌ Kakkodi (file not found)
+      ❌ Thalakkulathur (file not found)
+
+  📌 AC: Koduvally
+    🔹 Mandal: Koduvally
+      ❌ Koduvally (file not found)
+      ❌ Madavoor (file not found)
+      ❌ Narikkuni (file not found)
+    🔹 Mandal: Thamarassery
+      ❌ Kattippara (file not found)
+      ❌ Kizhakkoth (file not found)
+      ❌ Omasery (file not found)
+      ❌ Thamarassery (file not found)
+
+  📌 AC: Thiruvambady
+    🔹 Mandal: Mukkam
+      ❌ Karasseri (file not found)
+      ❌ Kodiyathur (file not found)
+      ❌ Koodaranhi (file not found)
+      ❌ Mukkam (file not found)
+    🔹 Mandal: Thiruvambady
+      ❌ Kodenchery (file not found)
+      ❌ Puthuppadi (file not found)
+      ❌ Thiruvambady (file not found)
+
+======================================================================
+📍 DISTRICT: Malappuram Central
+======================================================================
+
+  📌 AC: Kondotty
+    🔹 Mandal: Kondotty
+      ❌ Cherukavu (file not found)
+      ❌ Kondotty (file not found)
+      ❌ Pulikkal (file not found)
+    🔹 Mandal: Vazhakkad
+      ❌ Cheacode (file not found)
+      ❌ Muthuvallur (file not found)
+      ❌ Vazhakkad (file not found)
+      ❌ Vazhayur (file not found)
+
+  📌 AC: Kottakkal
+    🔹 Mandal: Kottakkal
+      ❌ Kottakkal (file not found)
+      ❌ Marakkara (file not found)
+      ❌ Ponmala (file not found)
+    🔹 Mandal: Kuttippuram
+      ❌ Edayur (file not found)
+      ❌ Irumbiliyum (file not found)
+      ❌ Kuttippuram (file not found)
+      ❌ Valanchery (file not found)
+
+  📌 AC: Malappuram
+    🔹 Mandal: Malappuram
+      ❌ Anakayam (file not found)
+      ❌ Kodur (file not found)
+      ❌ Malappuram (file not found)
+    🔹 Mandal: Pookkottur
+      ❌ Morayur (file not found)
+      ❌ Pookkottur (file not found)
+      ❌ Pulpetta (file not found)
+
+  📌 AC: Mankada
+    🔹 Mandal: Kolathur
+      ❌ Koottilangadi (file not found)
+      ❌ Kuruva (file not found)
+      ❌ Moorkanad (file not found)
+    🔹 Mandal: Mankada
+      ❌ Angadippuram (file not found)
+      ❌ Makkaraparamba (file not found)
+      ❌ Mankada (file not found)
+      ❌ Puzhakkatiri (file not found)
+
+  📌 AC: Vengara
+    🔹 Mandal: Parappur
+      ❌ Oorakam (file not found)
+      ❌ Othukkungal (file not found)
+      ❌ Parappur (file not found)
+    🔹 Mandal: Vengara
+      ❌ Abdurehman Nagar (file not found)
+      ❌ Kannamangalam (file not found)
+      ❌ Vengara (file not found)
+
+======================================================================
+📍 DISTRICT: Malappuram East
+======================================================================
+
+  📌 AC: Ernaad
+    🔹 Mandal: Edavanna
+      ❌ Chaliyar (file not found)
+      ❌ Edavanna (file not found)
+      ❌ Urangattiri (file not found)
+    🔹 Mandal: Eranad
+      ❌ Areacode (file not found)
+      ❌ Kavannur (file not found)
+      ❌ Keezhuparamba (file not found)
+      ❌ Kuzhimanna (file not found)
+
+  📌 AC: Manjeri
+    🔹 Mandal: Manjeri
+      ❌ Manjeri (file not found)
+      ❌ Thrikkalangode (file not found)
+    🔹 Mandal: Pandikkad
+      ❌ Edapatta (file not found)
+      ❌ Keezhattur (file not found)
+      ❌ Pandikkad (file not found)
+
+  📌 AC: Nilambur
+    🔹 Mandal: Edakkara
+      ❌ Edakkara (file not found)
+      ❌ Moothedam (file not found)
+      ❌ Pothukal (file not found)
+      ❌ Vazhikkadavu (file not found)
+    🔹 Mandal: Nilambur
+      ❌ Amarambalam (file not found)
+      ❌ Chungathara (file not found)
+      ❌ Karulai (file not found)
+      ❌ Nilambur (file not found)
+
+  📌 AC: Perinthalamanna
+    🔹 Mandal: Elamkulam
+      ❌ Aliparamba (file not found)
+      ❌ Elamkulam (file not found)
+      ❌ Pulamanthole (file not found)
+    🔹 Mandal: Perinthalmanna
+      ❌ Melattur (file not found)
+      ❌ Perinthalmanna (file not found)
+      ❌ Thazhekkode (file not found)
+      ❌ Vettathur (file not found)
+
+  📌 AC: Wandoor (SC)
+    🔹 Mandal: Kalikkavu
+      ❌ Chokkad (file not found)
+      ❌ Kalikavu (file not found)
+      ❌ Karuvarakundu (file not found)
+      ❌ Thuvvur (file not found)
+    🔹 Mandal: Wandoor
+      ❌ Mampad (file not found)
+      ❌ Porur (file not found)
+      ❌ Thiruvali (file not found)
+      ❌ Wandoor (file not found)
+
+======================================================================
+📍 DISTRICT: Malappuram West
+======================================================================
+
+  📌 AC: Ponnani
+    🔹 Mandal: Changaramkulam
+      ❌ Alamkode (file not found)
+      ❌ Nannamukku (file not found)
+      ❌ Perumbadappu (file not found)
+      ❌ Veliyancode (file not found)
+    🔹 Mandal: Ponnani
+      ❌ Maranchery (file not found)
+      ❌ Ponnani (file not found)
+
+  📌 AC: Tanur
+    🔹 Mandal: Ponmundam
+      ❌ Cheriyamundam (file not found)
+      ❌ Ozhoor (file not found)
+      ❌ Ponmundam (file not found)
+    🔹 Mandal: Tanur
+      ❌ Niramaruthoor (file not found)
+      ❌ Thanalur (file not found)
+      ❌ Thanoor (file not found)
+
+  📌 AC: Thavanur
+    🔹 Mandal: Thavanur
+      ❌ Edappal (file not found)
+      ❌ Kalady (file not found)
+      ❌ Thavanur (file not found)
+      ❌ Vattamkulam (file not found)
+    🔹 Mandal: Thrippangodu
+      ❌ Mangalam (file not found)
+      ❌ Purathur (file not found)
+      ❌ Thriprangode (file not found)
+
+  📌 AC: Thirurangadi
+    🔹 Mandal: Edarikkodu
+      ❌ Edarikkode (file not found)
+      ❌ Nannambra (file not found)
+      ❌ Perumanna Clari (file not found)
+      ❌ Thennela (file not found)
+    🔹 Mandal: Tirurangadi
+      ❌ Parappanangadi (file not found)
+      ❌ Tirurangadi (file not found)
+
+  📌 AC: Tirur
+    🔹 Mandal: Thirunavaya
+      ❌ Athavanad (file not found)
+      ❌ Kalpakancheri (file not found)
+      ❌ Thirunavaya (file not found)
+      ❌ Valavannur (file not found)
+    🔹 Mandal: Tirur
+      ❌ Thalakkad (file not found)
+      ❌ Tirur (file not found)
+      ❌ Vettom (file not found)
+
+  📌 AC: Vallikkunnu
+    🔹 Mandal: Pallikkal
+      ❌ Chelembra (file not found)
+      ❌ Pallikkal (file not found)
+      ❌ Peruvallur (file not found)
+    🔹 Mandal: Vallikkunnu
+      ❌ Moonniyur (file not found)
+      ❌ Thenhippalam (file not found)
+      ❌ Vallikkunnu (file not found)
+
+======================================================================
+📍 DISTRICT: Palakkad East
+======================================================================
+
+  📌 AC: Alathur
+    🔹 Mandal: Alathur
+      ❌ Alathur (file not found)
+      ❌ Erimayoor (file not found)
+      ❌ Kuzhalmannam (file not found)
+      ❌ Thenkurissi (file not found)
+    🔹 Mandal: Vandazhi
+      ❌ Kizhakkanchery (file not found)
+      ❌ Melarcode (file not found)
+      ❌ Vandazhi (file not found)
+
+  📌 AC: Chittur
+    🔹 Mandal: Chittoor
+      ❌ Chittur- Thathamangalam (file not found)
+      ❌ Pattanchery (file not found)
+      ❌ Perumatty (file not found)
+      ❌ Peruvemba (file not found)
+      ❌ Polpully (file not found)
+    🔹 Mandal: Kozhinjampara
+      ❌ Eruthempathy (file not found)
+      ❌ Kozhinjampara (file not found)
+      ❌ Nalleppilly (file not found)
+      ❌ Vadakarapathy (file not found)
+
+  📌 AC: Kongad (SC)
+    🔹 Mandal: Karimba
+      ❌ Kanjirapuzha (file not found)
+      ❌ Karakurissi (file not found)
+      ❌ Karimba (file not found)
+      ❌ Thachampara (file not found)
+    🔹 Mandal: Kongad
+      ❌ Keralasseri (file not found)
+      ❌ Kongad (file not found)
+      ❌ Mankara (file not found)
+      ❌ Mannur (file not found)
+      ❌ Parli (file not found)
+
+  📌 AC: Malampuzha
+    🔹 Mandal: Malampuzha
+      ❌ Akathethara (file not found)
+      ❌ Malampuzha (file not found)
+      ❌ Mundur (file not found)
+      ❌ Puduppariyaram (file not found)
+    🔹 Mandal: Puthussery
+      ❌ Elappully (file not found)
+      ❌ Kodumba (file not found)
+      ❌ Marutha Road (file not found)
+      ❌ Pudusserri (file not found)
+
+  📌 AC: Nenmara
+    🔹 Mandal: Kollengode
+      ❌ Elavanchery (file not found)
+      ❌ Kollengode (file not found)
+      ❌ Muthalamada (file not found)
+      ❌ Nelliyampathy (file not found)
+      ❌ Vadavannur (file not found)
+    🔹 Mandal: Nenmara
+      ❌ Ayiloor (file not found)
+      ❌ Koduvayur (file not found)
+      ❌ Nemmara (file not found)
+      ❌ Pallassana (file not found)
+      ❌ Pudunagaram (file not found)
+
+  📌 AC: Palakkad
+    🔹 Mandal: Palakkad
+      ❌ Palakkad (file not found)
+    🔹 Mandal: Pirayiri
+      ❌ Kannadi (file not found)
+      ❌ Mathur (file not found)
+      ❌ Pirayiri (file not found)
+
+======================================================================
+📍 DISTRICT: Palakkad West
+======================================================================
+
+  📌 AC: Mannarkad
+    🔹 Mandal: Attappady
+      ❌ Agali (file not found)
+      ❌ Pudur (file not found)
+      ❌ Sholayur (file not found)
+    🔹 Mandal: Mannarkkad
+      ❌ Alanallur (file not found)
+      ❌ Kottoppadam (file not found)
+      ❌ Kumaramputhur (file not found)
+      ❌ Mannarkkad (file not found)
+      ❌ Thenkara (file not found)
+
+  📌 AC: Ottapalam
+    🔹 Mandal: Ottapalam
+      ❌ Ambalapara (file not found)
+      ❌ Lekkidi-Perur (file not found)
+      ❌ Ottappalam (file not found)
+    🔹 Mandal: Sreekrishnapuram
+      ❌ Kadampazhipuram (file not found)
+      ❌ Karimpuzha (file not found)
+      ❌ Pookkottukavu (file not found)
+      ❌ Sreekrishnapuram (file not found)
+      ❌ Thachanattukara (file not found)
+
+  📌 AC: Pattambi
+    🔹 Mandal: Koppam
+      ❌ Koppam (file not found)
+      ❌ Kulukkallur (file not found)
+      ❌ Thiruvegappura (file not found)
+      ❌ Vilayur (file not found)
+    🔹 Mandal: Pattambi
+      ❌ Muthuthala (file not found)
+      ❌ Ongallur (file not found)
+      ❌ Pattambi (file not found)
+      ❌ Vallapuzha (file not found)
+
+  📌 AC: Shornur
+    🔹 Mandal: Cherpulassery
+      ❌ Cherupulassery (file not found)
+      ❌ Nellaya (file not found)
+      ❌ Thrikkadeiri (file not found)
+      ❌ Vellinezhi (file not found)
+    🔹 Mandal: Shornur
+      ❌ Ananganadi (file not found)
+      ❌ Chalavara (file not found)
+      ❌ Shornur (file not found)
+      ❌ Vaniyamkulam (file not found)
+
+  📌 AC: Tarur (SC)
+    🔹 Mandal: Tharur
+      ❌ Kottayi (file not found)
+      ❌ Kuthanur (file not found)
+      ❌ Peringottukurissi (file not found)
+      ❌ Tarur (file not found)
+    🔹 Mandal: Vadakkenchery
+      ❌ Kannambra (file not found)
+      ❌ Kavassery (file not found)
+      ❌ Puthukode (file not found)
+      ❌ Vadakkenchery (file not found)
+
+  📌 AC: Thrithala
+    🔹 Mandal: Kappur
+      ❌ Anakkara (file not found)
+      ❌ Chalissery (file not found)
+      ❌ Kappoor (file not found)
+      ❌ Pattithara (file not found)
+    🔹 Mandal: Thrithala
+      ❌ Nagalassery (file not found)
+      ❌ Paruthur (file not found)
+      ❌ Thirumittakode (file not found)
+      ❌ Thrithala (file not found)
+
+======================================================================
+📍 DISTRICT: Pathanamthitta
+======================================================================
+
+  📌 AC: Adoor (SC)
+    🔹 Mandal: Adoor
+      ✅ Adoor (29 wards)
+      ✅ Earathu (18 wards)
+      ✅ Ezhamkulam (21 wards)
+      ✅ Kadambanad (21 wards)
+    ✅ Mandal boundary created (86 geometries)
+    🔹 Mandal: Pandalam
+      ✅ Kodumon (19 wards)
+      ✅ Pallickal (24 wards)
+      ✅ Pandalam (34 wards)
+      ✅ Panthalam- Thekkekkara (15 wards)
+      ✅ Thumpamon (14 wards)
+    ✅ Mandal boundary created (106 geometries)
+  ✅ AC boundary created (192 geometries)
+
+  📌 AC: Aranmula
+    🔹 Mandal: Aranmula
+      ✅ Aranmula (19 wards)
+      ✅ Eraviperoor (18 wards)
+      ✅ Koipram (18 wards)
+      ✅ Kozhanchery (14 wards)
+      ✅ Mallappuzhassery (14 wards)
+      ✅ Naranganam (14 wards)
+      ✅ Thottappuzhassery (16 wards)
+    ✅ Mandal boundary created (113 geometries)
+    🔹 Mandal: Pathanamthitta
+      ✅ Chenneerkara (15 wards)
+      ✅ Elanthoor (14 wards)
+      ✅ Kulanada (17 wards)
+      ✅ Mezhuvely (14 wards)
+      ❌ Omalloor (file not found)
+      ✅ Pathanamthitta (33 wards)
+    ✅ Mandal boundary created (93 geometries)
+  ✅ AC boundary created (206 geometries)
+
+  📌 AC: Konni
+    🔹 Mandal: Chittar
+      ✅ Chittar (14 wards)
+      ✅ Malayalapuzha (14 wards)
+      ✅ Mylapra (14 wards)
+      ✅ Seethathodu (14 wards)
+      ✅ Thannithodu (14 wards)
+    ✅ Mandal boundary created (70 geometries)
+    🔹 Mandal: Konni
+      ✅ Aruvappulam (15 wards)
+      ✅ Enadimangalam (16 wards)
+      ✅ Kalanjoor (20 wards)
+      ✅ Konni (20 wards)
+      ✅ Pramadam (20 wards)
+      ✅ Vallikkodu (16 wards)
+    ✅ Mandal boundary created (107 geometries)
+  ✅ AC boundary created (177 geometries)
+
+  📌 AC: Ranni
+    🔹 Mandal: Ayiroor
+      ✅ Ayiroor (16 wards)
+      ✅ Cherukol (14 wards)
+      ✅ Ezhumattoor (19 wards)
+      ✅ Kottanad (14 wards)
+      ✅ Kottangal (14 wards)
+      ✅ Ranny Angady (14 wards)
+    ✅ Mandal boundary created (91 geometries)
+    🔹 Mandal: Ranni
+      ✅ Naranammoozhy (15 wards)
+      ✅ Ranni (14 wards)
+      ✅ Ranni Pazhavangady (17 wards)
+      ✅ Ranny Perunadu (16 wards)
+      ✅ Vadasserikkara (16 wards)
+      ✅ Vechoochira (16 wards)
+    ✅ Mandal boundary created (94 geometries)
+  ✅ AC boundary created (185 geometries)
+
+  📌 AC: Thiruvalla
+    🔹 Mandal: Mallappally
+      ✅ Anikkadu (14 wards)
+      ✅ Kallooppara (14 wards)
+      ✅ Kaviyoor (14 wards)
+      ✅ Kunnanthanam (16 wards)
+      ✅ Mallappally (15 wards)
+      ✅ Puramattam (14 wards)
+    ✅ Mandal boundary created (87 geometries)
+    🔹 Mandal: Thiruvalla
+      ✅ Kadapra (16 wards)
+      ✅ Kuttoor (15 wards)
+      ✅ Nedumpram (14 wards)
+      ✅ Niranam (14 wards)
+      ✅ Peringara (17 wards)
+      ✅ Thiruvalla (39 wards)
+    ✅ Mandal boundary created (115 geometries)
+  ✅ AC boundary created (202 geometries)
+✅ District saved: data/complete_hierarchy/pathanamthitta.json (962 geometries)
+
+======================================================================
+📍 DISTRICT: Thiruvananthapuram City
+======================================================================
+
+  📌 AC: Kazhakkoottam
+    🔹 Mandal: Kazhakkoottam
+      ❌ Thiruvananthapuram (file not found)
+
+======================================================================
+📍 DISTRICT: Thiruvananthapuram North
+======================================================================
+
+  📌 AC: Attingal (SC)
+    🔹 Mandal: Attingal
+      ❌ Attingal (file not found)
+      ❌ Cherunniyoor (file not found)
+      ❌ Manamboor (file not found)
+      ❌ Ottoor (file not found)
+      ❌ Vakkom (file not found)
+    🔹 Mandal: Kilimanoor
+      ❌ Karavaram (file not found)
+      ❌ Kilimanoor (file not found)
+      ❌ Nagaroor (file not found)
+      ❌ Pazhayakunnummel (file not found)
+      ❌ Pulimath (file not found)
+
+  📌 AC: Chirayinkeezhu (SC)
+    🔹 Mandal: Chirayinkeezhu
+      ❌ Azhoor (file not found)
+      ❌ Chirayinkeezhu (file not found)
+      ❌ Kadinamkulam (file not found)
+      ❌ Mangalapuram (file not found)
+    🔹 Mandal: Kadakkavoor
+      ❌ Anchuthengu (file not found)
+      ❌ Kadakkavoor (file not found)
+      ❌ Kizhuvilam (file not found)
+      ❌ Mudakkal (file not found)
+
+  📌 AC: Nedumangad
+    🔹 Mandal: Nedumangad
+      ❌ Karakulam (file not found)
+      ❌ Nedumangad (file not found)
+    🔹 Mandal: Pothencode
+      ❌ Andoorkonam (file not found)
+      ❌ Manickal (file not found)
+      ❌ Pothencode (file not found)
+      ❌ Vembayam (file not found)
+
+  📌 AC: Vamanapuram
+    🔹 Mandal: Palode
+      ❌ Anadu (file not found)
+      ❌ Nanniyode (file not found)
+      ❌ Pangode (file not found)
+      ❌ Peringammala (file not found)
+    🔹 Mandal: Vamanapuram
+      ❌ Kallara (file not found)
+      ❌ Nellanad (file not found)
+      ❌ Panavoor (file not found)
+      ❌ Pullampara (file not found)
+      ❌ Vamanapuram (file not found)
+
+  📌 AC: Varkala
+    🔹 Mandal: Navaikulam
+      ❌ Chemmaruthy (file not found)
+      ❌ Madavoor (file not found)
+      ❌ Navayikulam (file not found)
+      ❌ Pallikkal (file not found)
+    🔹 Mandal: Varkala
+      ❌ Edava (file not found)
+      ❌ Elakamon (file not found)
+      ❌ Varkala (file not found)
+      ❌ Vettoor (file not found)
+
+======================================================================
+📍 DISTRICT: Thiruvananthapuram South
+======================================================================
+
+  📌 AC: Aruvikkara
+    🔹 Mandal: Aruvikkara
+      ❌ Aruvikkara (file not found)
+      ❌ Kuttichal (file not found)
+      ❌ Poovachal (file not found)
+      ❌ Vellanad (file not found)
+    🔹 Mandal: Aryanadu
+      ❌ Aryanad (file not found)
+      ❌ Tholicode (file not found)
+      ❌ Uzhamalakkal (file not found)
+      ❌ Vithura (file not found)
+
+  📌 AC: Kattakkada
+    🔹 Mandal: Kattakkada
+      ❌ Kattakada (file not found)
+      ❌ Maranallur (file not found)
+      ❌ Vilappil (file not found)
+    🔹 Mandal: Malayinkeezhu
+      ❌ Malayinkeezhu (file not found)
+      ❌ Pallichal (file not found)
+      ❌ Vilavoorkal (file not found)
+
+  📌 AC: Kovalam
+    🔹 Mandal: Balaramapuram
+      ❌ Balaramapuram (file not found)
+      ❌ Kanjiramkulam (file not found)
+      ❌ Karumkulam (file not found)
+      ❌ Kottukal (file not found)
+      ❌ Poovar (file not found)
+    🔹 Mandal: Kovalam
+      ❌ Kalliyoor (file not found)
+      ❌ Venganoor (file not found)
+
+  📌 AC: Neyyattinkara
+    🔹 Mandal: Kulathoor
+      ❌ Chenkal (file not found)
+      ❌ Karode (file not found)
+      ❌ Kulathoor (file not found)
+    🔹 Mandal: Neyyattinkara
+      ❌ Athiyannoor (file not found)
+      ❌ Neyyattinkara (file not found)
+      ❌ Thirupuram (file not found)
+
+  📌 AC: Parasala
+    🔹 Mandal: Parassala
+      ❌ Kollayil (file not found)
+      ❌ Kunnathukal (file not found)
+      ❌ Parassala (file not found)
+      ❌ Perumkadavila (file not found)
+    🔹 Mandal: Vellarada
+      ❌ Amboori (file not found)
+      ❌ Aryankode (file not found)
+      ❌ Kallikkadu (file not found)
+      ❌ Ottasekaramangalam (file not found)
+      ❌ Vellarada (file not found)
+
+======================================================================
+📍 DISTRICT: Thrissur City
+======================================================================
+
+  📌 AC: Manalur
+    🔹 Mandal: Manalur
+      ❌ Arimbur (file not found)
+      ❌ Elavally (file not found)
+      ❌ Manalur (file not found)
+      ❌ Mullassery (file not found)
+      ❌ Vadanappilly (file not found)
+      ❌ Venkitangu (file not found)
+    🔹 Mandal: Pavaratty
+      ❌ Choondal (file not found)
+      ❌ Kandanassery (file not found)
+      ❌ Pavaratty (file not found)
+
+  📌 AC: Nattika (SC)
+    🔹 Mandal: Cherpu
+      ❌ Avinissery (file not found)
+      ❌ Chazhur (file not found)
+      ❌ Cherpu (file not found)
+      ❌ Paralam (file not found)
+      ❌ Thanniam (file not found)
+    🔹 Mandal: Nattika
+      ❌ Anthikkad (file not found)
+      ❌ Nattika (file not found)
+      ❌ Thalikulam (file not found)
+      ❌ Valappad (file not found)
+
+  📌 AC: Ollur
+    🔹 Mandal: Ollur
+      ❌ Nadathara (file not found)
+    🔹 Mandal: Peechi
+      ❌ Madakkathara (file not found)
+      ❌ Pananchery (file not found)
+      ❌ Puthur (file not found)
+
+  📌 AC: Puthukkad
+    🔹 Mandal: Amballur
+      ❌ Alagappanagar (file not found)
+      ❌ Nenmanikkara (file not found)
+      ❌ Thrikkur (file not found)
+      ❌ Varantharappilly (file not found)
+    🔹 Mandal: Puthukkad
+      ❌ Mattathur (file not found)
+      ❌ Parappookkara (file not found)
+      ❌ Pudukkad (file not found)
+      ❌ Vallachira (file not found)
+
+  📌 AC: Thrissur
+    🔹 Mandal: Thrissur west
+      ❌ Thrissur (file not found)
+
+======================================================================
+📍 DISTRICT: Thrissur North
+======================================================================
+
+  📌 AC: Chelakkara (SC)
+    🔹 Mandal: Chelakkara
+      ❌ Chelakkara (file not found)
+      ❌ Kondazhy (file not found)
+      ❌ Pazhayannur (file not found)
+      ❌ Thiruvilwamala (file not found)
+    🔹 Mandal: Cheruthuruthy
+      ❌ Desamangalam (file not found)
+      ❌ Mullurkkara (file not found)
+      ❌ Panjal (file not found)
+      ❌ Vallathole Nagar (file not found)
+      ❌ Varavoor (file not found)
+
+  📌 AC: Guruvayoor
+    🔹 Mandal: Chavakkad
+      ❌ Chavakkad (file not found)
+      ❌ Engandiyoor (file not found)
+      ❌ Kadappuram (file not found)
+      ❌ Orumanayoor (file not found)
+    🔹 Mandal: Guruvayoor
+      ❌ Guruvayoor (file not found)
+      ❌ Punnayoor (file not found)
+      ❌ Punnayoorkulam (file not found)
+      ❌ Vadakkekkad (file not found)
+
+  📌 AC: Kunnamkulam
+    🔹 Mandal: Erumapetty
+      ❌ Erumapetty (file not found)
+      ❌ Kadangode (file not found)
+      ❌ Kadavalloor (file not found)
+      ❌ Velur (file not found)
+    🔹 Mandal: Kunnamkulam
+      ❌ Chowannur (file not found)
+      ❌ Kattakampal (file not found)
+      ❌ Kunnamkulam (file not found)
+      ❌ Porkulam (file not found)
+
+  📌 AC: Wadakkanchery
+    🔹 Mandal: Kaipparambu
+      ❌ Adat (file not found)
+      ❌ Kaiparambu (file not found)
+      ❌ Kolazhy (file not found)
+      ❌ Tholur (file not found)
+    🔹 Mandal: Wadakkanchery
+      ❌ Avanur (file not found)
+      ❌ Mulamkunnathukavu (file not found)
+      ❌ Thekkumkara (file not found)
+      ❌ Vadakkancherry (file not found)
+
+======================================================================
+📍 DISTRICT: Thrissur South
+======================================================================
+
+  📌 AC: Chalakudy
+    🔹 Mandal: Chalakudy
+      ❌ Chalakudy (file not found)
+      ❌ Kodakara (file not found)
+      ❌ Kodassery (file not found)
+    🔹 Mandal: Koratty
+      ❌ Athirappilly (file not found)
+      ❌ Kadukutty (file not found)
+      ❌ Koratty (file not found)
+      ❌ Meloor (file not found)
+      ❌ Pariyaram (file not found)
+
+  📌 AC: Irinjalakuda
+    🔹 Mandal: Aloor
+      ❌ Aloor (file not found)
+      ❌ Muriyad (file not found)
+      ❌ Poomangalam (file not found)
+      ❌ Velookkara (file not found)
+    🔹 Mandal: Irinjalakuda
+      ❌ Irinjalakuda (file not found)
+      ❌ Karalam (file not found)
+      ❌ Kattoor (file not found)
+      ❌ Padiyoor (file not found)
+
+  📌 AC: Kaipamangalam
+    🔹 Mandal: Edavilangu
+      ❌ Edavilangu (file not found)
+      ❌ Eriyad (file not found)
+      ❌ Sree Narayanapuram (file not found)
+    🔹 Mandal: Kaipamangalam
+      ❌ Edathiruthy (file not found)
+      ❌ Kaipamangalam (file not found)
+      ❌ Mathilakam (file not found)
+      ❌ Perinjanam (file not found)
+
+  📌 AC: Kodungallur
+    🔹 Mandal: Kodungallur
+      ❌ Kodungallur (file not found)
+      ❌ Puthenchira (file not found)
+      ❌ Vellangalur (file not found)
+    🔹 Mandal: Mala
+      ❌ Annamanada (file not found)
+      ❌ Kuzhur (file not found)
+      ❌ Mala (file not found)
+      ❌ Poyya (file not found)
+
+======================================================================
+📍 DISTRICT: Wayanad
+======================================================================
+
+  📌 AC: Kalpetta
+    🔹 Mandal: Kalpetta
+      ✅ Kalpetta (30 wards)
+      ✅ Meppadi (23 wards)
+      ✅ Muppainadu (17 wards)
+      ✅ Muttil (22 wards)
+      ✅ Vythiri (15 wards)
+    ✅ Mandal boundary created (106 geometries)
+    🔹 Mandal: Padinjarathara
+      ✅ Kaniyambetta (21 wards)
+      ✅ Kottathara (14 wards)
+      ✅ Padinjarathara (18 wards)
+      ✅ Pozhuthana (15 wards)
+      ✅ Thariode (14 wards)
+      ✅ Vengappally (14 wards)
+    ✅ Mandal boundary created (96 geometries)
+  ✅ AC boundary created (202 geometries)
+
+  📌 AC: Mananthavady (ST)
+    🔹 Mandal: Mananthavady
+      ✅ Mananthavadi (37 wards)
+      ✅ Thavinhal (23 wards)
+      ✅ Thirunelly (19 wards)
+    ✅ Mandal boundary created (79 geometries)
+    🔹 Mandal: Panamaram
+      ✅ Edavaka (21 wards)
+      ✅ Panamaram (24 wards)
+      ✅ Thondernadu (17 wards)
+      ✅ Vellamunda (24 wards)
+    ✅ Mandal boundary created (86 geometries)
+  ✅ AC boundary created (165 geometries)
+
+  📌 AC: Sulthanbathery (ST)
+    🔹 Mandal: Pulpally
+      ✅ Meenangadi (21 wards)
+      ✅ Mullankolly (19 wards)
+      ✅ Poothady (23 wards)
+      ✅ Pulpally (21 wards)
+    ✅ Mandal boundary created (84 geometries)
+    🔹 Mandal: Sulthan Bathery
+      ✅ Ambalavayal (22 wards)
+      ✅ Nenmeni (24 wards)
+      ✅ Noolpuzha (19 wards)
+      ✅ Sulthanbethery (36 wards)
+    ✅ Mandal boundary created (101 geometries)
+  ✅ AC boundary created (185 geometries)
+✅ District saved: data/complete_hierarchy/wayanad.json (552 geometries)
+
+======================================================================
+📊 SUMMARY
+======================================================================
+Total Local Bodies Matched: 122
+Total Local Bodies Missed: 911
+Success Rate: 11.8%
+
+Districts processed: 3
+  • Kasaragod: 830 ward geometries
+  • Pathanamthitta: 962 ward geometries
+  • Wayanad: 552 ward geometries
+
+✅ Complete hierarchy saved to: data/complete_hierarchy/
+======================================================================

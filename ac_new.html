@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assembly Constituency</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+        }
+
+        /* Header - Thiruvalla Style */
+        .header {
+            background: #ffffff;
+            padding: 20px 40px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .breadcrumb {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .breadcrumb a {
+            color: #2196F3;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .total-wards-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .total-wards-count {
+            font-size: 48px;
+            color: #2196F3;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        /* Navigation Bar - Thiruvalla Style */
+        .nav-bar {
+            background: #ffffff;
+            padding: 15px 40px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .nav-btn, .download-btn, .preview-btn {
+            padding: 10px 24px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            background: #f5f5f5;
+            border-color: #bbb;
+        }
+
+        .download-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+        }
+
+        .download-btn:hover {
+            background: #1976D2;
+        }
+
+        .preview-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+        }
+
+        .preview-btn:hover {
+            background: #45a049;
+        }
+
+        select.nav-btn {
+            padding-right: 35px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            appearance: none;
+        }
+
+        /* Map Container */
+        .map-wrapper {
+            position: relative;
+            height: calc(100vh - 160px);
+            background: #ffffff;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Minimap - Thiruvalla Style */
+        .minimap-container {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 220px;
+            height: 180px;
+            border: 3px solid #333;
+            background: white;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #minimap {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Leaflet customization */
+        .leaflet-container {
+            background: #ffffff;
+        }
+
+        .leaflet-control-zoom {
+            border: 2px solid #ddd !important;
+            border-radius: 4px !important;
+        }
+
+        .leaflet-control-zoom a {
+            color: #333 !important;
+            font-weight: bold !important;
+        }
+
+        /* Mandal labels - Thiruvalla Style */
+        .mandal-label {
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 
+                -2px -2px 0 #fff,
+                2px -2px 0 #fff,
+                -2px 2px 0 #fff,
+                2px 2px 0 #fff,
+                -2px 0 0 #fff,
+                2px 0 0 #fff,
+                0 -2px 0 #fff,
+                0 2px 0 #fff,
+                3px 3px 6px rgba(0,0,0,0.4);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        /* Ward number labels */
+        .ward-label {
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            pointer-events: none;
+        }
+
+        .ward-number-badge {
+            background: #333;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            min-width: 28px;
+            text-align: center;
+            display: inline-block;
+        }
+
+        /* Preview Modal */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .preview-modal.active {
+            display: flex;
+        }
+
+        .preview-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 95%;
+            max-height: 95%;
+            overflow: auto;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #2196F3;
+        }
+
+        .preview-header h2 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .preview-close {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .preview-close:hover {
+            background: #d32f2f;
+        }
+
+        #preview-container {
+            min-width: 900px;
+            background: white;
+        }
+
+        .preview-map-container {
+            width: 100%;
+            height: 550px;
+            margin: 20px 0;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #preview-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview-info {
+            padding: 25px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .preview-info h3 {
+            margin-bottom: 20px;
+            color: #2196F3;
+            font-size: 20px;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 10px;
+        }
+
+        .mandal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .mandal-card {
+            padding: 15px;
+            border-left: 5px solid;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .mandal-card h4 {
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .mandal-card p {
+            font-size: 14px;
+            color: #666;
+            margin: 4px 0;
+        }
+
+        .color-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+            border: 2px solid #333;
+        }
+
+        .download-actions {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header - Thiruvalla Style -->
+    <div class="header">
+        <div class="header-left">
+            <h1 id="ac-title">Assembly Constituency</h1>
+            <div class="breadcrumb">
+                <a href="kerala_map.html">Kerala</a> > 
+                <a href="javascript:history.back()" id="district-link">District</a> > 
+                <span id="breadcrumb-text">AC > Mandals</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="total-wards-label">Total Wards</div>
+            <div class="total-wards-count" id="total-wards">0</div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar - Thiruvalla Style -->
+    <div class="nav-bar">
+        <button class="nav-btn" onclick="window.location.href='kerala_map.html'">🏠 Home</button>
+        <button class="nav-btn" onclick="history.back()">⬅️ Back</button>
+        <select class="nav-btn" id="boundary-select">
+            <option value="mandal">Organizational Mandal</option>
+            <option value="localbody">Panchayat/Municipality</option>
+            <option value="ward">Ward</option>
+        </select>
+        <button class="preview-btn" onclick="showPreview()">👁️ Preview</button>
+        <button class="download-btn" onclick="downloadMap()">📥 Download Map</button>
+    </div>
+
+    <!-- Map Container -->
+    <div class="map-wrapper">
+        <div id="map"></div>
+        
+        <!-- Minimap - Thiruvalla Style -->
+        <div class="minimap-container">
+            <div id="minimap"></div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="preview-modal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2 id="preview-title">Map Preview</h2>
+                <button class="preview-close" onclick="closePreview()">✕ Close</button>
+            </div>
+            <div id="preview-container">
+                <div class="preview-map-container">
+                    <div id="preview-map"></div>
+                </div>
+                <div class="preview-info">
+                    <h3 id="preview-info-title">Mandals in this Assembly Constituency</h3>
+                    <div class="mandal-grid" id="mandal-grid"></div>
+                </div>
+            </div>
+            <div class="download-actions">
+                <button class="download-btn" onclick="downloadPreviewPDF()" style="font-size: 16px; padding: 12px 32px;">
+                    📥 Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const districtId = urlParams.get('district');
+        const acId = urlParams.get('ac');
+
+        let map, minimap, previewMap;
+        let acData = null;
+        let currentLayers = [];
+        let currentBoundaryType = 'mandal';
+
+        // Mandal colors - Thiruvalla style (Blue & Orange primary)
+        const boundaryColors = [
+            '#5DADE2',  // Light Blue (Thiruvalla)
+            '#FF8C42',  // Orange (Mallappally)
+            '#9B59B6',  // Purple
+            '#58D68D',  // Green
+            '#F4D03F',  // Yellow
+            '#EC7063',  // Coral
+            '#85C1E9',  // Sky Blue
+            '#F8B739',  // Amber
+            '#48C9B0',  // Turquoise
+            '#AF7AC5',  // Lavender
+            '#52BE80',  // Emerald
+            '#EB984E'   // Dark Orange
+        ];
+
+        // Initialize
+        function init() {
+            // Main map
+            map = L.map('map', {
+                zoomControl: true,
+                attributionControl: false
+            }).setView([10.8505, 76.2711], 7);
+
+            // Minimap
+            minimap = L.map('minimap', {
+                zoomControl: false,
+                dragging: false,
+                touchZoom: false,
+                scrollWheelZoom: false,
+                doubleClickZoom: false,
+                boxZoom: false,
+                keyboard: false,
+                attributionControl: false
+            }).setView([10.8505, 76.2711], 7);
+
+            // Load AC data
+            loadACData();
+
+            // Boundary select handler
+            document.getElementById('boundary-select').addEventListener('change', function(e) {
+                currentBoundaryType = e.target.value;
+                updateDisplay();
+            });
+        }
+
+        // Load AC data
+        async function loadACData() {
+            try {
+                const response = await fetch(`data/14_districts/${districtId}.json`);
+                if (!response.ok) throw new Error('Failed to load data');
+                
+                const districtData = await response.json();
+                
+                // Find the AC
+                acData = districtData.acs.find(a => 
+                    cleanId(a.name) === cleanId(acId)
+                );
+
+                if (!acData) {
+                    console.error('AC not found:', acId);
+                    alert('AC data not found');
+                    return;
+                }
+
+                // Update header
+                document.getElementById('ac-title').textContent = acData.name + ' Assembly Constituency';
+                document.getElementById('breadcrumb-text').textContent = acData.name + ' AC > Mandals';
+                
+                // Calculate total wards
+                let totalWards = 0;
+                if (acData.mandals) {
+                    acData.mandals.forEach(mandal => {
+                        if (mandal.local_bodies) {
+                            mandal.local_bodies.forEach(lb => {
+                                if (lb.wards) {
+                                    totalWards += lb.wards.length;
+                                }
+                            });
+                        }
+                    });
+                }
+                document.getElementById('total-wards').textContent = totalWards;
+
+                // Display map
+                updateDisplay();
+
+            } catch (error) {
+                console.error('Error loading AC data:', error);
+                alert('Error loading data: ' + error.message);
+            }
+        }
+
+        // Update display based on boundary type
+        function updateDisplay() {
+            if (currentBoundaryType === 'mandal') {
+                displayMandals();
+            } else if (currentBoundaryType === 'localbody') {
+                displayLocalBodies();
+            } else if (currentBoundaryType === 'ward') {
+                displayWards();
+            }
+        }
+
+        // Clear all layers
+        function clearLayers() {
+            currentLayers.forEach(layer => {
+                if (map.hasLayer(layer)) map.removeLayer(layer);
+                if (minimap.hasLayer(layer)) minimap.removeLayer(layer);
+            });
+            currentLayers = [];
+        }
+
+        // Display mandals (Thiruvalla style - 2 colors)
+        function displayMandals() {
+            clearLayers();
+            if (!acData || !acData.mandals) return;
+
+            let allBounds = [];
+
+            acData.mandals.forEach((mandal, index) => {
+                if (!mandal.geometry) return;
+
+                const color = boundaryColors[index % boundaryColors.length];
+                
+                // Main map layer
+                const layer = L.geoJSON(mandal.geometry, {
+                    style: {
+                        fillColor: color,
+                        fillOpacity: 0.6,
+                        color: '#333',
+                        weight: 2.5,
+                        opacity: 1
+                    }
+                }).addTo(map);
+
+                // Minimap layer
+                const miniLayer = L.geoJSON(mandal.geometry, {
+                    style: {
+                        fillColor: color,
+                        fillOpacity: 0.8,
+                        color: '#333',
+                        weight: 1.5
+                    }
+                }).addTo(minimap);
+
+                currentLayers.push(layer, miniLayer);
+                allBounds.push(layer.getBounds());
+
+                // Add mandal name label
+                const center = layer.getBounds().getCenter();
+                const label = L.marker(center, {
+                    icon: L.divIcon({
+                        className: 'mandal-label',
+                        html: mandal.name
+                    })
+                }).addTo(map);
+                currentLayers.push(label);
+
+                // Click handler
+                layer.on('click', () => {
+                    const mandalId = cleanId(mandal.name);
+                    window.location.href = `mandal.html?district=${districtId}&ac=${cleanId(acData.name)}&mandal=${mandalId}`;
+                });
+
+                // Hover effect
+                layer.on('mouseover', function() {
+                    this.setStyle({ fillOpacity: 0.8, weight: 3.5 });
+                });
+                layer.on('mouseout', function() {
+                    this.setStyle({ fillOpacity: 0.6, weight: 2.5 });
+                });
+            });
+
+            // Fit bounds
+            if (allBounds.length > 0) {
+                const combinedBounds = allBounds.reduce((acc, bounds) => acc.extend(bounds), L.latLngBounds());
+                map.fitBounds(combinedBounds, { padding: [50, 50] });
+                minimap.fitBounds(combinedBounds, { padding: [10, 10] });
+            }
+        }
+
+        // Display local bodies
+        function displayLocalBodies() {
+            clearLayers();
+            if (!acData || !acData.mandals) return;
+
+            let allBounds = [];
+            let colorIndex = 0;
+
+            acData.mandals.forEach(mandal => {
+                if (!mandal.local_bodies) return;
+                
+                mandal.local_bodies.forEach(lb => {
+                    if (!lb.geometry) return;
+
+                    const color = boundaryColors[colorIndex % boundaryColors.length];
+                    colorIndex++;
+
+                    const layer = L.geoJSON(lb.geometry, {
+                        style: {
+                            fillColor: color,
+                            fillOpacity: 0.6,
+                            color: '#333',
+                            weight: 2,
+                            opacity: 1
+                        }
+                    }).addTo(map);
+
+                    const miniLayer = L.geoJSON(lb.geometry, {
+                        style: {
+                            fillColor: color,
+                            fillOpacity: 0.8,
+                            color: '#333',
+                            weight: 1
+                        }
+                    }).addTo(minimap);
+
+                    currentLayers.push(layer, miniLayer);
+                    allBounds.push(layer.getBounds());
+
+                    // Add label
+                    const center = layer.getBounds().getCenter();
+                    const label = L.marker(center, {
+                        icon: L.divIcon({
+                            className: 'mandal-label',
+                            html: `<div style="font-size: 14px;">${lb.name}</div>`
+                        })
+                    }).addTo(map);
+                    currentLayers.push(label);
+
+                    // Click handler
+                    layer.on('click', () => {
+                        window.location.href = `localbody.html?district=${districtId}&ac=${cleanId(acData.name)}&mandal=${cleanId(mandal.name)}&lb=${cleanId(lb.name)}`;
+                    });
+
+                    // Hover effect
+                    layer.on('mouseover', function() {
+                        this.setStyle({ fillOpacity: 0.8, weight: 3 });
+                    });
+                    layer.on('mouseout', function() {
+                        this.setStyle({ fillOpacity: 0.6, weight: 2 });
+                    });
+                });
+            });
+
+            if (allBounds.length > 0) {
+                const combinedBounds = allBounds.reduce((acc, bounds) => acc.extend(bounds), L.latLngBounds());
+                map.fitBounds(combinedBounds, { padding: [50, 50] });
+                minimap.fitBounds(combinedBounds, { padding: [10, 10] });
+            }
+        }
+
+        // Display wards
+        function displayWards() {
+            clearLayers();
+            if (!acData || !acData.mandals) return;
+
+            let allBounds = [];
+            let colorIndex = 0;
+
+            acData.mandals.forEach(mandal => {
+                if (!mandal.local_bodies) return;
+                
+                mandal.local_bodies.forEach(lb => {
+                    if (!lb.wards) return;
+                    
+                    lb.wards.forEach(ward => {
+                        if (!ward.geometry) return;
+
+                        const color = boundaryColors[colorIndex % boundaryColors.length];
+                        colorIndex++;
+
+                        const layer = L.geoJSON(ward.geometry, {
+                            style: {
+                                fillColor: color,
+                                fillOpacity: 0.6,
+                                color: '#333',
+                                weight: 1.5,
+                                opacity: 1
+                            }
+                        }).addTo(map);
+
+                        const miniLayer = L.geoJSON(ward.geometry, {
+                            style: {
+                                fillColor: color,
+                                fillOpacity: 0.8,
+                                color: '#333',
+                                weight: 0.5
+                            }
+                        }).addTo(minimap);
+
+                        currentLayers.push(layer, miniLayer);
+                        allBounds.push(layer.getBounds());
+
+                        // Add ward number
+                        const center = layer.getBounds().getCenter();
+                        const label = L.marker(center, {
+                            icon: L.divIcon({
+                                className: 'ward-label',
+                                html: `<div class="ward-number-badge" style="background-color: ${color};">${ward.ward_number}</div>`
+                            })
+                        }).addTo(map);
+                        currentLayers.push(label);
+                    });
+                });
+            });
+
+            if (allBounds.length > 0) {
+                const combinedBounds = allBounds.reduce((acc, bounds) => acc.extend(bounds), L.latLngBounds());
+                map.fitBounds(combinedBounds, { padding: [50, 50] });
+                minimap.fitBounds(combinedBounds, { padding: [10, 10] });
+            }
+        }
+
+        // Show preview
+        function showPreview() {
+            if (!acData) return;
+
+            document.getElementById('preview-modal').classList.add('active');
+            document.getElementById('preview-title').textContent = `Preview: ${acData.name} AC`;
+
+            // Initialize preview map
+            setTimeout(() => {
+                if (previewMap) {
+                    previewMap.remove();
+                }
+
+                previewMap = L.map('preview-map', {
+                    zoomControl: false,
+                    attributionControl: false
+                }).setView([10.8505, 76.2711], 7);
+
+                let allBounds = [];
+
+                // Display mandals in preview
+                if (currentBoundaryType === 'mandal' && acData.mandals) {
+                    acData.mandals.forEach((mandal, index) => {
+                        if (!mandal.geometry) return;
+
+                        const color = boundaryColors[index % boundaryColors.length];
+                        
+                        const layer = L.geoJSON(mandal.geometry, {
+                            style: {
+                                fillColor: color,
+                                fillOpacity: 0.6,
+                                color: '#333',
+                                weight: 2.5
+                            }
+                        }).addTo(previewMap);
+
+                        allBounds.push(layer.getBounds());
+
+                        // Add label
+                        const center = layer.getBounds().getCenter();
+                        L.marker(center, {
+                            icon: L.divIcon({
+                                className: 'mandal-label',
+                                html: mandal.name
+                            })
+                        }).addTo(previewMap);
+                    });
+
+                    // Update info panel
+                    document.getElementById('preview-info-title').textContent = 'Mandals in this Assembly Constituency';
+                    const gridHTML = acData.mandals.map((mandal, index) => {
+                        const color = boundaryColors[index % boundaryColors.length];
+                        let lbCount = mandal.local_bodies ? mandal.local_bodies.length : 0;
+                        let wardCount = 0;
+                        if (mandal.local_bodies) {
+                            mandal.local_bodies.forEach(lb => {
+                                if (lb.wards) wardCount += lb.wards.length;
+                            });
+                        }
+                        
+                        return `
+                            <div class="mandal-card" style="border-left-color: ${color};">
+                                <h4><span class="color-indicator" style="background-color: ${color};"></span>${mandal.name}</h4>
+                                <p>📍 ${lbCount} Local Bodies</p>
+                                <p>🏘️ ${wardCount} Wards</p>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    document.getElementById('mandal-grid').innerHTML = gridHTML;
+                }
+
+                // Fit bounds
+                if (allBounds.length > 0) {
+                    const combinedBounds = allBounds.reduce((acc, bounds) => acc.extend(bounds), L.latLngBounds());
+                    previewMap.fitBounds(combinedBounds, { padding: [30, 30] });
+                }
+            }, 200);
+        }
+
+        // Close preview
+        function closePreview() {
+            document.getElementById('preview-modal').classList.remove('active');
+            if (previewMap) {
+                previewMap.remove();
+                previewMap = null;
+            }
+        }
+
+        // Download map
+        function downloadMap() {
+            showPreview();
+            setTimeout(() => {
+                downloadPreviewPDF();
+            }, 1500);
+        }
+
+        // Download PDF
+        async function downloadPreviewPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+
+                // Capture preview container
+                const container = document.getElementById('preview-container');
+                const canvas = await html2canvas(container, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`${acData.name}_AC_Map.pdf`);
+                
+                alert('PDF downloaded successfully!');
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('Error generating PDF. Please try again.');
+            }
+        }
+
+        // Helper function
+        function cleanId(text) {
+            return text.toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kerala - Assembly Constituencies</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #1a1d2e;
+            overflow: hidden;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: #1a1d2e;
+        }
+        
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+        
+        .leaflet-container {
+            background: #1a1d2e !important;
+        }
+        
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+        }
+        
+        .leaflet-control-zoom a {
+            background: #2c3e50 !important;
+            color: white !important;
+            border: none !important;
+        }
+        
+        .leaflet-control-zoom a:hover {
+            background: #34495e !important;
+        }
+        
+        .ac-label {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2c3e50;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            border: 2px solid;
+            pointer-events: none;
+        }
+        
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .popup-content {
+            text-align: center;
+            padding: 8px;
+        }
+        
+        .popup-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+        
+        .popup-info {
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map, acBoundaries = {};
+        
+        // AC Colors - vibrant distinct colors
+        const acColors = {
+            'kasaragod': '#FF6B6B', 'kanhangad': '#4ECDC4', 'trikaripur': '#45B7D1',
+            'payyannur': '#96CEB4', 'kalliassery': '#FFEAA7', 'taliparamba': '#A29BFE',
+            'irikkur': '#FD79A8', 'azhikode': '#FDCB6E', 'kannur': '#6C5CE7',
+            'dharmadam': '#00B894', 'thalassery': '#E17055', 'kuthuparamba': '#74B9FF',
+            'mattannur': '#81ECEC', 'peravoor': '#FAB1A0', 'payyannur': '#FF7675',
+            'kalliasseri': '#A29BFE', 'taliparamba': '#55EFC4', 'irikkur': '#FD79A8',
+            'koothuparamba': '#DFE6E9', 'mattanur': '#0984E3', 'peravoor': '#6C5CE7',
+            'payyanur': '#00CEC9', 'mananthavady': '#FD79A8', 'sulthan_bathery': '#FDCB6E',
+            'kalpetta': '#E17055', 'vadakara': '#74B9FF', 'kuttiadi': '#00B894',
+            'nadapuram': '#FF6B6B', 'quilandy': '#4ECDC4', 'perambra': '#45B7D1',
+            'kozhikode_north': '#96CEB4', 'kozhikode_south': '#FFEAA7', 'beypore': '#A29BFE',
+            'kunnamangalam': '#FD79A8', 'koduvally': '#FDCB6E', 'thiruvambady': '#6C5CE7',
+            'kondotty': '#00B894', 'ernad': '#E17055', 'nilambur': '#74B9FF',
+            'wandoor': '#81ECEC', 'manjeri': '#FAB1A0', 'perinthalmanna': '#FF7675',
+            'mankada': '#A29BFE', 'malappuram': '#55EFC4', 'vengara': '#FD79A8',
+            'vallikkunnu': '#DFE6E9', 'tirurangadi': '#0984E3', 'tanur': '#6C5CE7',
+            'tirur': '#00CEC9', 'kottakkal': '#FD79A8', 'thavanur': '#FDCB6E',
+            'ponnani': '#E17055', 'thrithala': '#74B9FF', 'pattambi': '#00B894',
+            'shornur': '#FF6B6B', 'ottappalam': '#4ECDC4', 'kongad': '#45B7D1',
+            'mannarkkad': '#96CEB4', 'malampuzha': '#FFEAA7', 'palakkad': '#A29BFE',
+            'tarur': '#FD79A8', 'chittur': '#FDCB6E', 'nenmara': '#6C5CE7',
+            'alathur': '#00B894', 'chelakkara': '#E17055', 'kunnamkulam': '#74B9FF',
+            'guruvayur': '#81ECEC', 'manalur': '#FAB1A0', 'wadakkancherry': '#FF7675',
+            'thrissur': '#A29BFE', 'ollur': '#55EFC4', 'cherpu': '#FD79A8',
+            'puthukkad': '#DFE6E9', 'chalakudy': '#0984E3', 'kodungallur': '#6C5CE7',
+            'irinjalakuda': '#00CEC9', 'kaipamangalam': '#FD79A8', 'nattika': '#FDCB6E',
+            'kalamassery': '#E17055', 'paravur': '#74B9FF', 'vypin': '#00B894',
+            'kochi': '#FF6B6B', 'thripunithura': '#4ECDC4', 'ernakulam': '#45B7D1',
+            'thrikkakara': '#96CEB4', 'kunnathunad': '#FFEAA7', 'piravom': '#A29BFE',
+            'muvattupuzha': '#FD79A8', 'kothamangalam': '#FDCB6E', 'devikulam': '#6C5CE7',
+            'udumbanchola': '#00B894', 'thodupuzha': '#E17055', 'idukki': '#74B9FF',
+            'peerumade': '#81ECEC', 'pala': '#FAB1A0', 'kaduthuruthy': '#FF7675',
+            'vaikom': '#A29BFE', 'ettumanoor': '#55EFC4', 'kottayam': '#FD79A8',
+            'puthuppally': '#DFE6E9', 'changanassery': '#0984E3', 'kanjirappally': '#6C5CE7',
+            'poonjar': '#00CEC9', 'aroor': '#FD79A8', 'cherthala': '#FDCB6E',
+            'alappuzha': '#E17055', 'ambalappuzha': '#74B9FF', 'haripad': '#00B894',
+            'kayamkulam': '#FF6B6B', 'mavelikkara': '#4ECDC4', 'chengannur': '#45B7D1',
+            'thiruvalla': '#96CEB4', 'ranni': '#FFEAA7', 'aranmula': '#A29BFE',
+            'konni': '#FD79A8', 'adoor': '#FDCB6E', 'pandalam': '#6C5CE7',
+            'kunnathur': '#00B894', 'chadayamangalam': '#E17055', 'kundara': '#74B9FF',
+            'kollam': '#81ECEC', 'eravipuram': '#FAB1A0', 'chathannoor': '#FF7675',
+            'varkala': '#A29BFE', 'attingal': '#55EFC4', 'chirayinkeezhu': '#FD79A8',
+            'nedumangad': '#DFE6E9', 'vamanapuram': '#0984E3', 'aruvikkara': '#6C5CE7',
+            'kattakada': '#00CEC9', 'kovalam': '#FD79A8', 'neyyattinkara': '#FDCB6E',
+            'parassala': '#E17055', 'kazhakootam': '#74B9FF', 'vattiyoorkavu': '#00B894',
+            'thiruvananthapuram': '#FF6B6B', 'nemom': '#4ECDC4', 'aruvikkara': '#45B7D1',
+            'kattakkada': '#96CEB4', 'paravoor': '#FFEAA7', 'karunagappally': '#A29BFE',
+            'chavara': '#FD79A8', 'kottarakkara': '#FDCB6E', 'pathanapuram': '#6C5CE7',
+            'punalur': '#00B894', 'kottarakara': '#E17055', 'pathanamthitta': '#74B9FF'
+        };
+        
+        // Initialize map
+        map = L.map('map', {
+            zoomControl: true,
+            attributionControl: false,
+            preferCanvas: true
+        }).setView([10.8505, 76.2711], 7);
+        
+        // Load AC boundaries from ward data
+        async function loadACBoundaries() {
+            try {
+                // Load the CSV to get AC list
+                const response = await fetch('/Users/devandev/Desktop/ward_jsons/LSG Mapped - Sheet1.csv');
+                const csvText = await response.text();
+                
+                // Parse CSV to get unique ACs
+                const lines = csvText.split('\n');
+                const acSet = new Set();
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    const parts = line.split(',');
+                    if (parts.length >= 4) {
+                        const ac = parts[3].trim();
+                        if (ac && ac !== 'AC') {
+                            acSet.add(ac);
+                        }
+                    }
+                }
+                
+                console.log('Found ACs:', Array.from(acSet));
+                
+                // For now, load district boundaries and label them
+                await loadDistrictBoundariesAsAC();
+                
+            } catch (error) {
+                console.error('Error loading AC data:', error);
+                await loadDistrictBoundariesAsAC();
+            }
+        }
+        
+        async function loadDistrictBoundariesAsAC() {
+            try {
+                // Try to load AC boundaries first
+                let response = await fetch('data/kerala_ac_boundaries.geojson');
+                let geojson;
+                
+                if (response.ok) {
+                    geojson = await response.json();
+                    console.log('Loaded AC boundaries:', geojson.features.length);
+                } else {
+                    // Fallback to district boundaries
+                    response = await fetch('data/kerala_14_districts.geojson');
+                    geojson = await response.json();
+                    console.log('Using district boundaries as fallback');
+                }
+                
+                geojson.features.forEach((feature, index) => {
+                    const acId = feature.properties.ac_id || feature.properties.district_id;
+                    const acName = feature.properties.ac_name || feature.properties.name;
+                    
+                    // Generate random vibrant color for each AC
+                    const hue = (index * 137.508) % 360; // Golden angle for even distribution
+                    const saturation = 60 + (index % 20);
+                    const lightness = 50 + (index % 15);
+                    const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                    
+                    const layer = L.geoJSON(feature, {
+                        style: {
+                            fillColor: color,
+                            fillOpacity: 0.65,
+                            color: '#ffffff',
+                            weight: 2,
+                            opacity: 1
+                        },
+                        onEachFeature: function(feature, layer) {
+                            // Add hover effects
+                            layer.on({
+                                mouseover: function(e) {
+                                    e.target.setStyle({
+                                        fillOpacity: 0.85,
+                                        weight: 3
+                                    });
+                                },
+                                mouseout: function(e) {
+                                    e.target.setStyle({
+                                        fillOpacity: 0.65,
+                                        weight: 2
+                                    });
+                                }
+                            });
+                            
+                            // Add popup
+                            layer.bindPopup(`
+                                <div class="popup-content">
+                                    <div class="popup-title">${acName}</div>
+                                    <div class="popup-info">Assembly Constituency</div>
+                                </div>
+                            `);
+                            
+                            // Add label directly on the polygon center
+                            const center = layer.getBounds().getCenter();
+                            L.marker(center, {
+                                icon: L.divIcon({
+                                    className: 'ac-label',
+                                    html: `<div style="border-color: ${color}">${acName}</div>`,
+                                    iconSize: null
+                                })
+                            }).addTo(map);
+                        }
+                    }).addTo(map);
+                });
+                
+                // Fit map to all features
+                const allLayers = L.geoJSON(geojson);
+                map.fitBounds(allLayers.getBounds(), { padding: [20, 20] });
+                
+            } catch (error) {
+                console.error('Error loading boundaries:', error);
+            }
+        }
+        
+        // Initialize
+        loadACBoundaries();
+    </script>
+</body>
+</html>

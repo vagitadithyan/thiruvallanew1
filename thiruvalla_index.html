@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kerala - 14 Districts Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .header .subtitle {
+            font-size: 1em;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 100px);
+            gap: 0;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+        }
+        
+        .sidebar h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+            transition: border 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .district-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .district-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .district-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        
+        .color-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 15px;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        .district-info {
+            flex: 1;
+        }
+        
+        .district-name {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+        
+        .district-stats {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        .map-container {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+            font-size: 0.9em;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+        
+        /* Leaflet popup styles */
+        .leaflet-popup-content-wrapper {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .popup-content {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .popup-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .popup-stats {
+            font-size: 0.95em;
+            color: #7f8c8d;
+            margin: 8px 0;
+        }
+        
+        .popup-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.95em;
+            transition: opacity 0.3s;
+        }
+        
+        .popup-btn:hover {
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗺️ Kerala - Interactive District Map</h1>
+        <p class="subtitle">Explore all Districts, ACs, Mandals & Wards</p>
+        <div class="stats-bar">
+            <div class="stat-box">
+                <span class="stat-number" id="totalDistricts">0</span>
+                <span class="stat-label">Districts</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number" id="totalACs">0</span>
+                <span class="stat-label">Assembly Constituencies</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number" id="totalLBs">0</span>
+                <span class="stat-label">Local Bodies</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number" id="totalWards">0</span>
+                <span class="stat-label">Wards</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h2>Select District</h2>
+            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search districts...">
+            <div class="district-list" id="districtList"></div>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="map-legend">
+                <div class="legend-title">District Colors</div>
+                <div id="legendContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map, config;
+        let districtLayers = {};
+        
+        // Initialize map
+        map = L.map('map').setView([10.8505, 76.2711], 7);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Load configuration
+        async function init() {
+            try {
+                const response = await fetch('config/kerala_complete.json');
+                config = await response.json();
+                
+                // Update statistics
+                document.getElementById('totalDistricts').textContent = config.districts.length;
+                document.getElementById('totalACs').textContent = config.state.total_acs;
+                
+                // Calculate totals
+                let totalLBs = 0;
+                let totalWards = 0;
+                config.districts.forEach(district => {
+                    district.assembly_constituencies.forEach(ac => {
+                        ac.mandals.forEach(mandal => {
+                            totalLBs += mandal.local_bodies.length;
+                            mandal.local_bodies.forEach(lb => {
+                                totalWards += lb.total_wards;
+                            });
+                        });
+                    });
+                });
+                
+                document.getElementById('totalLBs').textContent = totalLBs.toLocaleString();
+                document.getElementById('totalWards').textContent = totalWards.toLocaleString();
+                
+                renderDistrictList();
+                renderLegend();
+                
+                // For now, create placeholder district boundaries
+                createDistrictMarkers();
+                
+            } catch (error) {
+                console.error('Error loading configuration:', error);
+                alert('Error loading Kerala data. Please check console for details.');
+            }
+        }
+        
+        function renderDistrictList() {
+            const list = document.getElementById('districtList');
+            list.innerHTML = '';
+            
+            config.districts.forEach(district => {
+                const item = document.createElement('div');
+                item.className = 'district-item';
+                item.style.background = `linear-gradient(135deg, ${district.color}22 0%, ${district.color}44 100%)`;
+                item.style.borderColor = district.color;
+                
+                item.innerHTML = `
+                    <div class="color-dot" style="background: ${district.color}"></div>
+                    <div class="district-info">
+                        <div class="district-name">${district.name}</div>
+                        <div class="district-stats">${district.total_acs} ACs</div>
+                    </div>
+                `;
+                
+                item.onclick = () => viewDistrict(district.id);
+                list.appendChild(item);
+            });
+        }
+        
+        function renderLegend() {
+            const legend = document.getElementById('legendContent');
+            legend.innerHTML = '';
+            
+            config.districts.slice(0, 10).forEach(district => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `
+                    <div class="legend-color" style="background: ${district.color}"></div>
+                    <span>${district.name}</span>
+                `;
+                legend.appendChild(item);
+            });
+            
+            if (config.districts.length > 10) {
+                const more = document.createElement('div');
+                more.className = 'legend-item';
+                more.style.fontStyle = 'italic';
+                more.textContent = `... and ${config.districts.length - 10} more`;
+                legend.appendChild(more);
+            }
+        }
+        
+        async function createDistrictMarkers() {
+            // Try to load actual district boundaries (14 actual Kerala districts)
+            try {
+                // Load Kerala state boundary with 14 districts
+                const response = await fetch('data/kerala_14_districts.geojson');
+                
+                if (response.ok) {
+                    const geojson = await response.json();
+                    console.log('Loaded Kerala 14 districts GeoJSON:', geojson.features.length, 'features');
+                    loadDistrictBoundaries(geojson);
+                    
+                    // Fit map to loaded boundaries
+                    const geoJsonLayer = L.geoJSON(geojson);
+                    map.fitBounds(geoJsonLayer.getBounds(), { padding: [50, 50] });
+                } else {
+                    console.log('Kerala 14 districts file not found, trying 30-district file');
+                    // Fallback to 30-district file
+                    const response2 = await fetch('data/kerala_districts.geojson');
+                    if (response2.ok) {
+                        const geojson = await response2.json();
+                        loadDistrictBoundaries(geojson);
+                        const geoJsonLayer = L.geoJSON(geojson);
+                        map.fitBounds(geoJsonLayer.getBounds(), { padding: [50, 50] });
+                    } else {
+                        await loadIndividualDistrictBoundaries();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading district boundaries:', error);
+                console.log('Using fallback markers');
+                createFallbackMarkers();
+            }
+        }
+        
+        function loadDistrictBoundaries(geojson) {
+            // Load GeoJSON with district boundaries
+            L.geoJSON(geojson, {
+                style: function(feature) {
+                    const districtId = feature.properties.district_id || feature.properties.DISTRICT_ID;
+                    const featureColor = feature.properties.color;
+                    
+                    // Try to find district in config
+                    const district = config.districts.find(d => 
+                        d.id === districtId || 
+                        d.name.toLowerCase().replace(/\s+/g, '_') === districtId
+                    );
+                    
+                    // Use color from GeoJSON properties, or from config, or default
+                    const fillColor = featureColor || (district ? district.color : '#95A5A6');
+                    
+                    return {
+                        fillColor: fillColor,
+                        fillOpacity: 0.7,
+                        color: '#2c3e50',
+                        weight: 2,
+                        opacity: 1
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+                    const districtId = feature.properties.district_id || feature.properties.DISTRICT_ID;
+                    const districtName = feature.properties.name || districtId;
+                    
+                    // Try to find district in config
+                    const district = config.districts.find(d => 
+                        d.id === districtId || 
+                        d.name.toLowerCase().replace(/\s+/g, '_') === districtId
+                    );
+                    
+                    // Add interactivity
+                    layer.on({
+                        mouseover: function(e) {
+                            e.target.setStyle({
+                                fillOpacity: 0.9,
+                                weight: 3
+                            });
+                        },
+                        mouseout: function(e) {
+                            e.target.setStyle({
+                                fillOpacity: 0.7,
+                                weight: 2
+                            });
+                        },
+                        click: function() {
+                            if (district) {
+                                viewDistrict(district.id);
+                            } else {
+                                alert(`Viewing ${districtName} details...`);
+                            }
+                        }
+                    });
+                    
+                    // Create popup
+                    const acCount = district ? district.total_acs : 'N/A';
+                    layer.bindPopup(`
+                        <div class="popup-content">
+                            <div class="popup-title">${districtName}</div>
+                            <div class="popup-stats">${acCount} Assembly Constituencies</div>
+                            ${district ? `<button class="popup-btn" onclick="viewDistrict('${district.id}')">Explore →</button>` : ''}
+                        </div>
+                    `);
+                    
+                    if (district) {
+                        districtLayers[district.id] = layer;
+                    }
+                }
+            }).addTo(map);
+        }
+        
+        async function loadIndividualDistrictBoundaries() {
+            // Try loading individual district boundary files
+            for (const district of config.districts) {
+                try {
+                    const response = await fetch(`data/${district.id}/district_boundary.geojson`);
+                    if (response.ok) {
+                        const geojson = await response.json();
+                        
+                        const layer = L.geoJSON(geojson, {
+                            style: {
+                                fillColor: district.color,
+                                fillOpacity: 0.7,
+                                color: '#2c3e50',
+                                weight: 2,
+                                opacity: 1
+                            },
+                            onEachFeature: function(feature, layer) {
+                                layer.on({
+                                    mouseover: function(e) {
+                                        e.target.setStyle({
+                                            fillOpacity: 0.9,
+                                            weight: 3
+                                        });
+                                    },
+                                    mouseout: function(e) {
+                                        e.target.setStyle({
+                                            fillOpacity: 0.7,
+                                            weight: 2
+                                        });
+                                    },
+                                    click: function() {
+                                        viewDistrict(district.id);
+                                    }
+                                });
+                                
+                                layer.bindPopup(`
+                                    <div class="popup-content">
+                                        <div class="popup-title">${district.name}</div>
+                                        <div class="popup-stats">${district.total_acs} Assembly Constituencies</div>
+                                        <button class="popup-btn" onclick="viewDistrict('${district.id}')">
+                                            Explore →
+                                        </button>
+                                    </div>
+                                `);
+                            }
+                        }).addTo(map);
+                        
+                        districtLayers[district.id] = layer;
+                    }
+                } catch (error) {
+                    // Skip if file doesn't exist
+                }
+            }
+            
+            // If no boundaries loaded, use fallback
+            if (Object.keys(districtLayers).length === 0) {
+                createFallbackMarkers();
+            }
+        }
+        
+        function createFallbackMarkers() {
+            // Fallback: Create markers if no boundary files available
+            const districtCenters = {
+                'pathanamthitta': [9.2648, 76.7870],
+                'thiruvananthapuram_south': [8.5241, 76.9366],
+                'thiruvananthapuram_north': [8.7139, 76.9894],
+                'kollam_west': [8.8809, 76.5842],
+                'kollam_east': [9.0215, 76.7390],
+                'alappuzha_north': [9.4981, 76.3388],
+                'alappuzha_south': [9.2905, 76.4638],
+                'kottayam_east': [9.5916, 76.5222],
+                'kottayam_west': [9.6931, 76.6403],
+                'idukki_north': [10.1097, 77.1706],
+                'idukki_south': [9.8525, 77.0672],
+                'ernakulam_city': [9.9312, 76.2673],
+                'ernakulam_east': [10.1632, 76.6414],
+                'ernakulam_north': [10.0967, 76.4897],
+                'thrissur_north': [10.5276, 76.2144],
+                'thrissur_south': [10.4509, 76.3098],
+                'thrissur_city': [10.5276, 76.2144],
+                'palakkad_west': [10.7867, 76.6548],
+                'palakkad_east': [10.9225, 76.8317],
+                'malappuram_central': [11.0510, 76.0711],
+                'malappuram_east': [11.1749, 76.2694],
+                'malappuram_west': [11.0204, 75.8699],
+                'kozhikode_city': [11.2588, 75.7804],
+                'kozhikode_north': [11.4102, 75.8398],
+                'kozhikode_rural': [11.3410, 75.9339],
+                'wayanad': [11.6854, 76.1320],
+                'kannur_north': [11.8745, 75.3704],
+                'kannur_south': [12.0242, 75.4934],
+                'kasaragod': [12.4996, 74.9869]
+            };
+            
+            config.districts.forEach(district => {
+                const center = districtCenters[district.id] || [10.8505, 76.2711];
+                
+                const marker = L.circleMarker(center, {
+                    radius: 15,
+                    fillColor: district.color,
+                    color: '#2c3e50',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.7
+                }).addTo(map);
+                
+                marker.bindPopup(`
+                    <div class="popup-content">
+                        <div class="popup-title">${district.name}</div>
+                        <div class="popup-stats">${district.total_acs} Assembly Constituencies</div>
+                        <button class="popup-btn" onclick="viewDistrict('${district.id}')">
+                            Explore →
+                        </button>
+                    </div>
+                `);
+                
+                marker.on('mouseover', function() {
+                    this.setStyle({ fillOpacity: 1, radius: 18 });
+                });
+                
+                marker.on('mouseout', function() {
+                    this.setStyle({ fillOpacity: 0.7, radius: 15 });
+                });
+                
+                marker.on('click', function() {
+                    viewDistrict(district.id);
+                });
+            });
+        }
+        
+        function viewDistrict(districtId) {
+            window.location.href = `district.html?district=${districtId}`;
+        }
+        
+        // Search functionality
+        document.getElementById('searchBox').addEventListener('input', function(e) {
+            const search = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.district-item');
+            
+            items.forEach(item => {
+                const name = item.querySelector('.district-name').textContent.toLowerCase();
+                if (name.includes(search)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+        
+        init();
+    </script>
+</body>
+</html>

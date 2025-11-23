@@ -1,0 +1,18 @@
+{
+  "districts": [
+    {"id": "thiruvananthapuram", "name": "Thiruvananthapuram", "color": "#9B59B6"},
+    {"id": "kollam", "name": "Kollam", "color": "#E74C3C"},
+    {"id": "pathanamthitta", "name": "Pathanamthitta", "color": "#E91E63"},
+    {"id": "alappuzha", "name": "Alappuzha", "color": "#FF5722"},
+    {"id": "kottayam", "name": "Kottayam", "color": "#00BCD4"},
+    {"id": "idukki", "name": "Idukki", "color": "#3F51B5"},
+    {"id": "ernakulam", "name": "Ernakulam", "color": "#2196F3"},
+    {"id": "thrissur", "name": "Thrissur", "color": "#FFC107"},
+    {"id": "palakkad", "name": "Palakkad", "color": "#FF9800"},
+    {"id": "malappuram", "name": "Malappuram", "color": "#4CAF50"},
+    {"id": "kozhikode", "name": "Kozhikode", "color": "#009688"},
+    {"id": "wayanad", "name": "Wayanad", "color": "#795548"},
+    {"id": "kannur", "name": "Kannur", "color": "#607D8B"},
+    {"id": "kasaragod", "name": "Kasaragod", "color": "#CDDC39"}
+  ]
+}

@@ -3,77 +3,1648 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thiruvalla Assembly Constituency</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Kerala - 14 Districts</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .header .subtitle {
+            font-size: 0.95em;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 90px);
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: #f8f9fa;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #e0e0e0;
+        }
+        
+        .sidebar h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        .district-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .district-item {
+            padding: 12px;
+            background: white;
+            border-left: 4px solid;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .district-item:hover {
+            transform: translateX(3px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .district-name {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.95em;
+        }
+        
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #ffffff;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+        }
+        
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+        
+        .leaflet-container {
+            background: #ffffff !important;  /* Changed to white to match borders */
+        }
+        
+        /* Prevent rendering artifacts and gaps */
+        .leaflet-overlay-pane svg {
+            shape-rendering: geometricPrecision;  /* Better rendering for boundaries */
+        }
+        
+        .leaflet-overlay-pane path {
+            stroke-linejoin: round;  /* Round joins to prevent gaps */
+            stroke-linecap: round;  /* Round caps */
+        }
+        
+        .district-label {
+            pointer-events: none !important;
+        }
+        
+        .district-label div {
+            pointer-events: none !important;
+        }
+        
+        .map-legend {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-width: 250px;
+        }
+        
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #2c3e50;
+            font-size: 0.95em;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+            font-size: 0.85em;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
+        
+        .legend-label {
+            color: #34495e;
+            font-weight: 400;
+        }
+        
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.2);
+        }
+        
+        .popup-content {
+            text-align: center;
+            padding: 10px 5px;
+        }
+        
+        .popup-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            flex-grow: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .preview-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .preview-btn:hover {
+            background-color: #27ae60;
+        }
+
+        /* Preview Modal Styles */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .preview-modal.active {
+            display: flex;
+        }
+
+        .preview-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 25px;
+            border: 1px solid #888;
+            width: 95%;
+            max-width: 1600px;
+            border-radius: 10px;
+            position: relative;
+            max-height: 95vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .preview-header h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .preview-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .preview-controls label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .preview-controls select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .preview-close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .preview-close:hover,
+        .preview-close:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        #preview-container {
+            display: flex;
+            gap: 20px;
+            flex-grow: 1;
+            margin-top: 20px;
+            overflow: hidden;
+            height: 65vh;
+        }
+
+        .preview-left {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-y: auto;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .filter-section h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+        }
+
+        .filter-group {
+            margin-bottom: 12px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+        }
+
+        .preview-map {
+            flex: 1;
+            height: 100%;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            background: #ffffff !important;
+        }
+        
+        #preview-map .leaflet-container {
+            background: #ffffff !important;
+        }
+
+        .stats-section {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .stats-section h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: #2c3e50;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 8px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+
+        .stat-label {
+            color: #555;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+            padding-top: 15px;
+        }
+
+        .preview-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-preview {
+            background-color: #9b59b6;
+            color: white;
+        }
+
+        .btn-preview:hover {
+            background-color: #8e44ad;
+        }
+
+        .btn-download {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background-color: #2980b9;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <header class="header">
-            <div class="header-top">
-                <h1>Thiruvalla Assembly Constituency</h1>
-                <div class="stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Total Wards</span>
-                        <span class="stat-value" id="total-wards">0</span>
-                    </div>
-                </div>
+    <div class="header">
+        <h1>Kerala - 14 Districts</h1>
+        <p class="subtitle">Interactive District Map</p>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h2>Districts</h2>
+            <div class="district-list" id="district-list">
+                <!-- District items will be populated here -->
             </div>
-            <div class="header-controls">
-                <div id="breadcrumbs" class="breadcrumbs"></div>
-                <div class="download-controls">
-                    <select id="download-level">
-                        <option value="AC">AC Boundary</option>
-                        <option value="MANDAL">Organizational Mandal</option>
-                        <option value="PANCHAYAT">Panchayat</option>
-                        <option value="WARD">Ward</option>
-                    </select>
-                    <button id="preview-btn" class="btn-secondary">Preview</button>
-                    <button id="download-btn" class="btn-primary">Download Map</button>
-                </div>
+        </div>
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="map-legend">
+                <div class="legend-title">District Legend</div>
+                <div id="legendContent"></div>
             </div>
-        </header>
-        <main>
-            <div id="map">
-                <div id="legend" class="map-legend hidden"></div>
-            </div>
-            <div id="info-panel" class="info-panel hidden">
-                <div class="panel-header">
-                    <h2>Ward Details</h2>
-                    <button id="close-panel" class="close-btn">&times;</button>
-                </div>
-                <div class="panel-content">
-                    <div class="detail-row">
-                        <span class="label">LSGD Name</span>
-                        <span class="value" id="lsgd-name">-</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">LSGD Type</span>
-                        <span class="value" id="lsgd-type">-</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Ward Name</span>
-                        <span class="value" id="ward-name">-</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Ward No</span>
-                        <span class="value" id="ward-no">-</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">District</span>
-                        <span class="value" id="district">-</span>
-                    </div>
-                </div>
-            </div>
-        </main>
+        </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="data.js"></script>
-    <script src="app.js"></script>
+    <div id="preview-modal" class="preview-modal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2 id="preview-title">Kerala State - Preview</h2>
+                <div class="preview-controls">
+                    <label for="preview-boundary-select">View Level:</label>
+                    <select id="preview-boundary-select" onchange="updatePreviewBoundary()">
+                        <option value="district">Districts</option>
+                        <option value="ac">Assembly Constituencies</option>
+                        <option value="ward">All Wards</option>
+                    </select>
+                    <span class="preview-close" onclick="closePreview()">&times;</span>
+                </div>
+            </div>
+            <div id="preview-container">
+                <div class="preview-left">
+                    <!-- Boundary Level Selection -->
+                    <div class="filter-section">
+                        <h3>🗺️ Boundary Level</h3>
+                        <div class="filter-group">
+                            <label>Select Level:</label>
+                            <select id="boundary-level-select" onchange="onBoundaryLevelChange()">
+                                <option value="district">Districts</option>
+                                <option value="ac">Assembly Constituencies (AC)</option>
+                                <option value="mandal">Organizational Mandals</option>
+                                <option value="lsgd">Panchayats/LSGDs</option>
+                                <option value="ward">Wards</option>
+                            </select>
+                        </div>
+                        <div class="filter-group" id="district-filter-group" style="display: none;">
+                            <label>District:</label>
+                            <select id="district-filter" onchange="onDistrictFilterChange()">
+                                <option value="all">All Districts</option>
+                            </select>
+                        </div>
+                        <div class="filter-group" id="ac-filter-group" style="display: none;">
+                            <label>Assembly Constituency:</label>
+                            <select id="ac-filter" onchange="onACFilterChange()">
+                                <option value="all">All ACs</option>
+                            </select>
+                        </div>
+                        <div class="filter-group" id="mandal-filter-group" style="display: none;">
+                            <label>Mandal:</label>
+                            <select id="mandal-filter" onchange="onMandalFilterChange()">
+                                <option value="all">All Mandals</option>
+                            </select>
+                        </div>
+                        <div class="filter-group" id="lsgd-filter-group" style="display: none;">
+                            <label>LSGD:</label>
+                            <select id="lsgd-filter" onchange="updateStats()">
+                                <option value="all">All LSGDs</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="stats-section">
+                        <h3>📊 Statistics</h3>
+                        <div id="stats-content">
+                            <div class="loading">Select filters to view data</div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="preview-actions">
+                        <button class="btn-preview" onclick="showBoundaryPreview()">👁️ Preview Map</button>
+                        <button class="btn-download" onclick="downloadPreviewPDF()">📥 Download PDF</button>
+                    </div>
+                </div>
+                <div id="preview-map" class="preview-map"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let geojsonLayer;
+        let districtLayers = {};
+        const districtColors = {};
+        let allDistrictsGeoJSON = null;
+        let previewMap;
+        let allACsData = [];
+        let allMandalsData = [];
+        let allLSGDsData = [];
+        let allWardsData = [];
+        let currentPreviewLayer = null;
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Professional color scheme matching reference map
+        Object.assign(districtColors, {
+            'thiruvananthapuram': '#9C27B0',  // Purple
+            'kollam': '#FF9800',              // Orange
+            'pathanamthitta': '#E91E63',      // Pink
+            'alappuzha': '#FF5722',           // Deep Orange
+            'kottayam': '#00BCD4',            // Cyan
+            'idukki': '#8BC34A',              // Light Green
+            'ernakulam': '#2196F3',           // Blue
+            'thrissur': '#FFC107',            // Amber
+            'palakkad': '#FF9800',            // Orange
+            'malappuram': '#4CAF50',          // Green
+            'kozhikode': '#009688',           // Teal
+            'wayanad': '#795548',             // Brown
+            'kannur': '#3F51B5',              // Indigo
+            'kasaragod': '#CDDC39'            // Lime
+        });
+        
+        const districtNames = {
+            'thiruvananthapuram': 'Thiruvananthapuram',
+            'kollam': 'Kollam',
+            'pathanamthitta': 'Pathanamthitta',
+            'alappuzha': 'Alappuzha',
+            'kottayam': 'Kottayam',
+            'idukki': 'Idukki',
+            'ernakulam': 'Ernakulam',
+            'thrissur': 'Thrissur',
+            'palakkad': 'Palakkad',
+            'malappuram': 'Malappuram',
+            'kozhikode': 'Kozhikode',
+            'wayanad': 'Wayanad',
+            'kannur': 'Kannur',
+            'kasaragod': 'Kasaragod'
+        };
+        
+        // Initialize map WITHOUT background tiles
+        map = L.map('map', {
+            zoomControl: true,
+            attributionControl: false,
+            preferCanvas: true
+        }).setView([10.8505, 76.2711], 7);
+        
+        // NO BACKGROUND MAP - just solid color background
+        
+        // Load district boundaries
+        async function loadDistricts() {
+            try {
+                console.log('🔄 Fetching district data...');
+                const response = await fetch('data/kerala_14_districts_fixed.geojson');
+                console.log('📥 Response received:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const geojson = await response.json();
+                console.log('✅ GeoJSON parsed successfully');
+                
+                // Store for preview/download functionality
+                allDistrictsGeoJSON = geojson;
+                
+                console.log('📊 Loaded districts:', geojson.features.length);
+                
+                // Add district boundaries to map
+                const districtLayer = L.geoJSON(geojson, {
+                    style: function(feature) {
+                        const districtId = feature.properties.district;
+                        const color = districtColors[districtId] || '#E0E0E0';
+                        
+                        return {
+                            fillColor: color,
+                            fillOpacity: 1,
+                            color: color,
+                            weight: 8,  // Extra thick border to completely cover gaps
+                            opacity: 1,
+                            smoothFactor: 0,  // No smoothing to prevent gaps
+                            lineJoin: 'round',
+                            lineCap: 'round'
+                        };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        const districtId = feature.properties.district;
+                        const districtName = districtNames[districtId] || feature.properties.name;
+                        
+                        // Add hover effects and drill-down
+                        layer.on({
+                            mouseover: function(e) {
+                                e.target.setStyle({
+                                    fillOpacity: 1,
+                                    weight: 3,
+                                    color: '#2c3e50',
+                                    opacity: 1
+                                });
+                                e.target.bringToFront();
+                            },
+                            mouseout: function(e) {
+                                const districtId = feature.properties.district;
+                                const color = districtColors[districtId] || '#E0E0E0';
+                                e.target.setStyle({
+                                    fillOpacity: 1,
+                                    weight: 2,
+                                    color: color,  // Back to matching color
+                                    opacity: 1
+                                });
+                            },
+                            click: function() {
+                                // Drill down to district view
+                                window.location.href = `district.html?district=${districtId}`;
+                            }
+                        });
+                        
+                        // Add district name label (clean style like reference map)
+                        const center = layer.getBounds().getCenter();
+                        const labelMarker = L.marker(center, {
+                            icon: L.divIcon({
+                                className: 'district-label',
+                                html: `<div style="
+                                    font-size: 13px;
+                                    font-weight: 700;
+                                    color: #000000;
+                                    text-transform: uppercase;
+                                    text-align: center;
+                                    white-space: nowrap;
+                                    pointer-events: none;
+                                    text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;
+                                ">${districtName.toUpperCase()}</div>`,
+                                iconSize: null
+                            }),
+                            interactive: false
+                        }).addTo(map);
+                        
+                        // Add popup
+                        layer.bindPopup(`
+                            <div class="popup-content">
+                                <div class="popup-title">${districtName}</div>
+                            </div>
+                        `);
+                    }
+                }).addTo(map);
+                
+                // Fit map to show all districts
+                map.fitBounds(districtLayer.getBounds(), { padding: [30, 30] });
+                
+                // Render sidebar and legend
+                renderSidebar();
+                renderLegend();
+                
+            } catch (error) {
+                console.error('Error loading districts:', error);
+                alert('Error loading district data. Please check the console.');
+            }
+        }
+        
+        function renderSidebar() {
+            const list = document.getElementById('district-list');
+            list.innerHTML = '';
+            
+            Object.keys(districtNames).forEach(districtId => {
+                const item = document.createElement('div');
+                item.className = 'district-item';
+                item.style.borderColor = districtColors[districtId];
+                
+                item.innerHTML = `
+                    <div class="district-name">${districtNames[districtId]}</div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    // Drill down to district view
+                    window.location.href = `district.html?district=${districtId}`;
+                });
+                
+                list.appendChild(item);
+            });
+        }
+        
+        function renderLegend() {
+            const legend = document.getElementById('legendContent');
+            legend.innerHTML = '';
+            
+            Object.keys(districtNames).forEach(districtId => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                
+                item.innerHTML = `
+                    <div class="legend-color" style="background: ${districtColors[districtId]}"></div>
+                    <div class="legend-label">${districtNames[districtId]}</div>
+                `;
+                
+                legend.appendChild(item);
+            });
+        }
+        
+        // Initialize
+        loadDistricts();
+
+        function viewDistrict(districtId) {
+            const district = config.districts.find(d => d.id === districtId);
+            if (district) {
+                window.location.href = `district.html?district=${district.id}`;
+            }
+        }
+
+        // --- PREVIEW MODAL FUNCTIONS ---
+
+        window.showPreview = function() {
+            document.getElementById('preview-modal').classList.add('active');
+            populateDistrictFilter();
+            if (!previewMap) {
+                // Wait for modal to be visible before initializing map
+                setTimeout(() => {
+                    initializePreviewMap();
+                    document.getElementById('boundary-level-select').value = 'district';
+                    onBoundaryLevelChange();
+                    // Automatically show district boundaries on open
+                    setTimeout(() => {
+                        showBoundaryPreview();
+                    }, 200);
+                }, 100);
+            } else {
+                // Map already exists, just invalidate size
+                setTimeout(() => {
+                    previewMap.invalidateSize();
+                }, 100);
+                document.getElementById('boundary-level-select').value = 'district';
+                onBoundaryLevelChange();
+                // Automatically show district boundaries on open
+                setTimeout(() => {
+                    showBoundaryPreview();
+                }, 200);
+            }
+        }
+
+        function initializePreviewMap() {
+            previewMap = L.map('preview-map', {
+                attributionControl: false,
+                preferCanvas: true
+            }).setView([10.8505, 76.2711], 7);
+            
+            // NO background map - only colored polygons will show
+        }
+
+        window.closePreview = function() {
+            document.getElementById('preview-modal').classList.remove('active');
+            if (previewMap) {
+                previewMap.remove();
+                previewMap = null;
+            }
+        }
+
+        function populateDistrictFilter() {
+            const select = document.getElementById('district-filter');
+            select.innerHTML = '<option value="all">All Districts</option>';
+            Object.keys(districtNames).forEach(id => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = districtNames[id];
+                select.appendChild(option);
+            });
+        }
+
+        window.onBoundaryLevelChange = function() {
+            const level = document.getElementById('boundary-level-select').value;
+            
+            // Hide all filter groups
+            document.getElementById('district-filter-group').style.display = 'none';
+            document.getElementById('ac-filter-group').style.display = 'none';
+            document.getElementById('mandal-filter-group').style.display = 'none';
+            document.getElementById('lsgd-filter-group').style.display = 'none';
+            
+            // Show relevant filters based on level
+            if (level === 'ac' || level === 'mandal' || level === 'lsgd' || level === 'ward') {
+                document.getElementById('district-filter-group').style.display = 'block';
+            }
+            if (level === 'mandal' || level === 'lsgd' || level === 'ward') {
+                document.getElementById('ac-filter-group').style.display = 'block';
+            }
+            if (level === 'lsgd' || level === 'ward') {
+                document.getElementById('mandal-filter-group').style.display = 'block';
+            }
+            if (level === 'ward') {
+                document.getElementById('lsgd-filter-group').style.display = 'block';
+            }
+            
+            // Reset filters
+            document.getElementById('district-filter').value = 'all';
+            document.getElementById('ac-filter').innerHTML = '<option value="all">All ACs</option>';
+            document.getElementById('mandal-filter').innerHTML = '<option value="all">All Mandals</option>';
+            document.getElementById('lsgd-filter').innerHTML = '<option value="all">All LSGDs</option>';
+            
+            // Clear existing map layers
+            if (currentPreviewLayer) {
+                previewMap.removeLayer(currentPreviewLayer);
+                currentPreviewLayer = null;
+            }
+            
+            updateStats();
+        }
+
+        window.onDistrictFilterChange = async function() {
+            const districtId = document.getElementById('district-filter').value;
+            const level = document.getElementById('boundary-level-select').value;
+            
+            if (level === 'ac' || level === 'mandal' || level === 'lsgd' || level === 'ward') {
+                await populateACFilter(districtId);
+            }
+            
+            updateStats();
+        }
+
+        async function populateACFilter(districtId) {
+            const select = document.getElementById('ac-filter');
+            select.innerHTML = '<option value="all">Loading...</option>';
+            
+            try {
+                if (districtId === 'all') {
+                    if (allACsData.length === 0) await cacheAllACs();
+                    const uniqueACs = [...new Set(allACsData.map(ac => ac.name))];
+                    select.innerHTML = '<option value="all">All ACs</option>';
+                    uniqueACs.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        select.appendChild(option);
+                    });
+                } else {
+                    const response = await fetch(`data/14_districts/${districtId}.json`);
+                    const data = await response.json();
+                    const acs = data.assembly_constituencies || data.acs || [];
+                    select.innerHTML = '<option value="all">All ACs</option>';
+                    acs.forEach(ac => {
+                        const option = document.createElement('option');
+                        option.value = ac.name;
+                        option.textContent = ac.name;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading ACs:', error);
+                select.innerHTML = '<option value="all">Error loading ACs</option>';
+            }
+        }
+
+        window.onACFilterChange = async function() {
+            const level = document.getElementById('boundary-level-select').value;
+            if (level === 'mandal' || level === 'lsgd' || level === 'ward') {
+                await populateMandalFilter();
+            }
+            updateStats();
+        }
+
+        async function populateMandalFilter() {
+            const select = document.getElementById('mandal-filter');
+            const districtId = document.getElementById('district-filter').value;
+            const acName = document.getElementById('ac-filter').value;
+            
+            select.innerHTML = '<option value="all">Loading...</option>';
+            
+            try {
+                if (allMandalsData.length === 0) await cacheAllMandals();
+                
+                const filtered = allMandalsData.filter(m => {
+                    if (districtId !== 'all' && m.districtId !== districtId) return false;
+                    if (acName !== 'all' && m.ac_name !== acName) return false;
+                    return true;
+                });
+                
+                const uniqueMandals = [...new Set(filtered.map(m => m.name))];
+                select.innerHTML = '<option value="all">All Mandals</option>';
+                uniqueMandals.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading mandals:', error);
+                select.innerHTML = '<option value="all">Error loading mandals</option>';
+            }
+        }
+
+        window.onMandalFilterChange = async function() {
+            const level = document.getElementById('boundary-level-select').value;
+            if (level === 'lsgd' || level === 'ward') {
+                await populateLSGDFilter();
+            }
+            updateStats();
+        }
+
+        async function populateLSGDFilter() {
+            const select = document.getElementById('lsgd-filter');
+            const districtId = document.getElementById('district-filter').value;
+            const acName = document.getElementById('ac-filter').value;
+            const mandalName = document.getElementById('mandal-filter').value;
+            
+            select.innerHTML = '<option value="all">Loading...</option>';
+            
+            try {
+                if (allLSGDsData.length === 0) await cacheAllLSGDs();
+                const filtered = allLSGDsData.filter(lsgd => {
+                    if (districtId !== 'all' && lsgd.districtId !== districtId) return false;
+                    if (acName !== 'all' && lsgd.ac_name !== acName) return false;
+                    if (mandalName !== 'all' && lsgd.mandal_name !== mandalName) return false;
+                    return true;
+                });
+                const uniqueLSGDs = [...new Set(filtered.map(l => l.name))];
+                select.innerHTML = '<option value="all">All LSGDs</option>';
+                uniqueLSGDs.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading LSGDs:', error);
+                select.innerHTML = '<option value="all">Error loading LSGDs</option>';
+            }
+        }
+
+        window.updatePreviewBoundary = async function() {
+            const level = document.getElementById('preview-boundary-select').value;
+            if (previewMap) {
+                previewMap.remove();
+            }
+            previewMap = L.map('preview-map').setView([10.8505, 76.2711], 7);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            }).addTo(previewMap);
+
+            const dataGrid = document.getElementById('data-grid');
+            dataGrid.innerHTML = '<div style="text-align: center; width: 100%;">Loading...</div>';
+
+            let title = '';
+            try {
+                switch (level) {
+                    case 'district':
+                        title = 'All Districts';
+                        renderPreviewDistricts();
+                        break;
+                    case 'ac':
+                        title = 'All Assembly Constituencies';
+                        if (allACsData.length === 0) await cacheAllACs();
+                        renderPreviewACs();
+                        break;
+                    case 'ward':
+                        title = 'All Wards';
+                        if (allWardsData.length === 0) await cacheAllWards();
+                        renderPreviewWards();
+                        break;
+                }
+            } catch (error) {
+                console.error("Error updating preview:", error);
+                dataGrid.innerHTML = '<div style="text-align: center; width: 100%; color: red;">Failed to load data.</div>';
+            }
+            document.getElementById('preview-info-title').textContent = title;
+            document.getElementById('preview-title').textContent = `Kerala State - ${title}`;
+        }
+
+        function renderPreviewDistricts() {
+            if (!allDistrictsGeoJSON) return;
+            let gridHtml = '';
+            const features = allDistrictsGeoJSON.features;
+            const geoJsonGroup = L.geoJSON(features, {
+                style: feature => {
+                    const districtId = feature.properties.district;
+                    return {
+                        fillColor: districtColors[districtId] || '#95A5A6',
+                        fillOpacity: 0.7,
+                        color: '#2c3e50',
+                        weight: 2
+                    };
+                }
+            }).addTo(previewMap);
+
+            features.forEach(feature => {
+                const districtId = feature.properties.district;
+                const districtName = districtNames[districtId] || districtId;
+                const color = districtColors[districtId];
+                gridHtml += `<div class="data-item" style="border-left-color: ${color};"><b>${districtName}</b></div>`;
+            });
+
+            document.getElementById('data-grid').innerHTML = gridHtml;
+            if (features.length > 0) {
+                previewMap.fitBounds(geoJsonGroup.getBounds());
+            }
+        }
+
+        async function cacheAllACs() {
+            allACsData = [];
+            const districtIds = Object.keys(districtNames);
+            for (const districtId of districtIds) {
+                try {
+                    const response = await fetch(`data/14_districts/${districtId}.json`);
+                    const data = await response.json();
+                    const acs = data.assembly_constituencies || data.acs || [];
+                    acs.forEach(ac => {
+                        if (ac.geometry) {
+                            allACsData.push({
+                                name: ac.name,
+                                district: districtNames[districtId],
+                                districtId: districtId,
+                                geometry: ac.geometry
+                            });
+                        }
+                    });
+                } catch (error) {
+                    console.error(`Error loading ${districtId}:`, error);
+                }
+            }
+        }
+
+        async function cacheAllMandals() {
+            allMandalsData = [];
+            const districtIds = Object.keys(districtNames);
+            for (const districtId of districtIds) {
+                try {
+                    const response = await fetch(`data/14_districts/${districtId}.json`);
+                    const data = await response.json();
+                    const acs = data.assembly_constituencies || data.acs || [];
+                    acs.forEach(ac => {
+                        if (ac.mandals) {
+                            ac.mandals.forEach(mandal => {
+                                if (mandal.geometry) {
+                                    allMandalsData.push({
+                                        name: mandal.name,
+                                        ac_name: ac.name,
+                                        district: districtNames[districtId],
+                                        districtId: districtId,
+                                        geometry: mandal.geometry
+                                    });
+                                }
+                            });
+                        }
+                    });
+                } catch (error) {
+                    console.error(`Error loading ${districtId}:`, error);
+                }
+            }
+        }
+
+        async function cacheAllLSGDs() {
+            allLSGDsData = [];
+            const districtIds = Object.keys(districtNames);
+            for (const districtId of districtIds) {
+                try {
+                    const response = await fetch(`data/14_districts/${districtId}.json`);
+                    const data = await response.json();
+                    const acs = data.assembly_constituencies || data.acs || [];
+                    acs.forEach(ac => {
+                        if (ac.mandals) {
+                            ac.mandals.forEach(mandal => {
+                                if (mandal.local_bodies) {
+                                    mandal.local_bodies.forEach(lb => {
+                                        if (lb.geometry) {
+                                            allLSGDsData.push({
+                                                name: lb.name,
+                                                mandal_name: mandal.name,
+                                                ac_name: ac.name,
+                                                district: districtNames[districtId],
+                                                districtId: districtId,
+                                                geometry: lb.geometry
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                } catch (error) {
+                    console.error(`Error loading ${districtId}:`, error);
+                }
+            }
+        }
+        
+        function renderPreviewACs() {
+            let gridHtml = '';
+            const acGeometries = allACsData.map(ac => ({
+                type: "Feature",
+                properties: { name: ac.name, district: ac.district },
+                geometry: ac.geometry
+            }));
+
+            const geoJsonGroup = L.geoJSON(acGeometries, {
+                style: feature => {
+                    const ac = allACsData.find(a => a.name === feature.properties.name);
+                    return {
+                        fillColor: districtColors[ac.districtId] || '#cccccc',
+                        fillOpacity: 0.7,
+                        color: 'white',
+                        weight: 1
+                    };
+                }
+            }).addTo(previewMap);
+
+            allACsData.forEach(ac => {
+                const color = districtColors[ac.districtId] || '#cccccc';
+                gridHtml += `<div class="data-item" style="border-left-color: ${color};"><b>${ac.name}</b><br><small>${ac.district}</small></div>`;
+            });
+
+            document.getElementById('data-grid').innerHTML = gridHtml;
+            if (acGeometries.length > 0) {
+                previewMap.fitBounds(geoJsonGroup.getBounds());
+            }
+        }
+
+        async function cacheAllWards() {
+            allWardsData = [];
+            const districtIds = Object.keys(districtNames);
+            for (const districtId of districtIds) {
+                try {
+                    const response = await fetch(`data/14_districts/${districtId}.json`);
+                    const data = await response.json();
+                    const acs = data.assembly_constituencies || data.acs || [];
+                    acs.forEach(ac => {
+                        if (ac.mandals) {
+                            ac.mandals.forEach(mandal => {
+                                if (mandal.local_bodies) {
+                                    mandal.local_bodies.forEach(lb => {
+                                        if (lb.wards) {
+                                            lb.wards.forEach(ward => {
+                                                allWardsData.push({
+                                                    ...ward,
+                                                    lsgd_name: lb.name,
+                                                    mandal_name: mandal.name,
+                                                    ac_name: ac.name,
+                                                    district: districtNames[districtId],
+                                                    districtId: districtId
+                                                });
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                } catch (error) {
+                    console.error(`Error loading ${districtId}:`, error);
+                }
+            }
+        }
+
+        function updateStats() {
+            const level = document.getElementById('boundary-level-select').value;
+            const districtId = document.getElementById('district-filter').value;
+            const acName = document.getElementById('ac-filter').value;
+            const mandalName = document.getElementById('mandal-filter').value;
+            const lsgdName = document.getElementById('lsgd-filter').value;
+
+            let count = 0;
+            let filterInfo = '';
+
+            if (level === 'district') {
+                count = districtId === 'all' ? 14 : 1;
+                filterInfo = districtId === 'all' ? 'All Districts' : districtNames[districtId];
+            } else if (level === 'ac') {
+                if (districtId === 'all') {
+                    count = allACsData.length || 'Loading...';
+                    filterInfo = 'All ACs';
+                } else {
+                    count = allACsData.filter(ac => ac.districtId === districtId).length || 'Loading...';
+                    filterInfo = `ACs in ${districtNames[districtId]}`;
+                }
+            } else if (level === 'mandal') {
+                const filtered = allMandalsData.filter(m => {
+                    if (districtId !== 'all' && m.districtId !== districtId) return false;
+                    if (acName !== 'all' && m.ac_name !== acName) return false;
+                    return true;
+                });
+                count = filtered.length || 'Loading...';
+                if (acName !== 'all') {
+                    filterInfo = `Mandals in ${acName}`;
+                } else if (districtId !== 'all') {
+                    filterInfo = `Mandals in ${districtNames[districtId]}`;
+                } else {
+                    filterInfo = 'All Mandals';
+                }
+            } else if (level === 'lsgd') {
+                const filtered = allLSGDsData.filter(l => {
+                    if (districtId !== 'all' && l.districtId !== districtId) return false;
+                    if (acName !== 'all' && l.ac_name !== acName) return false;
+                    if (mandalName !== 'all' && l.mandal_name !== mandalName) return false;
+                    return true;
+                });
+                count = filtered.length;
+                if (mandalName !== 'all') {
+                    filterInfo = `Panchayats in ${mandalName}`;
+                } else if (acName !== 'all') {
+                    filterInfo = `Panchayats in ${acName}`;
+                } else {
+                    filterInfo = 'All Panchayats';
+                }
+            } else if (level === 'ward') {
+                const filtered = allWardsData.filter(w => {
+                    if (districtId !== 'all' && w.districtId !== districtId) return false;
+                    if (acName !== 'all' && w.ac_name !== acName) return false;
+                    if (mandalName !== 'all' && w.mandal_name !== mandalName) return false;
+                    if (lsgdName !== 'all' && w.lsgd_name !== lsgdName) return false;
+                    return true;
+                });
+                count = filtered.length;
+                if (lsgdName !== 'all') {
+                    filterInfo = `Wards in ${lsgdName}`;
+                } else if (acName !== 'all') {
+                    filterInfo = `All Wards in ${acName}`;
+                } else {
+                    filterInfo = 'All Wards';
+                }
+            }
+
+            const statsContent = document.getElementById('stats-content');
+            statsContent.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-label">Level:</span>
+                    <span class="stat-value">${level.toUpperCase()}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Filter:</span>
+                    <span class="stat-value">${filterInfo}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Count:</span>
+                    <span class="stat-value">${count}</span>
+                </div>
+            `;
+        }
+
+        window.showBoundaryPreview = async function() {
+            await updatePreviewBoundary();
+        }
+
+        async function updatePreviewBoundary() {
+            if (currentPreviewLayer) {
+                previewMap.removeLayer(currentPreviewLayer);
+            }
+            
+            const level = document.getElementById('boundary-level-select').value;
+            const districtId = document.getElementById('district-filter').value;
+            const acName = document.getElementById('ac-filter').value;
+            const mandalName = document.getElementById('mandal-filter').value;
+            const lsgdName = document.getElementById('lsgd-filter').value;
+            
+            let features = [];
+            
+            try {
+                switch (level) {
+                    case 'district':
+                        features = allDistrictsGeoJSON.features
+                            .filter(f => districtId === 'all' || f.properties.district === districtId)
+                            .map(f => ({
+                                type: "Feature",
+                                properties: { name: districtNames[f.properties.district], districtId: f.properties.district },
+                                geometry: f.geometry
+                            }));
+                        break;
+                        
+                    case 'ac':
+                        if (allACsData.length === 0) await cacheAllACs();
+                        features = allACsData
+                            .filter(ac => {
+                                if (districtId !== 'all' && ac.districtId !== districtId) return false;
+                                if (acName !== 'all' && ac.name !== acName) return false;
+                                return true;
+                            })
+                            .map(ac => ({
+                                type: "Feature",
+                                properties: { name: ac.name, district: ac.district, districtId: ac.districtId },
+                                geometry: ac.geometry
+                            }));
+                        break;
+                        
+                    case 'mandal':
+                        if (allMandalsData.length === 0) await cacheAllMandals();
+                        features = allMandalsData
+                            .filter(m => {
+                                if (districtId !== 'all' && m.districtId !== districtId) return false;
+                                if (acName !== 'all' && m.ac_name !== acName) return false;
+                                if (mandalName !== 'all' && m.name !== mandalName) return false;
+                                return true;
+                            })
+                            .map(m => ({
+                                type: "Feature",
+                                properties: { name: m.name, ac: m.ac_name, district: m.district, districtId: m.districtId },
+                                geometry: m.geometry
+                            }));
+                        break;
+                        
+                    case 'lsgd':
+                        if (allLSGDsData.length === 0) await cacheAllLSGDs();
+                        features = allLSGDsData
+                            .filter(l => {
+                                if (districtId !== 'all' && l.districtId !== districtId) return false;
+                                if (acName !== 'all' && l.ac_name !== acName) return false;
+                                if (mandalName !== 'all' && l.mandal_name !== mandalName) return false;
+                                if (lsgdName !== 'all' && l.name !== lsgdName) return false;
+                                return true;
+                            })
+                            .map(l => ({
+                                type: "Feature",
+                                properties: { name: l.name, mandal: l.mandal_name, ac: l.ac_name, district: l.district, districtId: l.districtId },
+                                geometry: l.geometry
+                            }));
+                        break;
+                        
+                    case 'ward':
+                        if (allWardsData.length === 0) await cacheAllWards();
+                        const filteredWards = allWardsData.filter(w => {
+                            if (districtId !== 'all' && w.districtId !== districtId) return false;
+                            if (acName !== 'all' && w.ac_name !== acName) return false;
+                            if (mandalName !== 'all' && w.mandal_name !== mandalName) return false;
+                            if (lsgdName !== 'all' && w.lsgd_name !== lsgdName) return false;
+                            return true;
+                        });
+                        features = filteredWards
+                            .filter(w => w.geometry)
+                            .map(w => ({
+                                type: "Feature",
+                                properties: { 
+                                    name: `Ward ${w.ward_number}: ${w.ward_name}`, 
+                                    lsgd: w.lsgd_name, 
+                                    mandal: w.mandal_name, 
+                                    ac: w.ac_name, 
+                                    district: w.district,
+                                    districtId: w.districtId 
+                                },
+                                geometry: w.geometry
+                            }));
+                        break;
+                }
+                
+                if (features.length > 0) {
+                    // Generate different colors for wards
+                    const wardColors = [
+                        '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+                        '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B195', '#F67280',
+                        '#C06C84', '#6C5B7B', '#355C7D', '#99B898', '#FECEAB',
+                        '#FF847C', '#E84A5F', '#2A363B', '#A8E6CF', '#FFD3B6'
+                    ];
+                    
+                    currentPreviewLayer = L.geoJSON(features, {
+                        style: (feature, index) => {
+                            let fillColor;
+                            if (level === 'ward') {
+                                // Use different colors for each ward
+                                const wardIndex = features.indexOf(feature);
+                                fillColor = wardColors[wardIndex % wardColors.length];
+                            } else {
+                                // Use district colors for other levels
+                                fillColor = districtColors[feature.properties.districtId] || '#95A5A6';
+                            }
+                            
+                            return {
+                                fillColor: fillColor,
+                                fillOpacity: 0.85,
+                                color: '#ffffff',
+                                weight: 3,
+                                opacity: 1
+                            };
+                        },
+                        onEachFeature: (feature, layer) => {
+                            let popupContent = `<b>${feature.properties.name}</b>`;
+                            if (feature.properties.lsgd) popupContent += `<br>LSGD: ${feature.properties.lsgd}`;
+                            if (feature.properties.mandal) popupContent += `<br>Mandal: ${feature.properties.mandal}`;
+                            if (feature.properties.ac) popupContent += `<br>AC: ${feature.properties.ac}`;
+                            if (feature.properties.district) popupContent += `<br>District: ${feature.properties.district}`;
+                            layer.bindPopup(popupContent);
+                        }
+                    }).addTo(previewMap);
+                    
+                    previewMap.fitBounds(currentPreviewLayer.getBounds());
+                    updateStats();
+                } else {
+                    alert('No boundaries found for the selected filters.');
+                }
+            } catch (error) {
+                console.error('Error updating preview:', error);
+                alert('Error loading preview data.');
+            }
+        }
+
+        window.downloadPreviewPDF = async function() {
+            const level = document.getElementById('boundary-level-select').value;
+            const districtId = document.getElementById('district-filter').value;
+            const acName = document.getElementById('ac-filter').value;
+            const mandalName = document.getElementById('mandal-filter').value;
+            const lsgdName = document.getElementById('lsgd-filter').value;
+            
+            if (!currentPreviewLayer) {
+                alert('Please preview the map first by clicking "Preview Map" button');
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+
+                // Title
+                let title = 'Kerala State';
+                if (level === 'ward' && acName !== 'all') {
+                    title = acName;
+                } else if (level === 'lsgd' && lsgdName !== 'all') {
+                    title = lsgdName;
+                } else if (level === 'mandal' && mandalName !== 'all') {
+                    title = mandalName;
+                } else if (level === 'ac' && acName !== 'all') {
+                    title = acName;
+                } else if (districtId !== 'all') {
+                    title = districtNames[districtId];
+                }
+
+                pdf.setFontSize(20);
+                pdf.setFont(undefined, 'bold');
+                pdf.text(title, pageWidth / 2, 15, { align: 'center' });
+                
+                pdf.setFontSize(12);
+                pdf.setFont(undefined, 'normal');
+                let subtitle = level.charAt(0).toUpperCase() + level.slice(1) + ' Boundaries';
+                pdf.text(subtitle, pageWidth / 2, 22, { align: 'center' });
+
+                // Capture map
+                const mapElement = document.getElementById('preview-map');
+                const mapCanvas = await html2canvas(mapElement, { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                });
+                
+                // Add map image
+                const mapImgData = mapCanvas.toDataURL('image/png');
+                const mapWidth = pageWidth - 20;
+                const mapHeight = (mapCanvas.height / mapCanvas.width) * mapWidth;
+                const maxMapHeight = pageHeight - 70;
+                const finalMapHeight = Math.min(mapHeight, maxMapHeight);
+                const finalMapWidth = (mapCanvas.width / mapCanvas.height) * finalMapHeight;
+                
+                pdf.addImage(mapImgData, 'PNG', 
+                    (pageWidth - finalMapWidth) / 2, 
+                    28, 
+                    finalMapWidth, 
+                    finalMapHeight
+                );
+
+                // Get current features data
+                const features = currentPreviewLayer.toGeoJSON().features;
+                
+                // Add data table on new page
+                if (features.length > 0) {
+                    pdf.addPage();
+                    pdf.setFontSize(16);
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text(title + ' - Data Overview', pageWidth / 2, 15, { align: 'center' });
+
+                    let tableData = [];
+                    let columns = [];
+
+                    if (level === 'district') {
+                        columns = ['#', 'District Name', 'Color'];
+                        tableData = features.map((f, i) => [
+                            i + 1,
+                            f.properties.name,
+                            ''
+                        ]);
+                    } else if (level === 'ac') {
+                        columns = ['#', 'AC Name', 'District', 'Color'];
+                        tableData = features.map((f, i) => [
+                            i + 1,
+                            f.properties.name,
+                            f.properties.district,
+                            ''
+                        ]);
+                    } else if (level === 'mandal') {
+                        columns = ['#', 'Mandal Name', 'AC', 'District', 'Color'];
+                        tableData = features.map((f, i) => [
+                            i + 1,
+                            f.properties.name,
+                            f.properties.ac,
+                            f.properties.district,
+                            ''
+                        ]);
+                    } else if (level === 'lsgd') {
+                        columns = ['#', 'LSGD Name', 'Mandal', 'AC', 'Color'];
+                        tableData = features.map((f, i) => [
+                            i + 1,
+                            f.properties.name,
+                            f.properties.mandal,
+                            f.properties.ac,
+                            ''
+                        ]);
+                    } else if (level === 'ward') {
+                        columns = ['#', 'Ward', 'LSGD', 'Mandal', 'Color'];
+                        tableData = features.map((f, i) => [
+                            i + 1,
+                            f.properties.name,
+                            f.properties.lsgd,
+                            f.properties.mandal,
+                            ''
+                        ]);
+                    }
+
+                    pdf.autoTable({
+                        head: [columns],
+                        body: tableData,
+                        startY: 25,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: [41, 128, 185],
+                            textColor: 255,
+                            fontStyle: 'bold',
+                            fontSize: 10
+                        },
+                        bodyStyles: {
+                            fontSize: 9
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 15 },
+                            [columns.length - 1]: { cellWidth: 20 }
+                        },
+                        didDrawCell: (data) => {
+                            // Draw color box in last column
+                            if (data.section === 'body' && data.column.index === columns.length - 1) {
+                                const feature = features[data.row.index];
+                                let color;
+                                
+                                if (level === 'ward') {
+                                    // Use ward colors
+                                    const wardColors = [
+                                        '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+                                        '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B195', '#F67280',
+                                        '#C06C84', '#6C5B7B', '#355C7D', '#99B898', '#FECEAB',
+                                        '#FF847C', '#E84A5F', '#2A363B', '#A8E6CF', '#FFD3B6'
+                                    ];
+                                    color = wardColors[data.row.index % wardColors.length];
+                                } else {
+                                    color = districtColors[feature.properties.districtId] || '#95A5A6';
+                                }
+                                
+                                const hex = color.replace('#', '');
+                                const r = parseInt(hex.substr(0, 2), 16);
+                                const g = parseInt(hex.substr(2, 2), 16);
+                                const b = parseInt(hex.substr(4, 2), 16);
+                                pdf.setFillColor(r, g, b);
+                                pdf.rect(
+                                    data.cell.x + 2, 
+                                    data.cell.y + 2, 
+                                    data.cell.width - 4, 
+                                    data.cell.height - 4, 
+                                    'F'
+                                );
+                            }
+                        }
+                    });
+
+                    // Add footer
+                    const totalPages = pdf.internal.pages.length - 1;
+                    for (let i = 1; i <= totalPages; i++) {
+                        pdf.setPage(i);
+                        pdf.setFontSize(8);
+                        pdf.setTextColor(128);
+                        pdf.text(
+                            `Page ${i} of ${totalPages} | Total ${level}: ${features.length}`,
+                            pageWidth / 2,
+                            pageHeight - 5,
+                            { align: 'center' }
+                        );
+                    }
+                }
+
+                // Save PDF
+                const fileName = `${title.replace(/\s+/g, '_')}_${level}_map.pdf`;
+                pdf.save(fileName);
+
+            } catch (error) {
+                console.error('PDF Generation Error:', error);
+                alert('Failed to generate PDF. Please try again.');
+            }
+        }
+    });
+    </script>
 </body>
 </html>

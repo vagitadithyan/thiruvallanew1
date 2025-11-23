@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandal View</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 15px 20px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        
+        .breadcrumb a:hover {
+            opacity: 1;
+        }
+        
+        .breadcrumb span {
+            opacity: 0.6;
+        }
+        
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #e0e0e0;
+        }
+        
+        .sidebar h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        .lb-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .lb-item {
+            padding: 12px;
+            background: white;
+            border-left: 4px solid #e74c3c;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .lb-item:hover {
+            transform: translateX(3px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .lb-name {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.95em;
+        }
+        
+        .lb-stats {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+        
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #f0f0f0;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            background: #f0f0f0;
+        }
+        
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+        
+        .leaflet-container {
+            background: #f0f0f0 !important;
+        }
+        
+        .info-box {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 220px;
+        }
+        
+        .info-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 1em;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+        
+        .info-item {
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+        
+        .info-label {
+            color: #7f8c8d;
+            font-size: 0.85em;
+        }
+        
+        .info-value {
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+
+        /* Preview Modal Styles */
+        .nav-actions {
+            margin-top: 15px;
+            padding: 10px 0;
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .preview-modal.active {
+            display: flex;
+        }
+        
+        .preview-content {
+            background: white;
+            width: 90%;
+            height: 90%;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .preview-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .preview-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .preview-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .preview-controls select {
+            padding: 8px 15px;
+            border: 2px solid white;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        .preview-controls select option {
+            background: #667eea;
+            color: white;
+        }
+        
+        .preview-controls button {
+            padding: 8px 20px;
+            border: 2px solid white;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .preview-controls button:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .preview-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .preview-close:hover {
+            background: white;
+            color: #667eea;
+            transform: rotate(90deg);
+        }
+        
+        .preview-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .preview-map {
+            flex: 1;
+            min-height: 400px;
+            background: #ffffff !important;
+            position: relative;
+        }
+        
+        #previewMap {
+            background: #ffffff !important;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #previewMap .leaflet-container {
+            background: #ffffff !important;
+        }
+        
+        .preview-info {
+            flex: 1;
+            background: #ffffff;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .preview-info h3 {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            max-width: 100%;
+        }
+        
+        .data-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .data-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .data-item strong {
+            display: block;
+            color: #495057;
+            font-size: 12px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-item span {
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 10px;
+            border: 2px solid #dee2e6;
+        }
+        /* Ward details panel */
+        #wardDetailsPanel {
+            position: fixed;
+            right: 20px;
+            top: 100px;
+            width: 320px;
+            background: white;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            z-index: 12000;
+            overflow: hidden;
+        }
+        .ward-panel { padding: 16px; }
+        .ward-panel-header { display:flex; justify-content:space-between; align-items:center; }
+        .ward-panel-header h3 { margin:0; font-size:18px; color:#2c3e50; }
+        .ward-panel-body { padding-top:10px; }
+        #wardDetailsPanel .info-item { margin: 8px 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="breadcrumb">
+            <a href="kerala_map.html">Kerala</a>
+            <span>/</span>
+            <a href="#" id="districtLink">District</a>
+            <span>/</span>
+            <a href="#" id="acLink">AC</a>
+            <span>/</span>
+            <span id="mandalBreadcrumb">Mandal</span>
+        </div>
+        <h1 id="mandalTitle">Loading...</h1>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h2>Local Bodies</h2>
+            <div class="lb-list" id="lbList"></div>
+            <div class="nav-actions">
+                <button class="action-btn" onclick="showPreview()">
+                    👁️ Preview & Download
+                </button>
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="info-box">
+                <div class="info-title">Mandal Info</div>
+                <div class="info-item">
+                    <div class="info-label">Local Bodies</div>
+                    <div class="info-value" id="totalLBs">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Total Wards</div>
+                    <div class="info-value" id="totalWards">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ward Details Panel (shows when a ward is clicked) -->
+    <div id="wardDetailsPanel" style="display:none;">
+        <div class="ward-panel">
+            <div class="ward-panel-header">
+                <h3>Ward Details</h3>
+                <button id="closeWardPanel" class="preview-close" title="Close">×</button>
+            </div>
+            <div class="ward-panel-body">
+                <div class="info-item"><div class="info-label">LSGD Name</div><div class="info-value" id="wd-lsgd">-</div></div>
+                <div class="info-item"><div class="info-label">LSGD Type</div><div class="info-value" id="wd-lsgd-type">-</div></div>
+                <div class="info-item"><div class="info-label">Mandal</div><div class="info-value" id="wd-mandal">-</div></div>
+                <div class="info-item"><div class="info-label">Ward Name</div><div class="info-value" id="wd-name">-</div></div>
+                <div class="info-item"><div class="info-label">Ward No</div><div class="info-value" id="wd-no">-</div></div>
+                <div class="info-item"><div class="info-label">District</div><div class="info-value" id="wd-district">-</div></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    let map, currentMandal, currentAC;
+    let currentDistrictName = '';
+        
+        // Vibrant color palette for distinct polygon colors
+        const vibrantColors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+            '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B195', '#F67280',
+            '#C06C84', '#6C5B7B', '#355C7D', '#99B898', '#FECEAB',
+            '#FF847C', '#E84A5F', '#2A363B', '#A8E6CF', '#FFD3B6',
+            '#FFAAA5', '#FF8B94', '#FEC3A6', '#EFE9AE', '#CDEAC0',
+            '#8E44AD', '#3498DB', '#1ABC9C', '#F39C12', '#E74C3C',
+            '#9B59B6', '#2ECC71', '#E67E22', '#95A5A6', '#34495E'
+        ];
+
+        function getVibrantColors(count) {
+            const colors = [];
+            for (let i = 0; i < count; i++) {
+                colors.push(vibrantColors[i % vibrantColors.length]);
+            }
+            return colors;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const districtId = urlParams.get('district');
+        const acId = urlParams.get('ac');
+        const mandalId = urlParams.get('mandal');
+        
+        if (!districtId || !acId || !mandalId) {
+            alert('Invalid parameters!');
+            window.location.href = 'kerala_map.html';
+        }
+        
+        map = L.map('map', {
+            zoomControl: true,
+            attributionControl: false,
+            preferCanvas: true
+        }).setView([10.8505, 76.2711], 10);
+        
+        function cleanId(name) {
+            return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
+        
+        async function init() {
+            try {
+                // Load consolidated 14-district data
+                const response = await fetch(`data/14_districts/${districtId}.json`);
+                if (!response.ok) {
+                    alert('District data not found!');
+                    return;
+                }
+                
+                const districtData = await response.json();
+                
+                // Find AC
+                currentAC = districtData.acs.find(ac => cleanId(ac.name) === acId);
+                if (!currentAC) {
+                    alert('AC not found!');
+                    return;
+                }
+                
+                // Find Mandal
+                currentMandal = currentAC.mandals.find(m => cleanId(m.name) === mandalId);
+                if (!currentMandal) {
+                    alert('Mandal not found!');
+                    console.log('Looking for:', mandalId);
+                    console.log('Available:', currentAC.mandals.map(m => cleanId(m.name)));
+                    return;
+                }
+                
+                // Update header
+                document.getElementById('mandalTitle').textContent = currentMandal.name;
+                document.getElementById('mandalBreadcrumb').textContent = currentMandal.name;
+                document.getElementById('districtLink').href = `district.html?district=${districtId}`;
+                document.getElementById('acLink').href = `ac.html?district=${districtId}&ac=${acId}`;
+                document.title = `${currentMandal.name} - Mandal View`;
+                // store district name for panel
+                currentDistrictName = districtData.name || districtId;
+                
+                // Update info
+                let totalWards = 0;
+                currentMandal.local_bodies.forEach(lb => {
+                    totalWards += lb.wards.length;
+                });
+                
+                document.getElementById('totalLBs').textContent = currentMandal.local_bodies.length;
+                document.getElementById('totalWards').textContent = totalWards;
+                
+                // Render LB list
+                renderLBList(currentMandal.local_bodies);
+                
+                // Load local body boundaries
+                await loadLocalBodyBoundaries();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading mandal data.');
+            }
+        }
+        
+        function renderLBList(localBodies) {
+            const list = document.getElementById('lbList');
+            list.innerHTML = '';
+            
+            localBodies.forEach(lb => {
+                const item = document.createElement('div');
+                item.className = 'lb-item';
+                
+                const lbType = lb.type === 'M' ? 'Municipality' : (lb.type === 'C' ? 'Corporation' : 'Grama Panchayat');
+                
+                item.innerHTML = `
+                    <div class="lb-name">${lb.name}</div>
+                    <div class="lb-stats">${lbType} • ${lb.wards.length} Wards</div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    window.location.href = `localbody.html?district=${districtId}&ac=${acId}&mandal=${mandalId}&lb=${cleanId(lb.name)}`;
+                });
+                
+                list.appendChild(item);
+            });
+        }
+        
+        async function loadLocalBodyBoundaries() {
+            try {
+                const lbColors = getVibrantColors(currentMandal.local_bodies.length);
+                
+                let allBounds = [];
+                
+                currentMandal.local_bodies.forEach((lb, index) => {
+                    if (!lb.geometry) return;
+                    
+                    const color = lbColors[index % lbColors.length];
+                    const layer = L.geoJSON(lb.geometry, {
+                        style: {
+                            fillColor: color,
+                            fillOpacity: 0.5,
+                            color: '#2c3e50',
+                            weight: 2,
+                            opacity: 1
+                        },
+                        onEachFeature: function(feature, layer) {
+                            const lbType = lb.type === 'M' ? 'Municipality' : (lb.type === 'C' ? 'Corporation' : 'Grama Panchayat');
+                            layer.bindPopup(`
+                                <div style="text-align:center; padding:10px;">
+                                    <div style="font-size:1.1em; font-weight:600; color:#2c3e50; margin-bottom:5px;">${lb.name}</div>
+                                    <div>${lbType}</div>
+                                    <div>${lb.wards.length} Wards</div>
+                                </div>
+                            `);
+                            
+                            layer.on('mouseover', function(e) {
+                                layer.setStyle({
+                                    weight: 3,
+                                    fillOpacity: 0.7
+                                });
+                            });
+                            
+                            layer.on('mouseout', function(e) {
+                                layer.setStyle({
+                                    weight: 2,
+                                    fillOpacity: 0.5
+                                });
+                            });
+                            
+                            layer.on('click', function(e) {
+                                window.location.href = `localbody.html?district=${districtId}&ac=${acId}&mandal=${mandalId}&lb=${cleanId(lb.name)}`;
+                            });
+                        }
+                    }).addTo(map);
+                    
+                    allBounds.push(layer.getBounds());
+                    
+                    // Add local body name label
+                    const center = layer.getBounds().getCenter();
+                    L.marker(center, {
+                        icon: L.divIcon({
+                            className: 'lb-label',
+                            html: `<div style="font-size:10px; font-weight:600; color:#2c3e50; text-align:center; text-shadow: 1px 1px 2px white, -1px -1px 2px white; pointer-events:none; white-space:nowrap;">${lb.name}</div>`,
+                            iconSize: [100, 20]
+                        }),
+                        interactive: false
+                    }).addTo(map);
+                });
+                
+                // Fit map to show all local bodies
+                if (allBounds.length > 0) {
+                    const group = L.featureGroup(allBounds.map(b => L.rectangle(b)));
+                    map.fitBounds(group.getBounds(), { padding: [50, 50] });
+                }
+                
+            } catch (error) {
+                console.error('Error loading local body boundaries:', error);
+            }
+        }
+
+        // Render preview wards function - properly scoped
+        function renderPreviewWards() {
+            const dataGrid = document.getElementById('previewDataGrid');
+            dataGrid.innerHTML = '';
+            if (!currentMandal || !currentMandal.local_bodies) {
+                dataGrid.innerHTML = '<div class="data-item"><span>No data available</span></div>';
+                return;
+            }
+            let totalWards = 0;
+            currentMandal.local_bodies.forEach(lb => totalWards += lb.wards.length);
+            const wardColors = getVibrantColors(totalWards);
+            let wardIndex = 0;
+            let allBounds = [];
+            let wardsRendered = 0;
+            // To avoid duplicate rendering of fallback geometries
+            const renderedLBs = new Set();
+            const renderedMandals = new Set();
+            currentMandal.local_bodies.forEach((lb, lbIdx) => {
+                if (lb.wards) {
+                    lb.wards.forEach((ward, wIdx) => {
+                        const color = wardColors[wardIndex % wardColors.length];
+                        wardIndex++;
+                        const div = document.createElement('div');
+                        div.className = 'data-item';
+                        div.innerHTML = `
+                            <span class="color-box" style="background-color: ${color}"></span>
+                            <strong>${ward.ward_name || ward.name || 'Ward ' + wardIndex}</strong>
+                            <span>${lb.name}</span>
+                        `;
+                        div.style.cursor = 'pointer';
+                        div.addEventListener('click', () => {
+                            openWardPanel({
+                                lsgdName: lb.name,
+                                lsgdType: (lb.type === 'M' ? 'Municipality' : (lb.type === 'C' ? 'Corporation' : 'Grama Panchayat')),
+                                mandal: currentMandal.name,
+                                wardName: ward.ward_name || ward.name || ('Ward ' + wardIndex),
+                                wardNo: ward.ward_number || ward.ward_no || wardIndex,
+                                district: currentDistrictName
+                            });
+                        });
+                        dataGrid.appendChild(div);
+                        // Fuzzy mapping: try ward geometry, else LB, else mandal
+                        let rendered = false;
+                        if (previewMap && ward.geometry) {
+                            try {
+                                const layer = L.geoJSON(ward.geometry, {
+                                    style: {
+                                        fillColor: color,
+                                        fillOpacity: 0.85,
+                                        color: color,
+                                        weight: 2.5,
+                                        opacity: 1,
+                                        lineJoin: 'round'
+                                    }
+                                });
+                                layer.eachLayer(function(l) {
+                                    l.on('click', function(e) {
+                                        openWardPanel({
+                                            lsgdName: lb.name,
+                                            lsgdType: (lb.type === 'M' ? 'Municipality' : (lb.type === 'C' ? 'Corporation' : 'Grama Panchayat')),
+                                            mandal: currentMandal.name,
+                                            wardName: ward.ward_name || ward.name || ('Ward ' + wardIndex),
+                                            wardNo: ward.ward_number || ward.ward_no || wardIndex,
+                                            district: currentDistrictName
+                                        });
+                                    });
+                                });
+                                if (previewMap._previewLayerGroup) previewMap._previewLayerGroup.addLayer(layer);
+                                allBounds.push(layer.getBounds());
+                                wardsRendered++;
+                                rendered = true;
+                            } catch (error) {
+                                console.error('    ❌ Error rendering ward:', ward.ward_name, error);
+                            }
+                        }
+                        if (!rendered && previewMap && lb.geometry && !renderedLBs.has(lbIdx)) {
+                            try {
+                                const layer = L.geoJSON(lb.geometry, {
+                                    style: {
+                                        fillColor: color,
+                                        fillOpacity: 0.5,
+                                        color: color,
+                                        weight: 1.5,
+                                        opacity: 1,
+                                        lineJoin: 'round'
+                                    }
+                                });
+                                if (previewMap._previewLayerGroup) previewMap._previewLayerGroup.addLayer(layer);
+                                allBounds.push(layer.getBounds());
+                                renderedLBs.add(lbIdx);
+                                rendered = true;
+                            } catch (e) {
+                                console.warn('Fallback LB render failed', e);
+                            }
+                        }
+                        if (!rendered && previewMap && currentMandal.geometry && !renderedMandals.has(currentMandal.name)) {
+                            try {
+                                const mandalColor = '#45B7D1';
+                                const layer = L.geoJSON(currentMandal.geometry, {
+                                    style: {
+                                        fillColor: mandalColor,
+                                        fillOpacity: 0.3,
+                                        color: mandalColor,
+                                        weight: 1.5,
+                                        opacity: 1,
+                                        lineJoin: 'round'
+                                    }
+                                });
+                                if (previewMap._previewLayerGroup) previewMap._previewLayerGroup.addLayer(layer);
+                                allBounds.push(layer.getBounds());
+                                renderedMandals.add(currentMandal.name);
+                            } catch (e) {
+                                console.warn('Fallback mandal render failed', e);
+                            }
+                        }
+                    });
+                }
+            });
+            if (allBounds.length > 0) {
+                const group = L.featureGroup(allBounds.map(b => L.rectangle(b)));
+                previewMap.fitBounds(group.getBounds(), { padding: [20, 20] });
+                setTimeout(() => previewMap.invalidateSize(), 80);
+            }
+        }
+
+        async function downloadPreviewPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                const level = document.getElementById('boundaryLevel').value;
+                
+                // Title
+                let title = `${currentMandal.name} - ${level.toUpperCase()} Map`;
+                
+                // PAGE 1: Map Screenshot
+                pdf.setFontSize(18);
+                pdf.setTextColor(40, 40, 40);
+                pdf.text(title, pdf.internal.pageSize.width / 2, 15, { align: 'center' });
+                
+                const mapElement = document.getElementById('previewMap');
+                const canvas = await html2canvas(mapElement, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    logging: false
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 277;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 10, 25, imgWidth, Math.min(imgHeight, 170));
+                
+                // PAGE 2: Data Table with Colors
+                pdf.addPage();
+                pdf.setFontSize(18);
+                pdf.text(`${title} - Data Table`, 10, 15);
+                
+                let tableData = [];
+                let tableHeaders = [];
+                const lbColors = getVibrantColors(currentMandal.local_bodies.length);
+                let totalWards = 0;
+                currentMandal.local_bodies.forEach(lb => totalWards += lb.wards.length);
+                const wardColors = getVibrantColors(totalWards);
+                
+                if (level === 'localbody') {
+                    tableHeaders = [['Color', 'Local Body Name', 'Mandal', 'Wards Count']];
+                    
+                    currentMandal.local_bodies.forEach((lb, index) => {
+                        const color = lbColors[index % lbColors.length];
+                        const row = [
+                            '',
+                            lb.name,
+                            currentMandal.name,
+                            (lb.wards ? lb.wards.length : 0).toString()
+                        ];
+                        row._color = color;
+                        tableData.push(row);
+                    });
+                    
+                } else if (level === 'ward') {
+                    tableHeaders = [['Color', 'Ward No', 'Ward Name', 'Local Body', 'Mandal']];
+                    
+                    let wardIndex = 0;
+                    currentMandal.local_bodies.forEach(lb => {
+                        if (lb.wards) {
+                            lb.wards.forEach(ward => {
+                                const color = wardColors[wardIndex % wardColors.length];
+                                wardIndex++;
+                                
+                                const row = [
+                                    '',
+                                    (ward.ward_number || wardIndex).toString(),
+                                    ward.ward_name || ward.name || 'Ward ' + wardIndex,
+                                    lb.name,
+                                    currentMandal.name
+                                ];
+                                row._color = color;
+                                tableData.push(row);
+                            });
+                        }
+                    });
+                } else {
+                    // Mandal level
+                    tableHeaders = [['Mandal Name', 'Local Bodies', 'Total Wards']];
+                    let totalWards = 0;
+                    currentMandal.local_bodies.forEach(lb => {
+                        if (lb.wards) totalWards += lb.wards.length;
+                    });
+                    tableData = [[
+                        currentMandal.name,
+                        currentMandal.local_bodies.length.toString(),
+                        totalWards.toString()
+                    ]];
+                }
+                
+                pdf.autoTable({
+                    head: tableHeaders,
+                    body: tableData.map(row => {
+                        const cleanRow = [...row];
+                        delete cleanRow._color;
+                        return cleanRow;
+                    }),
+                    startY: 25,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [41, 100, 235],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        halign: 'left'
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 15, halign: 'center' }
+                    },
+                    didDrawCell: (data) => {
+                        if (data.column.index === 0 && data.row.section === 'body') {
+                            const rowData = tableData[data.row.index];
+                            if (rowData && rowData._color) {
+                                const color = rowData._color;
+                                const r = parseInt(color.slice(1, 3), 16);
+                                const g = parseInt(color.slice(3, 5), 16);
+                                const b = parseInt(color.slice(5, 7), 16);
+                                
+                                pdf.setFillColor(r, g, b);
+                                pdf.rect(
+                                    data.cell.x + 2,
+                                    data.cell.y + 2,
+                                    data.cell.width - 4,
+                                    data.cell.height - 4,
+                                    'F'
+                                );
+                            }
+                        }
+                    },
+                    margin: { top: 25, left: 10, right: 10 }
+                });
+                
+                // Add page numbers
+                const pageCount = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(150);
+                    pdf.text(
+                        `Page ${i} of ${pageCount}`,
+                        pdf.internal.pageSize.width - 30,
+                        pdf.internal.pageSize.height - 10
+                    );
+                }
+                
+                const filename = `${currentMandal.name.replace(/[^a-z0-9]/gi, '_')}_${level}_map.pdf`;
+                pdf.save(filename);
+                
+                alert('✅ PDF generated successfully!');
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('❌ Error generating PDF: ' + error.message);
+            }
+        }
+        
+        // Ward details panel helpers
+        function openWardPanel(details) {
+            try {
+                document.getElementById('wd-lsgd').textContent = details.lsgdName || '-';
+                document.getElementById('wd-lsgd-type').textContent = details.lsgdType || '-';
+                document.getElementById('wd-mandal').textContent = details.mandal || '-';
+                document.getElementById('wd-name').textContent = details.wardName || '-';
+                document.getElementById('wd-no').textContent = details.wardNo || '-';
+                document.getElementById('wd-district').textContent = details.district || currentDistrictName || '-';
+                const panel = document.getElementById('wardDetailsPanel');
+                panel.style.display = 'block';
+            } catch (e) {
+                console.error('openWardPanel error', e);
+            }
+        }
+
+        function closeWardPanel() {
+            const panel = document.getElementById('wardDetailsPanel');
+            if (panel) panel.style.display = 'none';
+        }
+
+        // Preview modal variables
+        let previewMap;
+
+        // Show preview modal
+        function showPreview() {
+            const modal = document.getElementById('previewModal');
+            modal.style.display = 'flex';
+            
+            setTimeout(() => {
+                if (previewMap) {
+                    previewMap.remove();
+                    previewMap = null;
+                }
+                
+                const mapContainer = document.getElementById('previewMap');
+                previewMap = L.map(mapContainer, {
+                    zoomControl: true,
+                    attributionControl: false,
+                    preferCanvas: true
+                }).setView([10.8505, 76.2711], 10);
+                
+                // Create layer group for preview
+                previewMap._previewLayerGroup = L.layerGroup().addTo(previewMap);
+                
+                // Wait a bit more for the map container to be fully sized
+                setTimeout(() => {
+                    previewMap.invalidateSize();
+                    updatePreviewBoundary();
+                }, 100);
+            }, 150);
+        }
+
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+            if (previewMap) {
+                previewMap.remove();
+                previewMap = null;
+            }
+        }
+
+        function updatePreviewBoundary() {
+            const level = document.getElementById('boundaryLevel').value;
+            
+            if (previewMap) {
+                // Clear existing preview layers
+                if (previewMap._previewLayerGroup) {
+                    previewMap._previewLayerGroup.clearLayers();
+                }
+            }
+
+            if (level === 'mandal') {
+                renderPreviewMandal();
+            } else if (level === 'localbody') {
+                renderPreviewLocalBodies();
+            } else if (level === 'ward') {
+                renderPreviewWards();
+            }
+        }
+
+        function renderPreviewMandal() {
+            const dataGrid = document.getElementById('previewDataGrid');
+            dataGrid.innerHTML = `
+                <div class="data-item">
+                    <strong>Mandal</strong>
+                    <span>${currentMandal.name}</span>
+                </div>
+                <div class="data-item">
+                    <strong>Total Local Bodies</strong>
+                    <span>${currentMandal.local_bodies.length}</span>
+                </div>
+            `;
+
+            // Render mandal polygon on map
+            if (previewMap && currentMandal.geometry) {
+                const mandalColor = '#45B7D1';
+                const layer = L.geoJSON(currentMandal.geometry, {
+                    style: {
+                        fillColor: mandalColor,
+                        fillOpacity: 0.85,
+                        color: '#ffffff',
+                        weight: 3,
+                        opacity: 1
+                    }
+                });
+                previewMap._previewLayerGroup.addLayer(layer);
+                previewMap.fitBounds(layer.getBounds(), { padding: [20, 20] });
+            }
+        }
+
+        function renderPreviewLocalBodies() {
+            const dataGrid = document.getElementById('previewDataGrid');
+            dataGrid.innerHTML = '';
+            
+            if (!currentMandal || !currentMandal.local_bodies) {
+                dataGrid.innerHTML = '<div class="data-item"><span>No data available</span></div>';
+                return;
+            }
+
+            const lbColors = getVibrantColors(currentMandal.local_bodies.length);
+            
+            currentMandal.local_bodies.forEach((lb, index) => {
+                const color = lbColors[index % lbColors.length];
+                
+                const div = document.createElement('div');
+                div.className = 'data-item';
+                div.innerHTML = `
+                    <span class="color-box" style="background-color: ${color}"></span>
+                    <strong>${lb.name}</strong>
+                    <span>${lb.wards ? lb.wards.length : 0} Wards</span>
+                `;
+                dataGrid.appendChild(div);
+            });
+
+            // Render local bodies on map
+            if (previewMap && currentMandal.local_bodies.length > 0) {
+                let allBounds = [];
+                currentMandal.local_bodies.forEach((lb, index) => {
+                    const color = lbColors[index % lbColors.length];
+                    if (lb.geometry) {
+                        const layer = L.geoJSON(lb.geometry, {
+                            style: {
+                                fillColor: color,
+                                fillOpacity: 0.85,
+                                color: '#ffffff',
+                                weight: 3,
+                                opacity: 1
+                            }
+                        });
+                        previewMap._previewLayerGroup.addLayer(layer);
+                        allBounds.push(layer.getBounds());
+                    }
+                });
+                if (allBounds.length > 0) {
+                    const group = L.featureGroup(allBounds.map(b => L.rectangle(b)));
+                    previewMap.fitBounds(group.getBounds(), { padding: [20, 20] });
+                }
+            }
+        }
+
+        // wire close button for the panel
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.id === 'closeWardPanel') {
+                closeWardPanel();
+            }
+        });
+        
+        init();
+    </script>
+
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2>Preview & Download</h2>
+                <div class="preview-controls">
+                    <select id="boundaryLevel" onchange="updatePreviewBoundary()">
+                        <option value="mandal">Mandal</option>
+                        <option value="localbody" selected>Local Bodies</option>
+                        <option value="ward">Wards</option>
+                    </select>
+                    <button onclick="downloadPreviewPDF()">📥 Download PDF</button>
+                </div>
+                <button class="preview-close" onclick="closePreview()">×</button>
+            </div>
+            <div class="preview-body">
+                <div class="preview-map" id="previewMap"></div>
+                <div class="preview-info">
+                    <h3>Data Overview</h3>
+                    <div class="data-grid" id="previewDataGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

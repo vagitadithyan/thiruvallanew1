@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>District View</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 15px 20px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        
+        .breadcrumb a:hover {
+            opacity: 1;
+        }
+        
+        .breadcrumb span {
+            opacity: 0.6;
+        }
+        
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #e0e0e0;
+        }
+        
+        .sidebar h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        .ac-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .ac-item {
+            padding: 12px;
+            background: white;
+            border-left: 4px solid #3498db;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .ac-item:hover {
+            transform: translateX(3px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .ac-name {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.95em;
+        }
+        
+        .ac-stats {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+        
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #f0f0f0;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            background: #f0f0f0;
+        }
+        
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+        
+        .leaflet-container {
+            background: #f0f0f0 !important;
+        }
+        
+        .info-box {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 220px;
+        }
+        
+        .info-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 1em;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+        
+        .info-item {
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+        
+        .info-label {
+            color: #7f8c8d;
+            font-size: 0.85em;
+        }
+        
+        .info-value {
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #7f8c8d;
+        }
+        
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+        
+        .popup-content {
+            text-align: center;
+            padding: 10px 5px;
+        }
+        
+        .popup-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        /* Preview Modal Styles */
+        .nav-actions {
+            margin-top: 15px;
+            padding: 10px 0;
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .preview-modal.active {
+            display: flex;
+        }
+        
+        .preview-content {
+            background: white;
+            width: 90%;
+            height: 90%;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .preview-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .preview-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .preview-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .preview-controls select {
+            padding: 8px 15px;
+            border: 2px solid white;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        .preview-controls select option {
+            background: #667eea;
+            color: white;
+        }
+        
+        .preview-controls button {
+            padding: 8px 20px;
+            border: 2px solid white;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .preview-controls button:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .preview-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .preview-close:hover {
+            background: white;
+            color: #667eea;
+            transform: rotate(90deg);
+        }
+        
+        .preview-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .preview-map {
+            flex: 1;
+            min-height: 400px;
+            background: #ffffff !important;
+        }
+        
+        #previewMap {
+            background: #ffffff !important;
+        }
+        
+        #previewMap .leaflet-container {
+            background: #ffffff !important;
+        }
+        
+        .preview-info {
+            flex: 1;
+            background: #ffffff;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .preview-info h3 {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            max-width: 100%;
+        }
+        
+        .data-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .data-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .data-item strong {
+            display: block;
+            color: #495057;
+            font-size: 12px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-item span {
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 10px;
+            border: 2px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <div class="breadcrumb">
+                <a href="kerala_map.html">← Kerala</a>
+                <span>/</span>
+                <span id="districtBreadcrumb">District</span>
+            </div>
+            <h1 id="districtTitle">Loading...</h1>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h2>Assembly Constituencies</h2>
+            <div class="ac-list" id="acList"></div>
+            <div class="nav-actions">
+                <button class="action-btn" onclick="showPreview()">
+                    👁️ Preview & Download
+                </button>
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <div id="map">
+                <div class="loading">Loading district data...</div>
+            </div>
+            <div class="info-box">
+                <div class="info-title">District Info</div>
+                <div class="info-item">
+                    <div class="info-label">Assembly Constituencies</div>
+                    <div class="info-value" id="totalACs">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Mandals</div>
+                    <div class="info-value" id="totalMandals">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Local Bodies</div>
+                    <div class="info-value" id="totalLBs">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map, config, currentDistrict;
+        
+        // Get district from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const districtId = urlParams.get('district');
+        
+        if (!districtId) {
+            alert('No district specified!');
+            window.location.href = 'kerala_map.html';
+        }
+        
+        // District name mapping
+        const districtNames = {
+            'thiruvananthapuram': 'Thiruvananthapuram',
+            'kollam': 'Kollam',
+            'pathanamthitta': 'Pathanamthitta',
+            'alappuzha': 'Alappuzha',
+            'kottayam': 'Kottayam',
+            'idukki': 'Idukki',
+            'ernakulam': 'Ernakulam',
+            'thrissur': 'Thrissur',
+            'palakkad': 'Palakkad',
+            'malappuram': 'Malappuram',
+            'kozhikode': 'Kozhikode',
+            'wayanad': 'Wayanad',
+            'kannur': 'Kannur',
+            'kasaragod': 'Kasaragod'
+        };
+        
+        const districtColors = {
+            'thiruvananthapuram': '#FF6B6B',
+            'kollam': '#4ECDC4',
+            'pathanamthitta': '#45B7D1',
+            'alappuzha': '#96CEB4',
+            'kottayam': '#FFEAA7',
+            'idukki': '#A29BFE',
+            'ernakulam': '#74B9FF',
+            'thrissur': '#FD79A8',
+            'palakkad': '#FDCB6E',
+            'malappuram': '#6C5CE7',
+            'kozhikode': '#00B894',
+            'wayanad': '#E17055',
+            'kannur': '#FF7675',
+            'kasaragod': '#81ECEC'
+        };
+        
+        // Initialize map WITHOUT background
+        map = L.map('map', {
+            zoomControl: true,
+            attributionControl: false,
+            preferCanvas: true
+        }).setView([10.8505, 76.2711], 8);
+        
+        // Load configuration
+        async function init() {
+            try {
+                // Update header
+                const districtName = districtNames[districtId] || districtId;
+                document.getElementById('districtTitle').textContent = districtName;
+                document.getElementById('districtBreadcrumb').textContent = districtName;
+                document.title = `${districtName} - District View`;
+                
+                // Load consolidated 14-district data
+                const response = await fetch(`data/14_districts/${districtId}.json`);
+                if (!response.ok) {
+                    alert('District data not found!');
+                    return;
+                }
+                
+                currentDistrict = await response.json();
+                
+                // Calculate stats
+                let totalMandals = 0;
+                let totalLBs = 0;
+                
+                currentDistrict.acs.forEach(ac => {
+                    ac.mandals.forEach(mandal => {
+                        totalMandals++;
+                        totalLBs += mandal.local_bodies.length;
+                    });
+                });
+                
+                // Update info
+                document.getElementById('totalACs').textContent = currentDistrict.acs.length;
+                document.getElementById('totalMandals').textContent = totalMandals;
+                document.getElementById('totalLBs').textContent = totalLBs;
+                
+                // Render AC list
+                renderACList(currentDistrict.acs);
+                
+                // Load district boundary with AC boundaries
+                await loadDistrictBoundaries();
+                
+            } catch (error) {
+                console.error('Error loading district data:', error);
+                alert('Error loading district data. Please check console.');
+            }
+        }
+        
+        function cleanId(name) {
+            return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
+        
+        function renderACList(acs) {
+            const list = document.getElementById('acList');
+            list.innerHTML = '';
+            
+            acs.forEach(ac => {
+                const item = document.createElement('div');
+                item.className = 'ac-item';
+                
+                let totalLBs = 0;
+                ac.mandals.forEach(mandal => {
+                    totalLBs += mandal.local_bodies.length;
+                });
+                
+                item.innerHTML = `
+                    <div class="ac-name">${ac.name}</div>
+                    <div class="ac-stats">${ac.mandals.length} Mandals • ${totalLBs} LBs</div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    window.location.href = `ac.html?district=${districtId}&ac=${cleanId(ac.name)}`;
+                });
+                
+                list.appendChild(item);
+            });
+        }
+        
+        async function loadDistrictBoundaries() {
+            try {
+                // Remove loading message
+                document.querySelector('.loading')?.remove();
+                
+                // Display all AC boundaries from the consolidated data
+                const acColors = [
+                    '#9C27B0', '#FF9800', '#E91E63', '#FF5722', '#00BCD4',
+                    '#8BC34A', '#2196F3', '#FFC107', '#FF9800', '#4CAF50',
+                    '#009688', '#795548', '#3F51B5', '#CDDC39', '#F44336',
+                    '#607D8B', '#673AB7', '#FF5252'
+                ];
+                
+                let allBounds = [];
+                
+                currentDistrict.acs.forEach((ac, index) => {
+                    // Deep fuzzy mapping: AC → mandals → LBs → wards
+                    let geometryToRender = null;
+                    
+                    if (ac.geometry) {
+                        geometryToRender = ac.geometry;
+                    } else if (ac.mandals && ac.mandals.length > 0) {
+                        // Collect all geometries from mandals, LBs, and wards
+                        const allGeometries = [];
+                        
+                        ac.mandals.forEach(mandal => {
+                            if (mandal.geometry) {
+                                allGeometries.push(mandal.geometry);
+                            } else if (mandal.local_bodies && mandal.local_bodies.length > 0) {
+                                mandal.local_bodies.forEach(lb => {
+                                    if (lb.geometry) {
+                                        allGeometries.push(lb.geometry);
+                                    } else if (lb.wards && lb.wards.length > 0) {
+                                        // LB missing geometry, aggregate ward geometries
+                                        lb.wards.forEach(ward => {
+                                            if (ward.geometry) {
+                                                allGeometries.push(ward.geometry);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                        
+                        if (allGeometries.length > 0) {
+                            // Combine all collected geometries
+                            const coordinates = allGeometries.map(g => {
+                                if (g.type === 'Polygon') return [g.coordinates];
+                                if (g.type === 'MultiPolygon') return g.coordinates;
+                                return null;
+                            }).filter(c => c !== null).flat();
+                            
+                            if (coordinates.length > 0) {
+                                geometryToRender = {
+                                    type: 'MultiPolygon',
+                                    coordinates: coordinates
+                                };
+                            }
+                        }
+                    }
+                    
+                    if (!geometryToRender) return;
+                    
+                    const color = acColors[index % acColors.length];
+                    const layer = L.geoJSON(geometryToRender, {
+                        style: {
+                            fillColor: color,
+                            fillOpacity: 0.5,
+                            color: '#2c3e50',
+                            weight: 2,
+                            opacity: 1
+                        },
+                        onEachFeature: function(feature, layer) {
+                            // Add popup
+                            layer.bindPopup(`
+                                <div class="popup-content">
+                                    <div class="popup-title">${ac.name}</div>
+                                    <div>${ac.mandals.length} Mandals</div>
+                                </div>
+                            `);
+                            
+                            // Highlight on hover
+                            layer.on('mouseover', function(e) {
+                                layer.setStyle({
+                                    weight: 3,
+                                    fillOpacity: 0.7
+                                });
+                            });
+                            
+                            layer.on('mouseout', function(e) {
+                                layer.setStyle({
+                                    weight: 2,
+                                    fillOpacity: 0.5
+                                });
+                            });
+                            
+                            // Click to navigate
+                            layer.on('click', function(e) {
+                                window.location.href = `ac.html?district=${districtId}&ac=${cleanId(ac.name)}`;
+                            });
+                        }
+                    }).addTo(map);
+                    
+                    allBounds.push(layer.getBounds());
+                    
+                    // Add AC name label
+                    const center = layer.getBounds().getCenter();
+                    L.marker(center, {
+                        icon: L.divIcon({
+                            className: 'ac-label',
+                            html: `<div style="font-size:12px; font-weight:600; color:#2c3e50; text-align:center; text-shadow: 1px 1px 2px white, -1px -1px 2px white; pointer-events:none; white-space:nowrap;">${ac.name}</div>`,
+                            iconSize: [100, 20]
+                        }),
+                        interactive: false
+                    }).addTo(map);
+                });
+                
+                // Fit map to show all ACs
+                if (allBounds.length > 0) {
+                    const group = L.featureGroup(allBounds.map(b => L.rectangle(b)));
+                    map.fitBounds(group.getBounds(), { padding: [50, 50] });
+                }
+                
+            } catch (error) {
+                console.error('Error loading district boundaries:', error);
+            }
+        }
+
+        // Preview & Download functionality
+        let previewMap;
+        let allACsData = [];
+        let allLocalBodiesData = [];
+        let allWardsData = [];
+
+        function showPreview() {
+            const modal = document.getElementById('previewModal');
+            modal.classList.add('active');
+            
+            setTimeout(() => {
+                if (previewMap) {
+                    previewMap.remove();
+                    previewMap = null;
+                }
+                
+                const mapContainer = document.getElementById('previewMap');
+                previewMap = L.map(mapContainer, {
+                    zoomControl: true,
+                    attributionControl: false,
+                    preferCanvas: true
+                }).setView([10.8505, 76.2711], 10);
+                // Ensure a layer group to manage preview layers
+                if (!previewMap._previewLayerGroup) previewMap._previewLayerGroup = L.layerGroup().addTo(previewMap);
+                
+                // NO background map - only colored polygons will show
+                
+                // Wait for map container to be fully sized
+                setTimeout(() => {
+                    previewMap.invalidateSize();
+                    updatePreviewBoundary();
+                }, 100);
+            }, 150);
+        }
+
+        function closePreview() {
+            document.getElementById('previewModal').classList.remove('active');
+            if (previewMap) {
+                previewMap.remove();
+                previewMap = null;
+            }
+        }
+
+        function updatePreviewBoundary() {
+            const level = document.getElementById('boundaryLevel').value;
+            
+            if (previewMap) {
+                previewMap.eachLayer(layer => {
+                    if (layer instanceof L.GeoJSON) {
+                        previewMap.removeLayer(layer);
+                    }
+                });
+            }
+
+            if (level === 'district') {
+                renderPreviewDistrict();
+            } else if (level === 'ac') {
+                renderPreviewACs();
+            } else if (level === 'localbody') {
+                renderPreviewLocalBodies();
+            } else if (level === 'ward') {
+                renderPreviewWards();
+            }
+        }
+
+        function renderPreviewDistrict() {
+            const dataGrid = document.getElementById('previewDataGrid');
+            
+            if (!currentDistrict) {
+                dataGrid.innerHTML = '<div class="data-item"><span>No data available</span></div>';
+                return;
+            }
+
+            let totalACs = currentDistrict.acs ? currentDistrict.acs.length : 0;
+            let totalMandals = 0;
+            let totalLBs = 0;
+            let totalWards = 0;
+            
+            if (currentDistrict.acs) {
+                currentDistrict.acs.forEach(ac => {
+                    if (ac.mandals) {
+                        totalMandals += ac.mandals.length;
+                        ac.mandals.forEach(mandal => {
+                            if (mandal.local_bodies) {
+                                totalLBs += mandal.local_bodies.length;
+                                mandal.local_bodies.forEach(lb => {
+                                    if (lb.wards) totalWards += lb.wards.length;
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            dataGrid.innerHTML = `
+                <div class="data-item">
+                    <strong>District</strong>
+                    <span>${districtNames[districtId] || districtId}</span>
+                </div>
+                <div class="data-item">
+                    <strong>Total ACs</strong>
+                    <span>${totalACs}</span>
+                </div>
+                <div class="data-item">
+                    <strong>Total Mandals</strong>
+                    <span>${totalMandals}</span>
+                </div>
+                <div class="data-item">
+                    <strong>Total Local Bodies</strong>
+                    <span>${totalLBs}</span>
+                </div>
+                <div class="data-item">
+                    <strong>Total Wards</strong>
+                    <span>${totalWards}</span>
+                </div>
+            `;
+        }
+
+        function renderPreviewACs() {
+            const dataGrid = document.getElementById('previewDataGrid');
+            dataGrid.innerHTML = '';
+            
+            // Use already loaded district data
+            if (!currentDistrict || !currentDistrict.acs) {
+                dataGrid.innerHTML = '<div class="data-item"><span>No AC data available</span></div>';
+                return;
+            }
+
+            const acColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA15E', '#BC6C25', '#A29BFE'];
+            
+            currentDistrict.acs.forEach((ac, index) => {
+                const color = acColors[index % acColors.length];
+                
+                let totalMandals = ac.mandals ? ac.mandals.length : 0;
+                let totalLBs = 0;
+                let totalWards = 0;
+                
+                if (ac.mandals) {
+                    ac.mandals.forEach(mandal => {
+                        if (mandal.local_bodies) {
+                            totalLBs += mandal.local_bodies.length;
+                            mandal.local_bodies.forEach(lb => {
+                                if (lb.wards) totalWards += lb.wards.length;
+                            });
+                        }
+                    });
+                }
+
+                const div = document.createElement('div');
+                div.className = 'data-item';
+                div.innerHTML = `
+                    <span class="color-box" style="background-color: ${color}"></span>
+                    <strong>${ac.name}</strong>
+                    <span>${totalMandals} Mandals, ${totalLBs} LBs, ${totalWards} Wards</span>
+                `;
+                dataGrid.appendChild(div);
+            });
+
+            // Render ACs on map with proper bounds
+            if (previewMap && currentDistrict.acs.length > 0) {
+                let allBounds = [];
+                currentDistrict.acs.forEach((ac, index) => {
+                    const color = acColors[index % acColors.length];
+                    if (ac.geometry) {
+                        const layer = L.geoJSON(ac.geometry, {
+                            style: {
+                                fillColor: color,
+                                weight: 3,
+                                opacity: 1,
+                                color: '#ffffff',
+                                fillOpacity: 0.85
+                            }
+                        }).addTo(previewMap);
+                        allBounds.push(layer.getBounds());
+                    }
+                });
+                if (allBounds.length > 0) {
+                    const group = L.featureGroup(allBounds.map(b => L.rectangle(b)));
+                    previewMap.fitBounds(group.getBounds(), { padding: [20, 20] });
+                }
+            }
+        }
+
+        function renderPreviewLocalBodies() {
+            const dataGrid = document.getElementById('previewDataGrid');
+            dataGrid.innerHTML = '';
+            
+            if (!currentDistrict || !currentDistrict.acs) {
+                dataGrid.innerHTML = '<div class="data-item"><span>No data available</span></div>';
+                return;
+            }
+
+            const lbColors = ['#9C27B0', '#FF9800', '#E91E63', '#FF5722', '#00BCD4', '#8BC34A', '#2196F3'];
+            let lbIndex = 0;
+            
+            currentDistrict.acs.forEach(ac => {
+                if (ac.mandals) {
+                    ac.mandals.forEach(mandal => {
+                        if (mandal.local_bodies) {
+                            mandal.local_bodies.forEach(lb => {
+                                const color = lbColors[lbIndex % lbColors.length];
+                                lbIndex++;
+                                
+                                const div = document.createElement('div');
+                                div.className = 'data-item';
+                                div.innerHTML = `
+                                    <span class="color-box" style="background-color: ${color}"></span>
+                                    <strong>${lb.name}</strong>
+                                    <span>${mandal.name} | ${ac.name}</span>
+                                `;
+                                dataGrid.appendChild(div);
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Show district boundary for context (guard config)
+            if (previewMap && typeof config !== 'undefined' && config && config.geojson) {
+                const districtLayer = L.geoJSON(config.geojson, {
+                    style: {
+                        fillColor: 'transparent',
+                        weight: 2,
+                        opacity: 0.6,
+                        color: '#2c3e50',
+                        fillOpacity: 0
+                    }
+                });
+                previewMap._previewLayerGroup.addLayer(districtLayer);
+                previewMap.fitBounds(districtLayer.getBounds(), { padding: [20, 20] });
+            } else {
+                console.warn('No config.geojson available for district preview');
+            }
+        }
+
+        function renderPreviewWards() {
+            const dataGrid = document.getElementById('previewDataGrid');
+            dataGrid.innerHTML = '';
+            
+            if (!currentDistrict || !currentDistrict.acs) {
+                dataGrid.innerHTML = '<div class="data-item"><span>No data available</span></div>';
+                return;
+            }
+
+            const wardColors = ['#9C27B0', '#FF9800', '#E91E63', '#FF5722', '#00BCD4', '#8BC34A', '#2196F3', '#FFC107'];
+            let wardIndex = 0;
+            
+            currentDistrict.acs.forEach(ac => {
+                if (ac.mandals) {
+                    ac.mandals.forEach(mandal => {
+                        if (mandal.local_bodies) {
+                            mandal.local_bodies.forEach(lb => {
+                                if (lb.wards) {
+                                    lb.wards.forEach(ward => {
+                                        const color = wardColors[wardIndex % wardColors.length];
+                                        wardIndex++;
+                                        
+                                        const div = document.createElement('div');
+                                        div.className = 'data-item';
+                                        div.innerHTML = `
+                                            <span class="color-box" style="background-color: ${color}"></span>
+                                            <strong>${ward.ward_name || ward.name || 'Ward ' + wardIndex}</strong>
+                                            <span>${lb.name} | ${mandal.name}</span>
+                                        `;
+                                        dataGrid.appendChild(div);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Show district boundary for context (guard config)
+            if (previewMap && typeof config !== 'undefined' && config && config.geojson) {
+                const districtLayer = L.geoJSON(config.geojson, {
+                    style: {
+                        fillColor: 'transparent',
+                        weight: 2,
+                        opacity: 0.6,
+                        color: '#2c3e50',
+                        fillOpacity: 0
+                    }
+                });
+                previewMap._previewLayerGroup.addLayer(districtLayer);
+                previewMap.fitBounds(districtLayer.getBounds(), { padding: [20, 20] });
+            } else {
+                console.warn('No config.geojson available for district preview');
+            }
+        }
+
+        async function downloadPreviewPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('landscape', 'mm', 'a4');
+            
+            // Page 1: Map Screenshot
+            const mapElement = document.getElementById('previewMap');
+            const canvas = await html2canvas(mapElement);
+            const imgData = canvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 10, 10, 277, 180);
+            
+            // Page 2+: Data Table
+            const level = document.getElementById('boundaryLevel').value;
+            pdf.addPage();
+            
+            let tableData = [];
+            let title = '';
+
+            if (level === 'district') {
+                title = `District: ${districtNames[districtId] || districtId}`;
+                tableData = [[districtNames[districtId] || districtId, config.assemblies.length + ' ACs']];
+                pdf.autoTable({
+                    head: [['District', 'Assembly Constituencies']],
+                    body: tableData,
+                    startY: 20,
+                    theme: 'grid',
+                    headStyles: { fillColor: [41, 128, 185] }
+                });
+            } else if (level === 'ac') {
+                title = `Assembly Constituencies in ${districtNames[districtId]}`;
+                tableData = allACsData.map(ac => [
+                    { content: '', styles: { cellWidth: 15, fillColor: ac.color } },
+                    ac.name,
+                    (ac.data.mandals ? ac.data.mandals.length : 0) + ' Mandals'
+                ]);
+                pdf.autoTable({
+                    head: [['Color', 'Assembly Constituency', 'Mandals']],
+                    body: tableData,
+                    startY: 20,
+                    theme: 'grid',
+                    headStyles: { fillColor: [41, 128, 185] },
+                    didDrawCell: (data) => {
+                        if (data.column.index === 0 && data.row.section === 'body') {
+                            const ac = allACsData[data.row.index];
+                            pdf.setFillColor(ac.color);
+                            pdf.rect(data.cell.x + 2, data.cell.y + 2, data.cell.width - 4, data.cell.height - 4, 'F');
+                        }
+                    }
+                });
+            } else if (level === 'localbody') {
+                title = `Local Bodies in ${districtNames[districtId]}`;
+                tableData = allLocalBodiesData.map(lb => [
+                    { content: '', styles: { cellWidth: 15 } },
+                    lb.name,
+                    lb.mandal,
+                    lb.ac
+                ]);
+                pdf.autoTable({
+                    head: [['Color', 'Local Body', 'Mandal', 'AC']],
+                    body: tableData,
+                    startY: 20,
+                    theme: 'grid',
+                    headStyles: { fillColor: [41, 128, 185] },
+                    didDrawCell: (data) => {
+                        if (data.column.index === 0 && data.row.section === 'body') {
+                            const lb = allLocalBodiesData[data.row.index];
+                            pdf.setFillColor(lb.color);
+                            pdf.rect(data.cell.x + 2, data.cell.y + 2, data.cell.width - 4, data.cell.height - 4, 'F');
+                        }
+                    }
+                });
+            } else if (level === 'ward') {
+                title = `Wards in ${districtNames[districtId]}`;
+                tableData = allWardsData.map(ward => [
+                    { content: '', styles: { cellWidth: 15 } },
+                    ward.name,
+                    ward.lb,
+                    ward.mandal
+                ]);
+                pdf.autoTable({
+                    head: [['Color', 'Ward', 'Local Body', 'Mandal']],
+                    body: tableData,
+                    startY: 20,
+                    theme: 'grid',
+                    headStyles: { fillColor: [41, 128, 185] },
+                    didDrawCell: (data) => {
+                        if (data.column.index === 0 && data.row.section === 'body') {
+                            const ward = allWardsData[data.row.index];
+                            pdf.setFillColor(ward.color);
+                            pdf.rect(data.cell.x + 2, data.cell.y + 2, data.cell.width - 4, data.cell.height - 4, 'F');
+                        }
+                    }
+                });
+            }
+            
+            pdf.save(`${districtId}_${level}_preview.pdf`);
+        }
+        
+        init();
+    </script>
+
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2>Preview & Download</h2>
+                <div class="preview-controls">
+                    <select id="boundaryLevel" onchange="updatePreviewBoundary()">
+                        <option value="district">District</option>
+                        <option value="ac" selected>Assembly Constituencies</option>
+                        <option value="localbody">Local Bodies</option>
+                        <option value="ward">Wards</option>
+                    </select>
+                    <button onclick="downloadPreviewPDF()">📥 Download PDF</button>
+                </div>
+                <button class="preview-close" onclick="closePreview()">×</button>
+            </div>
+            <div class="preview-body">
+                <div class="preview-map" id="previewMap"></div>
+                <div class="preview-info">
+                    <h3>Data Overview</h3>
+                    <div class="data-grid" id="previewDataGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

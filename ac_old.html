@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AC View</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 15px 20px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        
+        .breadcrumb a:hover {
+            opacity: 1;
+        }
+        
+        .breadcrumb span {
+            opacity: 0.6;
+        }
+        
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #e0e0e0;
+        }
+        
+        .sidebar h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        .mandal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .mandal-item {
+            padding: 12px;
+            background: white;
+            border-left: 4px solid #27ae60;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .mandal-item:hover {
+            transform: translateX(3px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .mandal-name {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.95em;
+        }
+        
+        .mandal-stats {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+        
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: #f0f0f0;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            background: #f0f0f0;
+        }
+        
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+        
+        .leaflet-container {
+            background: #f0f0f0 !important;
+        }
+        
+        .info-box {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 220px;
+        }
+        
+        .info-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 1em;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+        
+        .info-item {
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+        
+        .info-label {
+            color: #7f8c8d;
+            font-size: 0.85em;
+        }
+        
+        .info-value {
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="breadcrumb">
+            <a href="kerala_map.html">Kerala</a>
+            <span>/</span>
+            <a href="#" id="districtLink">District</a>
+            <span>/</span>
+            <span id="acBreadcrumb">AC</span>
+        </div>
+        <h1 id="acTitle">Loading...</h1>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h2>Mandals</h2>
+            <div class="mandal-list" id="mandalList"></div>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="info-box">
+                <div class="info-title">AC Info</div>
+                <div class="info-item">
+                    <div class="info-label">Mandals</div>
+                    <div class="info-value" id="totalMandals">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Local Bodies</div>
+                    <div class="info-value" id="totalLBs">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map, currentAC, currentDistrict;
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const districtId = urlParams.get('district');
+        const acId = urlParams.get('ac');
+        
+        if (!districtId || !acId) {
+            alert('Invalid parameters!');
+            window.location.href = 'kerala_map.html';
+        }
+        
+        map = L.map('map', {
+            zoomControl: true,
+            attributionControl: false,
+            preferCanvas: true
+        }).setView([10.8505, 76.2711], 9);
+        
+        function cleanId(name) {
+            return name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
+        
+        async function init() {
+            try {
+                // Load consolidated 14-district data
+                const response = await fetch(`data/14_districts/${districtId}.json`);
+                if (!response.ok) {
+                    alert('District data not found!');
+                    return;
+                }
+                
+                currentDistrict = await response.json();
+                
+                // Find AC by matching cleaned name
+                currentAC = currentDistrict.acs.find(ac => cleanId(ac.name) === acId);
+                
+                if (!currentAC) {
+                    alert('AC not found!');
+                    console.log('Looking for AC ID:', acId);
+                    console.log('Available ACs:', currentDistrict.acs.map(ac => ({name: ac.name, id: cleanId(ac.name)})));
+                    return;
+                }
+                
+                // Update header
+                document.getElementById('acTitle').textContent = currentAC.name;
+                document.getElementById('acBreadcrumb').textContent = currentAC.name;
+                document.getElementById('districtLink').href = `district.html?district=${districtId}`;
+                document.title = `${currentAC.name} - AC View`;
+                
+                // Update info
+                let totalLBs = 0;
+                currentAC.mandals.forEach(mandal => {
+                    totalLBs += mandal.local_bodies.length;
+                });
+                
+                document.getElementById('totalMandals').textContent = currentAC.mandals.length;
+                document.getElementById('totalLBs').textContent = totalLBs;
+                
+                // Render mandal list
+                renderMandalList(currentAC.mandals);
+                
+                // Load mandal boundaries
+                await loadMandalBoundaries();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading AC data.');
+            }
+        }
+        
+        function renderMandalList(mandals) {
+            const list = document.getElementById('mandalList');
+            list.innerHTML = '';
+            
+            mandals.forEach(mandal => {
+                const item = document.createElement('div');
+                item.className = 'mandal-item';
+                
+                item.innerHTML = `
+                    <div class="mandal-name">${mandal.name}</div>
+                    <div class="mandal-stats">${mandal.local_bodies.length} Local Bodies</div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    window.location.href = `mandal.html?district=${districtId}&ac=${acId}&mandal=${cleanId(mandal.name)}`;
+                });
+                
+                list.appendChild(item);
+            });
+        }
+        
+        async function loadMandalBoundaries() {
+            try {
+                const mandalColors = [
+                    '#9C27B0', '#FF9800', '#E91E63', '#FF5722', '#00BCD4',
+                    '#8BC34A', '#2196F3', '#FFC107', '#FF9800', '#4CAF50',
+                    '#009688', '#795548', '#3F51B5', '#CDDC39', '#F44336',
+                    '#607D8B', '#673AB7', '#FF5252'
+                ];
+                
+                let allBounds = [];
+                
+                currentAC.mandals.forEach((mandal, index) => {
+                    if (!mandal.geometry) return;
+                    
+                    const color = mandalColors[index % mandalColors.length];
+                    const layer = L.geoJSON(mandal.geometry, {
+                        style: {
+                            fillColor: color,
+                            fillOpacity: 0.5,
+                            color: '#2c3e50',
+                            weight: 2,
+                            opacity: 1
+                        },
+                        onEachFeature: function(feature, layer) {
+                            layer.bindPopup(`
+                                <div style="text-align:center; padding:10px;">
+                                    <div style="font-size:1.1em; font-weight:600; color:#2c3e50; margin-bottom:5px;">${mandal.name}</div>
+                                    <div>${mandal.local_bodies.length} Local Bodies</div>
+                                </div>
+                            `);
+                            
+                            layer.on('mouseover', function(e) {
+                                layer.setStyle({
+                                    weight: 3,
+                                    fillOpacity: 0.7
+                                });
+                            });
+                            
+                            layer.on('mouseout', function(e) {
+                                layer.setStyle({
+                                    weight: 2,
+                                    fillOpacity: 0.5
+                                });
+                            });
+                            
+                            layer.on('click', function(e) {
+                                window.location.href = `mandal.html?district=${districtId}&ac=${acId}&mandal=${cleanId(mandal.name)}`;
+                            });
+                        }
+                    }).addTo(map);
+                    
+                    allBounds.push(layer.getBounds());
+                    
+                    // Add mandal name label
+                    const center = layer.getBounds().getCenter();
+                    L.marker(center, {
+                        icon: L.divIcon({
+                            className: 'mandal-label',
+                            html: `<div style="font-size:11px; font-weight:600; color:#2c3e50; text-align:center; text-shadow: 1px 1px 2px white, -1px -1px 2px white; pointer-events:none; white-space:nowrap;">${mandal.name}</div>`,
+                            iconSize: [100, 20]
+                        }),
+                        interactive: false
+                    }).addTo(map);
+                });
+                
+                // Fit map to show all mandals
+                if (allBounds.length > 0) {
+                    const group = L.featureGroup(allBounds.map(b => L.rectangle(b)));
+                    map.fitBounds(group.getBounds(), { padding: [50, 50] });
+                }
+                
+            } catch (error) {
+                console.error('Error loading mandal boundaries:', error);
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>
