@@ -544,6 +544,7 @@
                     <div class="preview-actions">
                         <button class="btn-preview" onclick="showBoundaryPreview()">👁️ Preview Map</button>
                         <button class="btn-download" onclick="downloadPreviewPDF()">📥 Download PDF</button>
+                        <button class="btn-download" onclick="openCustomSelector()">📋 Select Specific Wards</button>
                     </div>
                 </div>
                 <div id="preview-map" class="preview-map"></div>
@@ -1643,6 +1644,11 @@
                 console.error('PDF Generation Error:', error);
                 alert('Failed to generate PDF. Please try again.');
             }
+        }
+        
+        window.openCustomSelector = function() {
+            const districtName = currentDistrict ? currentDistrict.properties.name : 'Kerala';
+            window.location.href = `localbody_ward_selector.html?from=${encodeURIComponent(districtName)}`;
         }
     });
     </script>

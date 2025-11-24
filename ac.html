@@ -714,14 +714,54 @@
                 dataGrid.appendChild(div);
             });
 
-            // Render mandals on map with enhanced styling
+            // Render mandals on map with enhanced styling - WITH GEOMETRY AGGREGATION
             if (previewMap && currentAC.mandals.length > 0) {
                 let allBounds = [];
                 currentAC.mandals.forEach((mandal, index) => {
                     const color = mandalColors[index % mandalColors.length];
+                    
+                    // Aggregate geometry from mandal, LBs, or wards
+                    let geometryToRender = null;
+                    
                     if (mandal.geometry) {
+                        geometryToRender = mandal.geometry;
+                        console.log(`Rendering mandal "${mandal.name}" with direct geometry`);
+                    } else if (mandal.local_bodies && mandal.local_bodies.length > 0) {
+                        // Collect geometries from local bodies and wards
+                        const allGeometries = [];
+                        
+                        mandal.local_bodies.forEach(lb => {
+                            if (lb.geometry) {
+                                allGeometries.push(lb.geometry);
+                            } else if (lb.wards && lb.wards.length > 0) {
+                                lb.wards.forEach(ward => {
+                                    if (ward.geometry) {
+                                        allGeometries.push(ward.geometry);
+                                    }
+                                });
+                            }
+                        });
+                        
+                        if (allGeometries.length > 0) {
+                            const coordinates = allGeometries.map(g => {
+                                if (g.type === 'Polygon') return [g.coordinates];
+                                if (g.type === 'MultiPolygon') return g.coordinates;
+                                return null;
+                            }).filter(c => c !== null).flat();
+                            
+                            if (coordinates.length > 0) {
+                                geometryToRender = {
+                                    type: 'MultiPolygon',
+                                    coordinates: coordinates
+                                };
+                                console.log(`Aggregated geometry for mandal "${mandal.name}" from ${allGeometries.length} sources`);
+                            }
+                        }
+                    }
+                    
+                    if (geometryToRender) {
                         console.log(`Rendering mandal "${mandal.name}" with color ${color}`);
-                        const layer = L.geoJSON(mandal.geometry, {
+                        const layer = L.geoJSON(geometryToRender, {
                             style: {
                                 fillColor: color,
                                 fillOpacity: 0.85,
@@ -733,7 +773,7 @@
                         allBounds.push(layer.getBounds());
                         console.log(`✓ Successfully rendered mandal "${mandal.name}"`);
                     } else {
-                        console.warn(`✗ Mandal "${mandal.name}" has no geometry`);
+                        console.warn(`✗ Mandal "${mandal.name}" has no geometry at any level`);
                     }
                 });
                 if (allBounds.length > 0) {
@@ -991,6 +1031,11 @@
             }
             
             pdf.save(`${currentAC.name}_${level}_preview.pdf`);
+        }
+        
+        function openCustomSelector() {
+            const acName = currentAC ? currentAC.name : 'AC';
+            window.location.href = `localbody_ward_selector.html?from=${encodeURIComponent(acName)}`;
         }
         
         init();

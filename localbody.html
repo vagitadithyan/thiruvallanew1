@@ -865,6 +865,11 @@
             }
         }
         
+        function openCustomSelector() {
+            const localBodyName = currentLocalBody ? currentLocalBody.name : 'Local Body';
+            window.location.href = `localbody_ward_selector.html?from=${encodeURIComponent(localBodyName)}`;
+        }
+        
         init();
     </script>
 
@@ -879,6 +884,7 @@
                         <option value="ward" selected>Wards</option>
                     </select>
                     <button onclick="downloadPreviewPDF()">📥 Download PDF</button>
+                    <button onclick="openCustomSelector()">📋 Select Specific Wards</button>
                 </div>
                 <button class="preview-close" onclick="closePreview()">×</button>
             </div>

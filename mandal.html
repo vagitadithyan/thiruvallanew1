@@ -228,6 +228,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+            z-index: 1000;
         }
         
         .preview-header h2 {
@@ -239,39 +241,79 @@
             display: flex;
             gap: 15px;
             align-items: center;
+            position: relative;
+            z-index: 1001;
         }
         
         .preview-controls select {
             padding: 8px 15px;
             border: 2px solid white;
             border-radius: 6px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+            background: white;
+            color: #333;
             font-size: 14px;
             cursor: pointer;
             outline: none;
+            appearance: auto;
+            -webkit-appearance: menulist;
+            -moz-appearance: menulist;
+            position: relative;
+            z-index: 1002;
+            min-width: 200px;
         }
         
         .preview-controls select option {
+            background: white;
+            color: #333;
+            padding: 10px;
+        }
+        
+        #specificLocalBodySelector {
+            min-width: 280px;
+            max-width: 350px;
+            background: white !important;
+            color: #333 !important;
+            font-weight: 500;
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            border: 2px solid #667eea !important;
+        }
+        
+        #specificLocalBodySelector:focus {
+            outline: 3px solid #667eea;
+            outline-offset: 2px;
+        }
+        
+        #specificLocalBodySelector option {
+            background: white;
+            color: #333;
+            padding: 10px;
+        }
+        
+        #specificLocalBodySelector option:hover,
+        #specificLocalBodySelector option:checked {
             background: #667eea;
             color: white;
         }
         
         .preview-controls button {
-            padding: 8px 20px;
+            padding: 10px 24px;
             border: 2px solid white;
             border-radius: 6px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+            background: white;
+            color: #667eea;
             cursor: pointer;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
         .preview-controls button:hover {
-            background: white;
-            color: #667eea;
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
         
         .preview-close {
@@ -295,10 +337,61 @@
             transform: rotate(90deg);
         }
         
+        .preview-download-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .download-center-btn {
+            padding: 15px 40px;
+            border: 3px solid white;
+            border-radius: 10px;
+            background: white;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .download-center-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
         .preview-body {
             display: flex;
             flex: 1;
-            overflow: hidden;
+            overflow: auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .preview-info {
+            position: relative;
+            z-index: 1;
+        }
+        
+        #localBodySelector {
+            position: relative;
+            z-index: 100;
+        }
+        
+        #localBodySelectorSection select {
+            cursor: pointer;
+            appearance: auto;
+            -webkit-appearance: menulist;
+            -moz-appearance: menulist;
         }
         
         .preview-map {
@@ -394,6 +487,143 @@
         .ward-panel-header h3 { margin:0; font-size:18px; color:#2c3e50; }
         .ward-panel-body { padding-top:10px; }
         #wardDetailsPanel .info-item { margin: 8px 0; }
+        
+        /* Local Body Selector Modal */
+        .lb-selector-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 15000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .lb-selector-modal.active {
+            display: flex;
+        }
+        
+        .lb-selector-content {
+            background: white;
+            width: 90%;
+            max-width: 1200px;
+            height: 85%;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .lb-selector-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .lb-selector-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .lb-list-panel {
+            width: 350px;
+            border-right: 2px solid #e0e0e0;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .lb-item {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            margin: 5px;
+            border-radius: 6px;
+        }
+        
+        .lb-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .lb-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .lb-preview-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .lb-map-container {
+            flex: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .lb-info-panel {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .lb-ward-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        
+        .lb-ward-item {
+            padding: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .lb-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .lb-download-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .lb-download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -417,6 +647,9 @@
             <div class="nav-actions">
                 <button class="action-btn" onclick="showPreview()">
                     👁️ Preview & Download
+                </button>
+                <button class="action-btn secondary" onclick="goBackToAC()" style="margin-top: 10px;">
+                    ← Back to AC
                 </button>
             </div>
         </div>
@@ -529,8 +762,16 @@
                 // Update header
                 document.getElementById('mandalTitle').textContent = currentMandal.name;
                 document.getElementById('mandalBreadcrumb').textContent = currentMandal.name;
-                document.getElementById('districtLink').href = `district.html?district=${districtId}`;
-                document.getElementById('acLink').href = `ac.html?district=${districtId}&ac=${acId}`;
+                
+                // Update breadcrumb links with text
+                const districtLink = document.getElementById('districtLink');
+                districtLink.textContent = districtData.name || districtId;
+                districtLink.href = `district.html?district=${districtId}`;
+                
+                const acLink = document.getElementById('acLink');
+                acLink.textContent = currentAC.name;
+                acLink.href = `ac.html?district=${districtId}&ac=${acId}`;
+                
                 document.title = `${currentMandal.name} - Mandal View`;
                 // store district name for panel
                 currentDistrictName = districtData.name || districtId;
@@ -781,6 +1022,12 @@
             try {
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF('landscape', 'mm', 'a4');
+                
+                // Check if specific local body is selected
+                if (selectedLocalBodyForPreview) {
+                    return await downloadSpecificLocalBodyPDF(pdf);
+                }
+                
                 const level = document.getElementById('boundaryLevel').value;
                 
                 // Title
@@ -960,6 +1207,9 @@
             const modal = document.getElementById('previewModal');
             modal.style.display = 'flex';
             
+            // Populate the specific local body selector
+            populateSpecificLocalBodySelector();
+            
             setTimeout(() => {
                 if (previewMap) {
                     previewMap.remove();
@@ -1098,6 +1348,622 @@
             }
         });
         
+        let selectedLocalBodyForPreview = null;
+        let currentPreviewLevel = 'localbody';
+        
+        async function downloadSpecificLocalBodyPDF(pdf) {
+            try {
+                // Title
+                pdf.setFontSize(20);
+                pdf.setTextColor(102, 126, 234);
+                pdf.text(selectedLocalBodyForPreview.name, 15, 20);
+                
+                pdf.setFontSize(12);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text(`Mandal: ${currentMandal.name}`, 15, 28);
+                pdf.text(`Total Wards: ${selectedLocalBodyForPreview.wards ? selectedLocalBodyForPreview.wards.length : 0}`, 15, 35);
+                
+                // Capture map
+                const mapElement = document.getElementById('previewMap');
+                const canvas = await html2canvas(mapElement, { 
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    logging: false,
+                    useCORS: true 
+                });
+                const imgData = canvas.toDataURL('image/png');
+                
+                const imgWidth = 180;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 15, 45, imgWidth, imgHeight);
+                
+                let yPosition = 45 + imgHeight + 10;
+                
+                // Add wards table if available
+                if (selectedLocalBodyForPreview.wards && selectedLocalBodyForPreview.wards.length > 0) {
+                    const wardsData = selectedLocalBodyForPreview.wards.map((ward, index) => [
+                        ward.number || (index + 1),
+                        ward.name || `Ward ${index + 1}`
+                    ]);
+                    
+                    // Check if we need a new page
+                    if (yPosition > 200) {
+                        pdf.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    pdf.autoTable({
+                        startY: yPosition,
+                        head: [['Ward Number', 'Ward Name']],
+                        body: wardsData,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: [102, 126, 234],
+                            textColor: 255,
+                            fontStyle: 'bold',
+                            fontSize: 11
+                        },
+                        bodyStyles: {
+                            fontSize: 10
+                        },
+                        alternateRowStyles: {
+                            fillColor: [245, 245, 245]
+                        }
+                    });
+                }
+                
+                const filename = `${selectedLocalBodyForPreview.name.replace(/\s+/g, '_')}_with_Wards.pdf`;
+                pdf.save(filename);
+                
+                alert(`✅ Downloaded: ${filename}`);
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('❌ Error generating PDF. Please try again.');
+            }
+        }
+        
+        function populateSpecificLocalBodySelector() {
+            console.log('🔍 Populating local body selector...');
+            const selector = document.getElementById('specificLocalBodySelector');
+            if (!selector) {
+                console.error('❌ Selector element not found!');
+                return;
+            }
+            
+            selector.innerHTML = '<option value="">Select Specific Local Body</option>';
+            
+            if (currentMandal && currentMandal.localBodies) {
+                console.log('✅ Found', currentMandal.localBodies.length, 'local bodies');
+                currentMandal.localBodies.forEach((lb, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${lb.name} (${lb.wards ? lb.wards.length : 0} wards)`;
+                    selector.appendChild(option);
+                });
+                console.log('✅ Selector populated with', selector.options.length - 1, 'options');
+            } else {
+                console.error('❌ No mandal or local bodies data!');
+            }
+        }
+        
+        function previewSpecificLocalBody() {
+            console.log('🎯 previewSpecificLocalBody called');
+            const selector = document.getElementById('specificLocalBodySelector');
+            const selectedIndex = selector.value;
+            console.log('Selected index:', selectedIndex);
+            
+            if (selectedIndex === '') {
+                // Reset to current boundary level view
+                console.log('Resetting to default view');
+                selectedLocalBodyForPreview = null;
+                updatePreviewBoundary();
+                return;
+            }
+            
+            selectedLocalBodyForPreview = currentMandal.localBodies[selectedIndex];
+            console.log('Selected local body:', selectedLocalBodyForPreview.name);
+            currentPreviewLevel = 'specific';
+            
+            // Update data grid
+            updateDataGridForSpecificLocalBody();
+            
+            // Update preview map to show only selected local body and its wards
+            if (previewMap) {
+                // Clear existing layers
+                previewMap.eachLayer(layer => {
+                    if (layer.feature) {
+                        previewMap.removeLayer(layer);
+                    }
+                });
+                
+                // Show selected local body
+                if (selectedLocalBodyForPreview.geometry) {
+                    const lbLayer = L.geoJSON(selectedLocalBodyForPreview.geometry, {
+                        style: {
+                            color: selectedLocalBodyForPreview.color || '#3498db',
+                            weight: 3,
+                            fillOpacity: 0.2
+                        }
+                    });
+                    lbLayer.addTo(previewMap);
+                    
+                    // Show wards if available
+                    if (selectedLocalBodyForPreview.wards) {
+                        selectedLocalBodyForPreview.wards.forEach((ward, index) => {
+                            if (ward.geometry) {
+                                const wardLayer = L.geoJSON(ward.geometry, {
+                                    style: {
+                                        color: '#e74c3c',
+                                        weight: 2,
+                                        fillOpacity: 0.1
+                                    }
+                                }).bindPopup(`<strong>Ward ${ward.number || index + 1}</strong><br>${ward.name || ''}`);
+                                wardLayer.addTo(previewMap);
+                            }
+                        });
+                    }
+                    
+                    // Fit map to local body bounds
+                    previewMap.fitBounds(lbLayer.getBounds());
+                }
+            }
+        }
+        
+        function updateDataGridForSpecificLocalBody() {
+            const dataGrid = document.getElementById('previewDataGrid');
+            
+            if (!selectedLocalBodyForPreview) return;
+            
+            const wardCount = selectedLocalBodyForPreview.wards ? selectedLocalBodyForPreview.wards.length : 0;
+            
+            dataGrid.innerHTML = `
+                <div class="data-card">
+                    <div class="data-value">${selectedLocalBodyForPreview.name}</div>
+                    <div class="data-label">Local Body</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-value">${wardCount}</div>
+                    <div class="data-label">Total Wards</div>
+                </div>
+            `;
+            
+            // Add ward list if available
+            if (selectedLocalBodyForPreview.wards && selectedLocalBodyForPreview.wards.length > 0) {
+                const wardsList = selectedLocalBodyForPreview.wards.map((ward, index) => 
+                    `<div style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
+                        <strong style="color: #667eea;">Ward ${ward.number || index + 1}:</strong> ${ward.name || 'Ward ' + (index + 1)}
+                    </div>`
+                ).join('');
+                
+                dataGrid.innerHTML += `
+                    <div class="data-card" style="grid-column: 1 / -1;">
+                        <div class="data-label" style="margin-bottom: 10px;">All Wards in ${selectedLocalBodyForPreview.name}</div>
+                        <div style="max-height: 300px; overflow-y: auto; background: #f8f9fa; border-radius: 6px; padding: 10px; margin-bottom: 15px;">
+                            ${wardsList}
+                        </div>
+                        <button onclick="downloadLocalBodyWithAllWards()" 
+                                style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                       color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; 
+                                       font-size: 0.95em; transition: all 0.3s;">
+                            📥 Download ${selectedLocalBodyForPreview.name} with All Wards
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        async function downloadLocalBodyWithAllWards() {
+            console.log('📥 Download function called');
+            if (!selectedLocalBodyForPreview) {
+                console.error('❌ No local body selected');
+                alert('Please select a local body first.');
+                return;
+            }
+            
+            console.log('✅ Generating PDF for:', selectedLocalBodyForPreview.name);
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                // Title
+                pdf.setFontSize(20);
+                pdf.setTextColor(102, 126, 234);
+                pdf.text(selectedLocalBodyForPreview.name, 15, 20);
+                
+                pdf.setFontSize(12);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text(`Mandal: ${currentMandal.name}`, 15, 28);
+                pdf.text(`Total Wards: ${selectedLocalBodyForPreview.wards ? selectedLocalBodyForPreview.wards.length : 0}`, 15, 35);
+                
+                // Capture map
+                const mapElement = document.getElementById('previewMap');
+                const canvas = await html2canvas(mapElement, { 
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    logging: false,
+                    useCORS: true 
+                });
+                const imgData = canvas.toDataURL('image/png');
+                
+                const imgWidth = 180;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 15, 45, imgWidth, imgHeight);
+                
+                let yPosition = 45 + imgHeight + 10;
+                
+                // Add all wards table
+                if (selectedLocalBodyForPreview.wards && selectedLocalBodyForPreview.wards.length > 0) {
+                    const wardsData = selectedLocalBodyForPreview.wards.map((ward, index) => [
+                        ward.number || (index + 1),
+                        ward.name || `Ward ${index + 1}`
+                    ]);
+                    
+                    // Check if we need a new page
+                    if (yPosition > 200) {
+                        pdf.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    pdf.autoTable({
+                        startY: yPosition,
+                        head: [['Ward Number', 'Ward Name']],
+                        body: wardsData,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: [102, 126, 234],
+                            textColor: 255,
+                            fontStyle: 'bold',
+                            fontSize: 11
+                        },
+                        bodyStyles: {
+                            fontSize: 10
+                        },
+                        alternateRowStyles: {
+                            fillColor: [245, 245, 245]
+                        }
+                    });
+                }
+                
+                const filename = `${selectedLocalBodyForPreview.name.replace(/\s+/g, '_')}_AllWards.pdf`;
+                pdf.save(filename);
+                
+                alert(`✅ Downloaded: ${filename}`);
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('❌ Error generating PDF. Please try again.');
+            }
+        }
+        
+        function openCustomSelector() {
+            const mandalName = currentMandal ? currentMandal.name : 'Mandal';
+            window.location.href = `localbody_ward_selector.html?from=${encodeURIComponent(mandalName)}`;
+        }
+        
+        // Local Body Selector Functions
+        function openLocalBodySelector() {
+            console.log('🏢 Opening local body selector modal');
+            
+            // Show modal with local body list
+            if (!currentMandal || !currentMandal.local_bodies) {
+                alert('No local body data available');
+                return;
+            }
+            
+            // Create a selection modal
+            const modalHTML = `
+                <div id="lbSelectModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 20000; display: flex; justify-content: center; align-items: center;">
+                    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <h2 style="margin: 0 0 20px 0; color: #667eea; font-size: 24px;">🏢 Select Local Body</h2>
+                        <p style="margin-bottom: 20px; color: #666;">Choose a local body to view detailed map with ward boundaries:</p>
+                        <div id="lbSelectList" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                            ${currentMandal.local_bodies.map((lb, index) => `
+                                <div onclick="redirectToLocalBody(${index})" style="padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s; background: white;">
+                                    <div style="font-weight: 600; font-size: 16px; color: #2c3e50; margin-bottom: 5px;">${lb.name}</div>
+                                    <div style="font-size: 13px; color: #7f8c8d;">${lb.wards ? lb.wards.length : 0} wards</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button onclick="closeLBSelectModal()" style="width: 100%; padding: 12px; background: #e0e0e0; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Add hover effect via stylesheet
+            const style = document.createElement('style');
+            style.textContent = `
+                #lbSelectList > div:hover {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+                    color: white !important;
+                    border-color: #667eea !important;
+                    transform: translateX(5px);
+                }
+                #lbSelectList > div:hover * {
+                    color: white !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        function closeLBSelectModal() {
+            const modal = document.getElementById('lbSelectModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function redirectToLocalBody(index) {
+            console.log('Redirecting to local body:', index);
+            
+            // Build URL with parameters
+            const params = new URLSearchParams({
+                mandal: `${districtId}.json`,
+                lb: index,
+                district: currentDistrictName || districtId,
+                ac: currentAC ? currentAC.name : acId,
+                mandalName: currentMandal.name
+            });
+            
+            window.location.href = `localbody_detail.html?${params.toString()}`;
+        }
+        
+        function closeLBSelector() {
+            console.log('Closing local body selector');
+            const modal = document.getElementById('lbSelectorModal');
+            modal.classList.remove('active');
+            selectedLBForDownload = null;
+        }
+        
+        function initLBSelectorMap() {
+            const mapContainer = document.getElementById('lbMapContainer');
+            if (!mapContainer) return;
+            
+            lbSelectorMap = L.map('lbMapContainer').setView([9.5, 76.5], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(lbSelectorMap);
+            
+            console.log('LB Selector map initialized');
+        }
+        
+        function selectLocalBody(index) {
+            console.log('Selected local body index:', index);
+            selectedLBForDownload = currentMandal.localBodies[index];
+            
+            // Update active state
+            document.querySelectorAll('.lb-item').forEach((item, idx) => {
+                if (idx === index) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Update info panel
+            const infoPanel = document.getElementById('lbInfoPanel');
+            infoPanel.innerHTML = `
+                <h3 style="margin: 0 0 10px 0; color: #667eea;">${selectedLBForDownload.name}</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+                    <div style="background: white; padding: 10px; border-radius: 6px;">
+                        <div style="font-size: 24px; font-weight: 600; color: #667eea;">
+                            ${selectedLBForDownload.wards ? selectedLBForDownload.wards.length : 0}
+                        </div>
+                        <div style="font-size: 12px; opacity: 0.7;">Total Wards</div>
+                    </div>
+                    <div style="background: white; padding: 10px; border-radius: 6px;">
+                        <div style="font-size: 24px; font-weight: 600; color: #764ba2;">
+                            ${currentMandal.name}
+                        </div>
+                        <div style="font-size: 12px; opacity: 0.7;">Mandal</div>
+                    </div>
+                </div>
+                <div class="lb-ward-list">
+                    ${selectedLBForDownload.wards ? selectedLBForDownload.wards.map((ward, idx) => `
+                        <div class="lb-ward-item">
+                            <span><strong>Ward ${ward.number || idx + 1}:</strong> ${ward.name || 'Ward ' + (idx + 1)}</span>
+                        </div>
+                    `).join('') : '<div style="padding: 10px; text-align: center; opacity: 0.5;">No ward data available</div>'}
+                </div>
+            `;
+            
+            // Show download actions
+            document.getElementById('lbActions').style.display = 'flex';
+            
+            // Update map
+            updateLBSelectorMap();
+        }
+        
+        function updateLBSelectorMap() {
+            if (!lbSelectorMap || !selectedLBForDownload) return;
+            
+            // Clear existing layers
+            lbSelectorMap.eachLayer(layer => {
+                if (layer.feature || layer instanceof L.GeoJSON) {
+                    lbSelectorMap.removeLayer(layer);
+                }
+            });
+            
+            // Add local body boundary
+            if (selectedLBForDownload.geometry) {
+                const lbLayer = L.geoJSON(selectedLBForDownload.geometry, {
+                    style: {
+                        color: selectedLBForDownload.color || '#667eea',
+                        weight: 3,
+                        fillOpacity: 0.3,
+                        fillColor: selectedLBForDownload.color || '#667eea'
+                    }
+                }).addTo(lbSelectorMap);
+                
+                // Add wards if available
+                if (selectedLBForDownload.wards) {
+                    selectedLBForDownload.wards.forEach((ward, index) => {
+                        if (ward.geometry) {
+                            L.geoJSON(ward.geometry, {
+                                style: {
+                                    color: '#e74c3c',
+                                    weight: 2,
+                                    fillOpacity: 0.1
+                                }
+                            }).bindPopup(`<strong>Ward ${ward.number || index + 1}</strong><br>${ward.name || ''}`).addTo(lbSelectorMap);
+                        }
+                    });
+                }
+                
+                // Fit map to bounds
+                lbSelectorMap.fitBounds(lbLayer.getBounds(), { padding: [20, 20] });
+            }
+        }
+        
+        async function downloadLBWithMap() {
+            if (!selectedLBForDownload) {
+                alert('Please select a local body first.');
+                return;
+            }
+            
+            console.log('📥 Downloading local body with map:', selectedLBForDownload.name);
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                // Title
+                pdf.setFontSize(22);
+                pdf.setTextColor(102, 126, 234);
+                pdf.text(selectedLBForDownload.name, 15, 20);
+                
+                pdf.setFontSize(12);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text(`Mandal: ${currentMandal.name}`, 15, 28);
+                pdf.text(`Total Wards: ${selectedLBForDownload.wards ? selectedLBForDownload.wards.length : 0}`, 15, 35);
+                
+                // Capture map
+                const mapElement = document.getElementById('lbMapContainer');
+                const canvas = await html2canvas(mapElement, { 
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    logging: false,
+                    useCORS: true 
+                });
+                const imgData = canvas.toDataURL('image/png');
+                
+                const imgWidth = 180;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 15, 45, imgWidth, imgHeight);
+                
+                const filename = `${selectedLBForDownload.name.replace(/\s+/g, '_')}_Map.pdf`;
+                pdf.save(filename);
+                
+                alert(`✅ Downloaded: ${filename}`);
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('❌ Error generating PDF. Please try again.');
+            }
+        }
+        
+        async function downloadLBWithWards() {
+            if (!selectedLBForDownload) {
+                alert('Please select a local body first.');
+                return;
+            }
+            
+            console.log('📥 Downloading local body with wards:', selectedLBForDownload.name);
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                // Title
+                pdf.setFontSize(22);
+                pdf.setTextColor(102, 126, 234);
+                pdf.text(selectedLBForDownload.name, 15, 20);
+                
+                pdf.setFontSize(12);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text(`Mandal: ${currentMandal.name}`, 15, 28);
+                pdf.text(`Total Wards: ${selectedLBForDownload.wards ? selectedLBForDownload.wards.length : 0}`, 15, 35);
+                
+                // Capture map
+                const mapElement = document.getElementById('lbMapContainer');
+                const canvas = await html2canvas(mapElement, { 
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    logging: false,
+                    useCORS: true 
+                });
+                const imgData = canvas.toDataURL('image/png');
+                
+                const imgWidth = 180;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 15, 45, imgWidth, imgHeight);
+                
+                let yPosition = 45 + imgHeight + 10;
+                
+                // Add wards table
+                if (selectedLBForDownload.wards && selectedLBForDownload.wards.length > 0) {
+                    const wardsData = selectedLBForDownload.wards.map((ward, index) => [
+                        ward.number || (index + 1),
+                        ward.name || `Ward ${index + 1}`
+                    ]);
+                    
+                    // Check if we need a new page
+                    if (yPosition > 200) {
+                        pdf.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    pdf.autoTable({
+                        startY: yPosition,
+                        head: [['Ward Number', 'Ward Name']],
+                        body: wardsData,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: [102, 126, 234],
+                            textColor: 255,
+                            fontStyle: 'bold',
+                            fontSize: 11
+                        },
+                        bodyStyles: {
+                            fontSize: 10
+                        },
+                        alternateRowStyles: {
+                            fillColor: [245, 245, 245]
+                        },
+                        margin: { left: 15, right: 15 }
+                    });
+                }
+                
+                const filename = `${selectedLBForDownload.name.replace(/\s+/g, '_')}_WithWards.pdf`;
+                pdf.save(filename);
+                
+                alert(`✅ Downloaded: ${filename}`);
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('❌ Error generating PDF. Please try again.');
+            }
+        }
+        
+        function goBackToAC() {
+            // Build AC page URL with proper parameters
+            const params = new URLSearchParams(window.location.search);
+            const districtId = params.get('district');
+            const acId = params.get('ac');
+            
+            if (districtId && acId) {
+                const acUrl = `ac.html?district=${encodeURIComponent(districtId)}&ac=${encodeURIComponent(acId)}`;
+                console.log('Going back to AC:', acUrl);
+                window.location.href = acUrl;
+            } else {
+                // Fallback to browser back
+                window.history.back();
+            }
+        }
+        
         init();
     </script>
 
@@ -1112,9 +1978,12 @@
                         <option value="localbody" selected>Local Bodies</option>
                         <option value="ward">Wards</option>
                     </select>
-                    <button onclick="downloadPreviewPDF()">📥 Download PDF</button>
+                    <button onclick="openLocalBodySelector()">🏢 Select Local Body</button>
                 </div>
                 <button class="preview-close" onclick="closePreview()">×</button>
+            </div>
+            <div class="preview-download-section">
+                <button class="download-center-btn" onclick="downloadPreviewPDF()">📥 Download PDF</button>
             </div>
             <div class="preview-body">
                 <div class="preview-map" id="previewMap"></div>

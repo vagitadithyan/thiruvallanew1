@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Body Details</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f7fa;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 30px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+        
+        .breadcrumb a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        
+        .breadcrumb span {
+            opacity: 0.6;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 320px;
+            background: white;
+            border-right: 2px solid #e0e0e0;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .info-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .info-card h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .info-label {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .info-value {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        
+        .ward-section {
+            margin-top: 20px;
+        }
+        
+        .ward-section h3 {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .ward-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .ward-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .ward-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .ward-number {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 3px;
+        }
+        
+        .ward-item:hover .ward-number {
+            color: white;
+        }
+        
+        .ward-name {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .action-btn.secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .action-btn.secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: white;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            background: white !important;
+        }
+        
+        .white-background {
+            background: white !important;
+        }
+        
+        .leaflet-container {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+        }
+        
+        .leaflet-tile-pane {
+            opacity: 0 !important;
+        }
+        
+        .leaflet-pane {
+            background: transparent !important;
+        }
+        
+        .leaflet-map-pane {
+            background: #ffffff !important;
+        }
+        
+        .map-legend {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 8px;
+            border: 2px solid #333;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 18px;
+            color: #667eea;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        Loading Local Body Details...
+    </div>
+    
+    <div id="content" style="display: none; flex-direction: column; flex: 1;">
+        <div class="header">
+            <div class="breadcrumb">
+                <a href="kerala_map.html">Kerala</a>
+                <span>/</span>
+                <a href="#" id="districtLink">District</a>
+                <span>/</span>
+                <a href="#" id="acLink">AC</a>
+                <span>/</span>
+                <a href="#" id="mandalLink">Mandal</a>
+                <span>/</span>
+                <span id="lbBreadcrumb">Local Body</span>
+            </div>
+            <h1 id="lbTitle">Local Body</h1>
+            <div class="subtitle" id="lbSubtitle"></div>
+        </div>
+        
+        <div class="container">
+            <div class="sidebar">
+                <div class="info-card">
+                    <h2>📊 Overview</h2>
+                    <div class="info-item">
+                        <span class="info-label">Mandal</span>
+                        <span class="info-value" id="mandalName">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Total Wards</span>
+                        <span class="info-value" id="totalWards">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Local Body Type</span>
+                        <span class="info-value" id="lbType">Municipality</span>
+                    </div>
+                </div>
+                
+                <div class="ward-section">
+                    <h3>🏘️ Wards</h3>
+                    <div class="ward-list" id="wardList">
+                        <!-- Wards will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="downloadLBPolygonOnly()">
+                        �️ Download Local Body Polygon
+                    </button>
+                    <button class="action-btn" onclick="downloadWardsPolygons()">
+                        🎨 Download Ward Polygons
+                    </button>
+                    <button class="action-btn" onclick="downloadLBWithWards()">
+                        📥 Download Complete (Map + Table)
+                    </button>
+                    <button class="action-btn secondary" onclick="goBack()">
+                        ← Back to Mandal
+                    </button>
+                </div>
+            </div>
+            
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="map-legend">
+                    <div class="legend-title">🗺️ Polygon View</div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1); border-color: #2c3e50;"></div>
+                        <span>Ward Polygons</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: white; border: 3px solid #2c3e50;"></div>
+                        <span>Local Body Boundary</span>
+                    </div>
+                    <div style="font-size: 11px; margin-top: 8px; opacity: 0.7;">
+                        Pure polygon view - Each ward in unique color
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let map;
+        let localBodyData = null;
+        let mandalData = null;
+        let navigationData = {};
+        
+        async function init() {
+            // Get URL parameters
+            const params = new URLSearchParams(window.location.search);
+            const mandalFile = params.get('mandal');
+            const lbIndex = params.get('lb');
+            
+            // Store navigation data
+            navigationData.district = params.get('district') || '';
+            navigationData.ac = params.get('ac') || '';
+            navigationData.mandalName = params.get('mandalName') || '';
+            
+            if (!mandalFile || lbIndex === null) {
+                alert('Invalid parameters. Redirecting back...');
+                window.history.back();
+                return;
+            }
+            
+            try {
+                // Load mandal data from 14_districts folder
+                const response = await fetch(`data/14_districts/${mandalFile}`);
+                const districtData = await response.json();
+                
+                console.log('District data loaded:', districtData);
+                
+                // Navigate through the structure: district -> acs -> mandals -> local_bodies
+                let foundLocalBody = null;
+                
+                // Search through all ACs and mandals to find our local body
+                for (const ac of districtData.acs) {
+                    for (const mandal of ac.mandals) {
+                        if (mandal.name === navigationData.mandalName) {
+                            console.log('Found mandal:', mandal.name);
+                            console.log('Local bodies count:', mandal.local_bodies.length);
+                            
+                            if (mandal.local_bodies[parseInt(lbIndex)]) {
+                                foundLocalBody = mandal.local_bodies[parseInt(lbIndex)];
+                                mandalData = mandal;
+                                break;
+                            }
+                        }
+                    }
+                    if (foundLocalBody) break;
+                }
+                
+                localBodyData = foundLocalBody;
+                
+                if (!localBodyData) {
+                    console.error('Local body not found at index:', lbIndex);
+                    alert('Local body not found. Redirecting back...');
+                    window.history.back();
+                    return;
+                }
+                
+                console.log('Local body loaded:', localBodyData.name);
+                console.log('Has geometry:', !!localBodyData.geometry);
+                console.log('Number of wards:', localBodyData.wards ? localBodyData.wards.length : 0);
+                
+                // Update UI
+                updateUI();
+                
+                // Hide loading, show content first so map container has dimensions
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'flex';
+                
+                // Initialize map after DOM is ready
+                setTimeout(() => {
+                    initMap();
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div style="color: #e74c3c;">
+                        <h2>Error Loading Data</h2>
+                        <p>${error.message}</p>
+                        <button onclick="window.history.back()" style="padding: 10px 20px; margin-top: 20px; cursor: pointer;">
+                            ← Go Back
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function updateUI() {
+            // Update header
+            document.getElementById('lbTitle').textContent = localBodyData.name;
+            document.getElementById('lbBreadcrumb').textContent = localBodyData.name;
+            document.getElementById('lbSubtitle').textContent = `${localBodyData.wards ? localBodyData.wards.length : 0} Wards`;
+            
+            // Update breadcrumb links
+            document.getElementById('districtLink').textContent = navigationData.district;
+            document.getElementById('districtLink').href = `district.html?name=${encodeURIComponent(navigationData.district)}`;
+            
+            document.getElementById('acLink').textContent = navigationData.ac;
+            document.getElementById('acLink').href = `ac.html?name=${encodeURIComponent(navigationData.ac)}`;
+            
+            document.getElementById('mandalLink').textContent = navigationData.mandalName;
+            const params = new URLSearchParams(window.location.search);
+            // Build proper mandal URL with district, ac, and mandal parameters
+            const mandalUrl = new URLSearchParams({
+                district: params.get('district') || navigationData.district.toLowerCase().replace(/\s+/g, ''),
+                ac: params.get('ac') || navigationData.ac.toLowerCase().replace(/\s+/g, ''),
+                mandal: navigationData.mandalName.toLowerCase().replace(/\s+/g, '')
+            });
+            document.getElementById('mandalLink').href = `mandal.html?${mandalUrl.toString()}`;
+            
+            // Update info card
+            document.getElementById('mandalName').textContent = navigationData.mandalName;
+            document.getElementById('totalWards').textContent = localBodyData.wards ? localBodyData.wards.length : 0;
+            
+            // Populate ward list
+            const wardList = document.getElementById('wardList');
+            wardList.innerHTML = '';
+            
+            if (localBodyData.wards && localBodyData.wards.length > 0) {
+                localBodyData.wards.forEach((ward, index) => {
+                    const wardItem = document.createElement('div');
+                    wardItem.className = 'ward-item';
+                    const wardNum = ward.ward_number || ward.number || (index + 1);
+                    const wardName = ward.ward_name || ward.name || `Ward ${wardNum}`;
+                    
+                    wardItem.innerHTML = `
+                        <div class="ward-number">Ward ${wardNum}</div>
+                        <div class="ward-name">${wardName}</div>
+                    `;
+                    wardItem.onclick = () => highlightWard(index);
+                    wardList.appendChild(wardItem);
+                });
+            } else {
+                wardList.innerHTML = '<div style="text-align: center; padding: 20px; opacity: 0.5;">No ward data available</div>';
+            }
+        }
+        
+        // Generate vibrant colors for wards
+        const vibrantColors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+            '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788',
+            '#FF9999', '#66B3FF', '#99FF99', '#FFCC99', '#FF99CC',
+            '#C39BD3', '#76D7C4', '#F8C471', '#85929E', '#AED6F1',
+            '#FAD7A0', '#D7BDE2', '#A3E4D7', '#F9E79F', '#EDBB99',
+            '#D5DBDB', '#A9CCE3', '#A2D9CE', '#F5CBA7', '#CCD1D1'
+        ];
+        
+        function getWardColor(index) {
+            return vibrantColors[index % vibrantColors.length];
+        }
+        
+        function initMap() {
+            console.log('Initializing map...');
+            console.log('Local body data:', localBodyData);
+            
+            // Initialize map WITHOUT tile layer - pure polygon view
+            map = L.map('map', {
+                zoomControl: true,
+                attributionControl: false,
+                preferCanvas: false
+            }).setView([9.5, 76.5], 12);
+            
+            // Set white background on all map elements
+            const mapContainer = map.getContainer();
+            mapContainer.style.background = '#ffffff';
+            mapContainer.style.backgroundColor = '#ffffff';
+            
+            // Create invisible white tile layer for Leaflet compatibility
+            const whiteTileLayer = L.tileLayer('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=', {
+                attribution: '',
+                opacity: 0
+            });
+            whiteTileLayer.addTo(map);
+            
+            let bounds = [];
+            
+            console.log('Adding local body boundary...');
+            
+            // Add local body boundary first (as outline)
+            if (localBodyData.geometry) {
+                console.log('Local body geometry exists');
+                const lbLayer = L.geoJSON(localBodyData.geometry, {
+                    style: {
+                        color: '#2c3e50',
+                        weight: 4,
+                        fillOpacity: 0,
+                        opacity: 1
+                    }
+                }).bindPopup(`<strong>${localBodyData.name}</strong><br>Local Body Boundary`);
+                lbLayer.addTo(map);
+                bounds.push(lbLayer.getBounds());
+                console.log('Local body boundary added');
+            } else {
+                console.error('No local body geometry!');
+            }
+            
+            console.log('Adding ward polygons...');
+            
+            // Add ward polygons with different colors
+            if (localBodyData.wards && localBodyData.wards.length > 0) {
+                console.log('Number of wards:', localBodyData.wards.length);
+                localBodyData.wards.forEach((ward, index) => {
+                    if (ward.geometry) {
+                        const wardColor = getWardColor(index);
+                        ward._color = wardColor; // Store color for PDF
+                        
+                        const wardNum = ward.ward_number || ward.number || (index + 1);
+                        const wardName = ward.ward_name || ward.name || `Ward ${wardNum}`;
+                        
+                        console.log(`Adding ward ${wardNum}: ${wardName}`);
+                        
+                        const wardLayer = L.geoJSON(ward.geometry, {
+                            style: {
+                                color: '#2c3e50',
+                                weight: 2,
+                                fillOpacity: 0.85,
+                                fillColor: wardColor
+                            }
+                        }).bindPopup(`
+                            <strong>Ward ${wardNum}</strong><br>
+                            ${wardName}
+                        `);
+                        wardLayer.addTo(map);
+                        
+                        // Store reference for highlighting
+                        wardLayer._wardIndex = index;
+                        wardLayer._wardColor = wardColor;
+                        
+                        bounds.push(wardLayer.getBounds());
+                    } else {
+                        console.warn(`Ward ${index} has no geometry`);
+                    }
+                });
+            } else {
+                console.error('No wards found!');
+            }
+            
+            // Fit map to all boundaries
+            if (bounds.length > 0) {
+                console.log('Fitting map to bounds...');
+                const group = L.featureGroup(bounds.map(b => L.rectangle(b)));
+                map.fitBounds(group.getBounds(), { padding: [50, 50] });
+            } else {
+                console.error('No bounds to fit!');
+            }
+            
+            console.log('Map initialization complete');
+        }
+        
+        function highlightWard(index) {
+            // Find and highlight the specific ward
+            map.eachLayer(layer => {
+                if (layer._wardIndex === index) {
+                    layer.setStyle({
+                        color: '#f39c12',
+                        weight: 4,
+                        fillOpacity: 0.4
+                    });
+                    layer.openPopup();
+                    
+                    // Zoom to ward
+                    map.fitBounds(layer.getBounds(), { padding: [50, 50] });
+                    
+                    // Reset style after 3 seconds
+                    setTimeout(() => {
+                        layer.setStyle({
+                            color: '#e74c3c',
+                            weight: 2,
+                            fillOpacity: 0.1
+                        });
+                    }, 3000);
+                }
+            });
+        }
+        
+        async function downloadLBPolygonOnly() {
+            if (!localBodyData) return;
+            
+            console.log('🗺️ Downloading local body polygon only:', localBodyData.name);
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                
+                // Temporarily hide wards to show only local body
+                const tempMap = L.map(document.createElement('div'), {
+                    zoomControl: false,
+                    attributionControl: false
+                }).setView([9.5, 76.5], 12);
+                
+                // Create container
+                const tempContainer = document.createElement('div');
+                tempContainer.style.width = '1200px';
+                tempContainer.style.height = '800px';
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.left = '-9999px';
+                document.body.appendChild(tempContainer);
+                
+                const tempMapInstance = L.map(tempContainer, {
+                    zoomControl: false,
+                    attributionControl: false
+                }).setView([9.5, 76.5], 12);
+                
+                // Add only local body boundary
+                if (localBodyData.geometry) {
+                    const lbLayer = L.geoJSON(localBodyData.geometry, {
+                        style: {
+                            color: '#667eea',
+                            weight: 4,
+                            fillOpacity: 0.6,
+                            fillColor: '#667eea'
+                        }
+                    });
+                    lbLayer.addTo(tempMapInstance);
+                    tempMapInstance.fitBounds(lbLayer.getBounds(), { padding: [50, 50] });
+                }
+                
+                // Wait for render
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Capture
+                const canvas = await html2canvas(tempContainer, { 
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    logging: false
+                });
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Cleanup
+                tempMapInstance.remove();
+                document.body.removeChild(tempContainer);
+                
+                // Add to PDF
+                const pageWidth = 297;
+                const pageHeight = 210;
+                const margin = 10;
+                
+                pdf.addImage(imgData, 'PNG', margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2));
+                
+                // Add title
+                pdf.setFontSize(18);
+                pdf.setTextColor(102, 126, 234);
+                pdf.text(`${localBodyData.name} - Local Body Boundary`, pageWidth / 2, margin + 5, { align: 'center' });
+                
+                const filename = `${localBodyData.name.replace(/\s+/g, '_')}_LocalBody_Polygon.pdf`;
+                pdf.save(filename);
+                
+                alert(`✅ Downloaded: ${filename}`);
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('❌ Error generating PDF. Please try again.');
+            }
+        }
+        
+        async function downloadWardsPolygons() {
+            if (!localBodyData) return;
+            
+            console.log('🎨 Downloading ward polygons:', localBodyData.name);
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                
+                // Capture current map (which has colored wards)
+                const mapElement = document.getElementById('map');
+                const canvas = await html2canvas(mapElement, { 
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    logging: false,
+                    useCORS: true 
+                });
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Full page map
+                const pageWidth = 297;
+                const pageHeight = 210;
+                const margin = 10;
+                
+                pdf.addImage(imgData, 'PNG', margin, margin, pageWidth - (margin * 2), pageHeight - (margin * 2));
+                
+                const filename = `${localBodyData.name.replace(/\s+/g, '_')}_Ward_Polygons.pdf`;
+                pdf.save(filename);
+                
+                alert(`✅ Downloaded: ${filename}`);
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('❌ Error generating PDF. Please try again.');
+            }
+        }
+        
+        async function downloadLBMap() {
+            if (!localBodyData) return;
+            
+            console.log('📥 Downloading local body map:', localBodyData.name);
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                
+                // Capture map at full size
+                const mapElement = document.getElementById('map');
+                const canvas = await html2canvas(mapElement, { 
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    logging: false,
+                    useCORS: true 
+                });
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Full page map (landscape A4: 297mm x 210mm)
+                const pageWidth = 297;
+                const pageHeight = 210;
+                const margin = 10;
+                
+                const imgWidth = pageWidth - (margin * 2);
+                const imgHeight = pageHeight - (margin * 2);
+                
+                pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+                
+                const filename = `${localBodyData.name.replace(/\s+/g, '_')}_ward_map.pdf`;
+                pdf.save(filename);
+                
+                alert(`✅ Downloaded: ${filename}`);
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('❌ Error generating PDF. Please try again.');
+            }
+        }
+        
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? [
+                parseInt(result[1], 16),
+                parseInt(result[2], 16),
+                parseInt(result[3], 16)
+            ] : [200, 200, 200];
+        }
+        
+        async function downloadLBWithWards() {
+            if (!localBodyData) return;
+            
+            console.log('📥 Downloading local body with wards:', localBodyData.name);
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                
+                // PAGE 1: Full page map with white background
+                const mapElement = document.getElementById('map');
+                
+                // Ensure white background before capture
+                const originalBg = mapElement.style.backgroundColor;
+                mapElement.style.backgroundColor = '#ffffff';
+                
+                const canvas = await html2canvas(mapElement, { 
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    removeContainer: false
+                });
+                
+                // Restore original
+                mapElement.style.backgroundColor = originalBg;
+                
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Full page dimensions (landscape A4: 297mm x 210mm)
+                const pageWidth = 297;
+                const pageHeight = 210;
+                const margin = 15;
+                
+                // Calculate centered image dimensions
+                const availableWidth = pageWidth - (margin * 2);
+                const availableHeight = pageHeight - (margin * 2);
+                
+                // Maintain aspect ratio and center
+                const imgAspect = canvas.width / canvas.height;
+                const pageAspect = availableWidth / availableHeight;
+                
+                let imgWidth, imgHeight, xPos, yPos;
+                
+                if (imgAspect > pageAspect) {
+                    // Image is wider - fit to width
+                    imgWidth = availableWidth;
+                    imgHeight = availableWidth / imgAspect;
+                    xPos = margin;
+                    yPos = margin + (availableHeight - imgHeight) / 2;
+                } else {
+                    // Image is taller - fit to height
+                    imgHeight = availableHeight;
+                    imgWidth = availableHeight * imgAspect;
+                    xPos = margin + (availableWidth - imgWidth) / 2;
+                    yPos = margin;
+                }
+                
+                // Add white background to entire page
+                pdf.setFillColor(255, 255, 255);
+                pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+                
+                pdf.addImage(imgData, 'PNG', xPos, yPos, imgWidth, imgHeight);
+                
+                // PAGE 2+: Ward data table
+                if (localBodyData.wards && localBodyData.wards.length > 0) {
+                    pdf.addPage('landscape');
+                    
+                    // White background for data page
+                    pdf.setFillColor(255, 255, 255);
+                    pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+                    
+                    // Title on data page
+                    pdf.setFontSize(16);
+                    pdf.setTextColor(44, 62, 80);
+                    pdf.text(`${localBodyData.name} - WARD Map - Data Table`, pageWidth / 2, 20, { align: 'center' });
+                    
+                    // Prepare table data with colors
+                    const wardsData = localBodyData.wards.map((ward, index) => {
+                        const wardColor = ward._color || getWardColor(index);
+                        const rgb = hexToRgb(wardColor);
+                        const wardNum = ward.ward_number || ward.number || (index + 1);
+                        const wardName = ward.ward_name || ward.name || `Ward ${wardNum}`;
+                        
+                        return [
+                            { content: '', styles: { fillColor: rgb, cellWidth: 10 } },
+                            wardNum,
+                            wardName,
+                            localBodyData.name,
+                            navigationData.mandalName
+                        ];
+                    });
+                    
+                    pdf.autoTable({
+                        startY: 30,
+                        head: [['Color', 'Ward No', 'Ward Name', 'Local Body', 'Mandal']],
+                        body: wardsData,
+                        theme: 'grid',
+                        headStyles: {
+                            fillColor: [66, 139, 202],
+                            textColor: 255,
+                            fontStyle: 'bold',
+                            fontSize: 11,
+                            halign: 'center'
+                        },
+                        bodyStyles: {
+                            fontSize: 10,
+                            valign: 'middle'
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 15, halign: 'center' },
+                            1: { cellWidth: 20, halign: 'center' },
+                            2: { cellWidth: 80 },
+                            3: { cellWidth: 60 },
+                            4: { cellWidth: 60 }
+                        },
+                        alternateRowStyles: {
+                            fillColor: [245, 245, 245]
+                        },
+                        margin: { left: 15, right: 15 }
+                    });
+                }
+                
+                const filename = `${localBodyData.name.replace(/\s+/g, '_')}_ward_map.pdf`;
+                pdf.save(filename);
+                
+                alert(`✅ Downloaded: ${filename}`);
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('❌ Error generating PDF. Please try again.');
+            }
+        }
+        
+        function goBack() {
+            window.history.back();
+        }
+        
+        // Initialize on page load
+        init();
+    </script>
+</body>
+</html>

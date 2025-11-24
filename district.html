@@ -884,13 +884,57 @@
                 dataGrid.appendChild(div);
             });
 
-            // Render ACs on map with proper bounds
+            // Render ACs on map with proper bounds - WITH GEOMETRY AGGREGATION
             if (previewMap && currentDistrict.acs.length > 0) {
                 let allBounds = [];
                 currentDistrict.acs.forEach((ac, index) => {
                     const color = acColors[index % acColors.length];
+                    
+                    // Same aggregation logic as main map
+                    let geometryToRender = null;
+                    
                     if (ac.geometry) {
-                        const layer = L.geoJSON(ac.geometry, {
+                        geometryToRender = ac.geometry;
+                    } else if (ac.mandals && ac.mandals.length > 0) {
+                        // Collect all geometries from mandals, LBs, and wards
+                        const allGeometries = [];
+                        
+                        ac.mandals.forEach(mandal => {
+                            if (mandal.geometry) {
+                                allGeometries.push(mandal.geometry);
+                            } else if (mandal.local_bodies && mandal.local_bodies.length > 0) {
+                                mandal.local_bodies.forEach(lb => {
+                                    if (lb.geometry) {
+                                        allGeometries.push(lb.geometry);
+                                    } else if (lb.wards && lb.wards.length > 0) {
+                                        lb.wards.forEach(ward => {
+                                            if (ward.geometry) {
+                                                allGeometries.push(ward.geometry);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                        
+                        if (allGeometries.length > 0) {
+                            const coordinates = allGeometries.map(g => {
+                                if (g.type === 'Polygon') return [g.coordinates];
+                                if (g.type === 'MultiPolygon') return g.coordinates;
+                                return null;
+                            }).filter(c => c !== null).flat();
+                            
+                            if (coordinates.length > 0) {
+                                geometryToRender = {
+                                    type: 'MultiPolygon',
+                                    coordinates: coordinates
+                                };
+                            }
+                        }
+                    }
+                    
+                    if (geometryToRender) {
+                        const layer = L.geoJSON(geometryToRender, {
                             style: {
                                 fillColor: color,
                                 weight: 3,

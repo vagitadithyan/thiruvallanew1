@@ -206,6 +206,30 @@
             opacity: 0.9;
         }
         
+        .quick-actions {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .quick-actions-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .quick-actions-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
         @media (max-width: 1024px) {
             .container {
                 flex-direction: column;
@@ -240,6 +264,10 @@
                 <span class="stat-label">Wards</span>
             </div>
         </div>
+    </div>
+    
+    <div class="quick-actions">
+        <a href="localbody_ward_selector.html" class="quick-actions-btn">📋 Select & Download Local Body Wards</a>
     </div>
     
     <div class="container">
