@@ -9981,7 +9981,7 @@
             {
               "id": "kovalam",
               "name": "Kovalam",
-              "total_local_bodies": 2,
+              "total_local_bodies": 3,
               "local_bodies": [
                 {
                   "id": "kalliyoor",
@@ -9998,6 +9998,14 @@
                   "type": "Panchayat",
                   "total_wards": 22,
                   "data_path": "data/thiruvananthapuram_south/kovalam/kovalam/venganoor.geojson"
+                },
+                {
+                  "id": "tvm_corporation_kovalam",
+                  "name": "TVM Corporation (Kovalam)",
+                  "code": "C01001",
+                  "type": "Corporation",
+                  "total_wards": 10,
+                  "data_path": "data/thiruvananthapuram_south/kovalam/kovalam/tvm_corporation_kovalam.geojson"
                 }
               ]
             }

@@ -236,19 +236,28 @@
         
         .preview-controls {
             display: flex;
-            gap: 15px;
-            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: stretch;
+            justify-content: center;
         }
         
-        .preview-controls select {
-            padding: 8px 15px;
+        .preview-controls select,
+        .preview-controls button {
+            min-width: 170px;
+            height: 44px;
             border: 2px solid white;
-            border-radius: 6px;
+            border-radius: 8px;
             background: rgba(255, 255, 255, 0.2);
             color: white;
             font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
             outline: none;
+        }
+        
+        .preview-controls select {
+            padding: 0 15px;
         }
         
         .preview-controls select option {
@@ -257,14 +266,10 @@
         }
         
         .preview-controls button {
-            padding: 8px 20px;
-            border: 2px solid white;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s ease;
         }
         
@@ -417,6 +422,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         let map, currentAC, currentDistrict;
+        let corporationMandalsCache = null;
         
         const urlParams = new URLSearchParams(window.location.search);
         const districtId = urlParams.get('district');
@@ -465,6 +471,66 @@
             return name.toLowerCase().replace(/[^a-z0-9]/g, '');
         }
         
+        function toMultiPolygon(geometries) {
+            if (!geometries || !geometries.length) return null;
+            const coordinates = geometries.map(geom => {
+                if (!geom) return null;
+                if (geom.type === 'Polygon') return [geom.coordinates];
+                if (geom.type === 'MultiPolygon') return geom.coordinates;
+                return null;
+            }).filter(Boolean).flat();
+            if (!coordinates.length) return null;
+            return { type: 'MultiPolygon', coordinates };
+        }
+
+        function flattenGeometryFragments(geometry) {
+            if (!geometry) return [];
+            if (geometry.type === 'FeatureCollection' && Array.isArray(geometry.features)) {
+                return geometry.features.flatMap(feature => flattenGeometryFragments(feature));
+            }
+            if (geometry.type === 'Feature' && geometry.geometry) {
+                return flattenGeometryFragments(geometry.geometry);
+            }
+            if (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon') {
+                return [geometry];
+            }
+            return [];
+        }
+
+        function ensureMandalLocalBodies(mandal) {
+            if (!mandal) return [];
+            if (Array.isArray(mandal.local_bodies)) return mandal.local_bodies;
+            if (Array.isArray(mandal.localBodies)) {
+                mandal.local_bodies = mandal.localBodies;
+                return mandal.local_bodies;
+            }
+            mandal.local_bodies = [];
+            return mandal.local_bodies;
+        }
+
+        function getLocalBodyGeometry(lb) {
+            if (!lb) return null;
+            if (lb.geometry) return lb.geometry;
+            if (lb.wards && lb.wards.length) {
+                const wardGeoms = lb.wards.map(ward => ward.geometry).filter(Boolean);
+                return toMultiPolygon(wardGeoms);
+            }
+            return null;
+        }
+
+        function buildMandalGeometry(mandal) {
+            if (mandal?.geometry) return mandal.geometry;
+            const fragments = [];
+            ensureMandalLocalBodies(mandal).forEach(lb => {
+                const geometry = lb.geometry || getLocalBodyGeometry(lb);
+                flattenGeometryFragments(geometry).forEach(fragment => fragments.push(fragment));
+            });
+            if (!fragments.length) return null;
+            const aggregated = toMultiPolygon(fragments);
+            if (aggregated) mandal.geometry = aggregated;
+            return mandal.geometry;
+        }
+
         async function init() {
             try {
                 // Load consolidated 14-district data
@@ -485,6 +551,9 @@
                     console.log('Available ACs:', currentDistrict.acs.map(ac => ({name: ac.name, id: cleanId(ac.name)})));
                     return;
                 }
+
+                await enhanceCorporationMandals();
+                await ensureKovalamCorporationSlice();
                 
                 // Update header
                 document.getElementById('acTitle').textContent = currentAC.name;
@@ -495,7 +564,7 @@
                 // Update info
                 let totalLBs = 0;
                 currentAC.mandals.forEach(mandal => {
-                    totalLBs += mandal.local_bodies.length;
+                    totalLBs += ensureMandalLocalBodies(mandal).length;
                 });
                 
                 document.getElementById('totalMandals').textContent = currentAC.mandals.length;
@@ -512,18 +581,164 @@
                 alert('Error loading AC data.');
             }
         }
+
+        async function loadCorporationMandalsData() {
+            if (corporationMandalsCache !== null) {
+                return corporationMandalsCache;
+            }
+            try {
+                const response = await fetch('data/corporation_mandals.json');
+                if (!response.ok) {
+                    console.warn('Corporation mandals file missing');
+                    corporationMandalsCache = { features: [] };
+                    return corporationMandalsCache;
+                }
+                corporationMandalsCache = await response.json();
+            } catch (error) {
+                console.warn('Failed to load corporation mandals file', error);
+                corporationMandalsCache = { features: [] };
+            }
+            return corporationMandalsCache;
+        }
+
+        async function enhanceCorporationMandals() {
+            try {
+                const corpData = await loadCorporationMandalsData();
+                const relevant = (corpData.features || []).filter(feature => {
+                    return feature?.properties?.ac_id === acId;
+                });
+                
+                if (!relevant.length) {
+                    return;
+                }
+                
+                relevant.forEach(feature => {
+                    const props = feature.properties || {};
+                    const mandalKey = cleanId(props.mandal_id || props.mandal_name || props.corporation_name || '');
+                    if (!mandalKey) return;
+                    
+                    const geometryFeature = {
+                        type: 'Feature',
+                        properties: {
+                            source: 'corporation_mandals',
+                            corporation: props.corporation_name,
+                            mandal: props.mandal_name
+                        },
+                        geometry: feature.geometry
+                    };
+                    const wardFeatures = (props.ward_features || []).map(ward => ({
+                        type: 'Feature',
+                        properties: {
+                            ward_number: ward?.properties?.ward_number || ward?.ward_number,
+                            ward_name: ward?.properties?.ward_name || ward?.ward_name
+                        },
+                        geometry: ward.geometry
+                    }));
+                    
+                    let mandal = currentAC.mandals.find(m => cleanId(m.name) === mandalKey);
+                    if (mandal) {
+                        mandal.geometry = geometryFeature;
+                        mandal.isCorporationMandal = true;
+                        mandal.corporationMeta = props;
+                        mandal.corporationWardFeatures = wardFeatures;
+                    } else {
+                        mandal = {
+                            name: props.mandal_name || props.corporation_name || 'Corporation Mandal',
+                            local_bodies: [],
+                            geometry: geometryFeature,
+                            isCorporationMandal: true,
+                            corporationMeta: props,
+                            corporationWardFeatures: wardFeatures
+                        };
+                        currentAC.mandals.push(mandal);
+                    }
+                    
+                    // Inject synthetic local body so mandal/localbody pages can drill down
+                    const corpLbId = `corp_${props.mandal_id || cleanId(props.mandal_name || props.corporation_name || '')}`;
+                    if (!mandal.local_bodies.some(lb => lb.id === corpLbId)) {
+                        mandal.local_bodies.push({
+                            id: corpLbId,
+                            name: props.mandal_name || props.corporation_name,
+                            type: 'Corporation Mandal',
+                            code: props.corporation_id || '',
+                            wards: wardFeatures.map(ward => ({
+                                ward_number: ward.properties?.ward_number,
+                                ward_name: ward.properties?.ward_name,
+                                geometry: ward.geometry
+                            })),
+                            geometry: {
+                                type: 'FeatureCollection',
+                                features: wardFeatures
+                            }
+                        });
+                    }
+                });
+            } catch (error) {
+                console.warn('Unable to enhance corporation mandals', error);
+            }
+        }
+
+        async function ensureKovalamCorporationSlice() {
+            if (!(districtId === 'thiruvananthapuram_south' && acId === 'kovalam')) {
+                return;
+            }
+            
+            const mandal = currentAC.mandals.find(m => cleanId(m.name) === 'kovalam');
+            if (!mandal) return;
+            
+            const alreadyExists = mandal.local_bodies.some(lb => cleanId(lb.name) === 'tvm_corporation_kovalam');
+            if (alreadyExists) return;
+            
+            try {
+                const response = await fetch('data/thiruvananthapuram_south/kovalam/kovalam/tvm_corporation_kovalam.geojson');
+                if (!response.ok) {
+                    console.warn('TVM Corporation (Kovalam) data missing');
+                    return;
+                }
+                const geojson = await response.json();
+                const wards = (geojson.features || []).map((feature, index) => ({
+                    ward_number: feature?.properties?.ward_number || feature?.properties?.Ward_No || `${index + 1}`,
+                    ward_name: feature?.properties?.ward_name || feature?.properties?.Ward_Name || `Ward ${index + 1}`,
+                    geometry: feature.geometry
+                }));
+                
+                const lbGeometry = {
+                    type: 'FeatureCollection',
+                    features: (geojson.features || []).map(feature => ({
+                        type: 'Feature',
+                        properties: {
+                            ward_number: feature?.properties?.ward_number || feature?.properties?.Ward_No || '',
+                            ward_name: feature?.properties?.ward_name || feature?.properties?.Ward_Name || ''
+                        },
+                        geometry: feature.geometry
+                    }))
+                };
+                
+                mandal.local_bodies.push({
+                    name: 'TVM Corporation (Kovalam)',
+                    id: 'tvm_corporation_kovalam',
+                    code: 'C01001',
+                    type: 'C',
+                    wards,
+                    geometry: lbGeometry
+                });
+            } catch (error) {
+                console.warn('Failed to inject TVM Corporation (Kovalam)', error);
+            }
+        }
         
         function renderMandalList(mandals) {
             const list = document.getElementById('mandalList');
             list.innerHTML = '';
             
             mandals.forEach(mandal => {
+                const mandalLBs = ensureMandalLocalBodies(mandal);
                 const item = document.createElement('div');
                 item.className = 'mandal-item';
                 
                 item.innerHTML = `
                     <div class="mandal-name">${mandal.name}</div>
-                    <div class="mandal-stats">${mandal.local_bodies.length} Local Bodies</div>
+                    <div class="mandal-stats">${mandalLBs.length} Local Bodies</div>
                 `;
                 
                 item.addEventListener('click', function() {
@@ -542,10 +757,12 @@
                 let allBounds = [];
                 
                 currentAC.mandals.forEach((mandal, index) => {
-                    if (!mandal.geometry) return;
+                    const mandalGeometry = buildMandalGeometry(mandal);
+                    if (!mandalGeometry) return;
+                    const mandalLocalBodies = ensureMandalLocalBodies(mandal);
                     
                     const color = mandalColors[index % mandalColors.length];
-                    const layer = L.geoJSON(mandal.geometry, {
+                    const layer = L.geoJSON(mandalGeometry, {
                         style: {
                             fillColor: color,
                             fillOpacity: 0.5,
@@ -557,7 +774,7 @@
                             layer.bindPopup(`
                                 <div style="text-align:center; padding:10px;">
                                     <div style="font-size:1.1em; font-weight:600; color:#2c3e50; margin-bottom:5px;">${mandal.name}</div>
-                                    <div>${mandal.local_bodies.length} Local Bodies</div>
+                                        <div>${mandalLocalBodies.length} Local Bodies</div>
                                 </div>
                             `);
                             
@@ -627,8 +844,7 @@
                     attributionControl: false,
                     preferCanvas: true
                 }).setView([10.8505, 76.2711], 10);
-                
-                // NO background map - only colored polygons will show
+                previewMap._previewLayerGroup = L.layerGroup().addTo(previewMap);
                 
                 // Wait for map container to be fully sized
                 setTimeout(() => {
@@ -649,12 +865,8 @@
         function updatePreviewBoundary() {
             const level = document.getElementById('boundaryLevel').value;
             
-            if (previewMap) {
-                previewMap.eachLayer(layer => {
-                    if (layer instanceof L.GeoJSON) {
-                        previewMap.removeLayer(layer);
-                    }
-                });
+            if (previewMap && previewMap._previewLayerGroup) {
+                previewMap._previewLayerGroup.clearLayers();
             }
 
             if (level === 'ac') {
@@ -680,6 +892,40 @@
                     <span>${currentAC.mandals.length}</span>
                 </div>
             `;
+
+            if (!previewMap) return;
+            const layerTarget = previewMap._previewLayerGroup || previewMap;
+            const acColor = districtColors[districtId] || '#45B7D1';
+            const bounds = [];
+
+            const drawGeometry = (geometry) => {
+                const layer = L.geoJSON(geometry, {
+                    style: {
+                        fillColor: acColor,
+                        fillOpacity: 0.85,
+                        color: '#ffffff',
+                        weight: 3,
+                        opacity: 1
+                    }
+                }).addTo(layerTarget);
+                bounds.push(layer.getBounds());
+            };
+
+            if (currentAC.geometry) {
+                drawGeometry(currentAC.geometry);
+            } else if (currentAC.mandals && currentAC.mandals.length > 0) {
+                currentAC.mandals.forEach(mandal => {
+                    const mandalGeometry = buildMandalGeometry(mandal);
+                    if (mandalGeometry) {
+                        drawGeometry(mandalGeometry);
+                    }
+                });
+            }
+
+            if (bounds.length > 0) {
+                const group = L.featureGroup(bounds.map(b => L.rectangle(b)));
+                previewMap.fitBounds(group.getBounds(), { padding: [20, 20] });
+            }
         }
 
         function renderPreviewMandals() {
@@ -701,7 +947,9 @@
             const mandalColors = getVibrantColors(currentAC.mandals.length);
             
             currentAC.mandals.forEach((mandal, index) => {
+                const mandalLocalBodies = ensureMandalLocalBodies(mandal);
                 const color = mandalColors[index % mandalColors.length];
+                mandal.previewColor = color;
                 console.log(`Mandal ${index + 1}:`, mandal.name, "| Has geometry:", !!mandal.geometry, "| Color:", color);
                 
                 const div = document.createElement('div');
@@ -709,7 +957,7 @@
                 div.innerHTML = `
                     <span class="color-box" style="background-color: ${color}"></span>
                     <strong>${mandal.name}</strong>
-                    <span>${mandal.local_bodies.length} Local Bodies</span>
+                    <span>${mandalLocalBodies.length} Local Bodies</span>
                 `;
                 dataGrid.appendChild(div);
             });
@@ -723,41 +971,7 @@
                     // Aggregate geometry from mandal, LBs, or wards
                     let geometryToRender = null;
                     
-                    if (mandal.geometry) {
-                        geometryToRender = mandal.geometry;
-                        console.log(`Rendering mandal "${mandal.name}" with direct geometry`);
-                    } else if (mandal.local_bodies && mandal.local_bodies.length > 0) {
-                        // Collect geometries from local bodies and wards
-                        const allGeometries = [];
-                        
-                        mandal.local_bodies.forEach(lb => {
-                            if (lb.geometry) {
-                                allGeometries.push(lb.geometry);
-                            } else if (lb.wards && lb.wards.length > 0) {
-                                lb.wards.forEach(ward => {
-                                    if (ward.geometry) {
-                                        allGeometries.push(ward.geometry);
-                                    }
-                                });
-                            }
-                        });
-                        
-                        if (allGeometries.length > 0) {
-                            const coordinates = allGeometries.map(g => {
-                                if (g.type === 'Polygon') return [g.coordinates];
-                                if (g.type === 'MultiPolygon') return g.coordinates;
-                                return null;
-                            }).filter(c => c !== null).flat();
-                            
-                            if (coordinates.length > 0) {
-                                geometryToRender = {
-                                    type: 'MultiPolygon',
-                                    coordinates: coordinates
-                                };
-                                console.log(`Aggregated geometry for mandal "${mandal.name}" from ${allGeometries.length} sources`);
-                            }
-                        }
-                    }
+                    geometryToRender = buildMandalGeometry(mandal);
                     
                     if (geometryToRender) {
                         console.log(`Rendering mandal "${mandal.name}" with color ${color}`);
@@ -769,7 +983,7 @@
                                 weight: 3,
                                 opacity: 1
                             }
-                        }).addTo(previewMap);
+                        }).addTo(previewMap._previewLayerGroup || previewMap);
                         allBounds.push(layer.getBounds());
                         console.log(`✓ Successfully rendered mandal "${mandal.name}"`);
                     } else {
@@ -797,16 +1011,18 @@
                 return;
             }
 
-            const baseColor = districtColors[districtId] || '#2196F3';
             let totalLBs = 0;
-            currentAC.mandals.forEach(mandal => totalLBs += mandal.local_bodies.length);
-            const lbColors = generateColorGradient(baseColor, Math.max(totalLBs, 20));
+            currentAC.mandals.forEach(mandal => totalLBs += ensureMandalLocalBodies(mandal).length);
+            const lbColors = getVibrantColors(totalLBs);
             let lbIndex = 0;
+            allLocalBodiesData = [];
             
             currentAC.mandals.forEach(mandal => {
-                console.log(`Processing mandal: ${mandal.name} with ${mandal.local_bodies.length} local bodies`);
-                mandal.local_bodies.forEach(lb => {
+                const mandalLocalBodies = ensureMandalLocalBodies(mandal);
+                console.log(`Processing mandal: ${mandal.name} with ${mandalLocalBodies.length} local bodies`);
+                mandalLocalBodies.forEach(lb => {
                     const color = lbColors[lbIndex % lbColors.length];
+                    lb.previewColor = color;
                     console.log(`Local Body ${lbIndex + 1}: ${lb.name} | Has geometry: ${!!lb.geometry} | Color: ${color}`);
                     lbIndex++;
                     
@@ -818,6 +1034,11 @@
                         <span>${mandal.name}</span>
                     `;
                     dataGrid.appendChild(div);
+                    allLocalBodiesData.push({
+                        name: lb.name,
+                        mandal: mandal.name,
+                        color
+                    });
                 });
             });
 
@@ -826,12 +1047,16 @@
                 let allBounds = [];
                 lbIndex = 0;
                 currentAC.mandals.forEach(mandal => {
-                    mandal.local_bodies.forEach(lb => {
+                    const mandalLocalBodies = ensureMandalLocalBodies(mandal);
+                    mandalLocalBodies.forEach(lb => {
                         const color = lbColors[lbIndex % lbColors.length];
                         lbIndex++;
-                        if (lb.geometry) {
+                        const lbGeometry = getLocalBodyGeometry(lb);
+                        const displayGeometry = lbGeometry || lb.geometry;
+                        if (displayGeometry) {
+                            if (!lb.geometry) lb.geometry = displayGeometry;
                             console.log(`Rendering local body "${lb.name}" with color ${color}`);
-                            const layer = L.geoJSON(lb.geometry, {
+                            const layer = L.geoJSON(displayGeometry, {
                                 style: {
                                     fillColor: color,
                                     fillOpacity: 0.85,
@@ -839,7 +1064,7 @@
                                     weight: 3,
                                     opacity: 1
                                 }
-                            }).addTo(previewMap);
+                            }).addTo(previewMap._previewLayerGroup || previewMap);
                             allBounds.push(layer.getBounds());
                             console.log(`✓ Successfully rendered local body "${lb.name}"`);
                         } else {
@@ -869,13 +1094,18 @@
             }
 
             let totalWards = 0;
-            currentAC.mandals.forEach(mandal => mandal.local_bodies.forEach(lb => totalWards += lb.wards.length));
+            currentAC.mandals.forEach(mandal => {
+                ensureMandalLocalBodies(mandal).forEach(lb => {
+                    if (lb.wards) totalWards += lb.wards.length;
+                });
+            });
             const wardColors = getVibrantColors(totalWards);
             let wardIndex = 0;
+            allWardsData = [];
             
             currentAC.mandals.forEach(mandal => {
                 console.log(`Processing mandal: ${mandal.name}`);
-                mandal.local_bodies.forEach(lb => {
+                ensureMandalLocalBodies(mandal).forEach(lb => {
                     console.log(`  Local Body: ${lb.name} | Has wards: ${!!lb.wards} | Ward count: ${lb.wards?.length || 0}`);
                     if (lb.wards) {
                         lb.wards.forEach(ward => {
@@ -892,6 +1122,12 @@
                                 <span>${lb.name} | ${mandal.name}</span>
                             `;
                             dataGrid.appendChild(div);
+                            allWardsData.push({
+                                name: wardName,
+                                lb: lb.name,
+                                mandal: mandal.name,
+                                color
+                            });
                         });
                     }
                 });
@@ -902,7 +1138,7 @@
                 let allBounds = [];
                 wardIndex = 0;
                 currentAC.mandals.forEach(mandal => {
-                    mandal.local_bodies.forEach(lb => {
+                    ensureMandalLocalBodies(mandal).forEach(lb => {
                         if (lb.wards) {
                             lb.wards.forEach(ward => {
                                 const color = wardColors[wardIndex % wardColors.length];
@@ -918,7 +1154,7 @@
                                             weight: 3,
                                             opacity: 1
                                         }
-                                    }).addTo(previewMap);
+                                    }).addTo(previewMap._previewLayerGroup || previewMap);
                                     allBounds.push(layer.getBounds());
                                     console.log(`✓ Successfully rendered ward "${wardName}"`);
                                 } else {
@@ -969,7 +1205,7 @@
                 tableData = currentAC.mandals.map(mandal => [
                     { content: '', styles: { cellWidth: 15 } },
                     mandal.name,
-                    mandal.local_bodies.length + ' Local Bodies'
+                    ensureMandalLocalBodies(mandal).length + ' Local Bodies'
                 ]);
                 pdf.autoTable({
                     head: [['Color', 'Mandal', 'Local Bodies']],
@@ -980,7 +1216,8 @@
                     didDrawCell: (data) => {
                         if (data.column.index === 0 && data.row.section === 'body') {
                             const mandal = currentAC.mandals[data.row.index];
-                            pdf.setFillColor(mandal.color);
+                            const fillColor = mandal?.previewColor || '#cccccc';
+                            pdf.setFillColor(fillColor);
                             pdf.rect(data.cell.x + 2, data.cell.y + 2, data.cell.width - 4, data.cell.height - 4, 'F');
                         }
                     }
@@ -1001,7 +1238,7 @@
                     didDrawCell: (data) => {
                         if (data.column.index === 0 && data.row.section === 'body') {
                             const lb = allLocalBodiesData[data.row.index];
-                            pdf.setFillColor(lb.color);
+                            pdf.setFillColor(lb.color || '#cccccc');
                             pdf.rect(data.cell.x + 2, data.cell.y + 2, data.cell.width - 4, data.cell.height - 4, 'F');
                         }
                     }

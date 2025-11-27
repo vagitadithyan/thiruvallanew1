@@ -267,19 +267,28 @@
         
         .preview-controls {
             display: flex;
-            gap: 15px;
-            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: stretch;
+            justify-content: center;
         }
         
-        .preview-controls select {
-            padding: 8px 15px;
+        .preview-controls select,
+        .preview-controls button {
+            min-width: 170px;
+            height: 44px;
             border: 2px solid white;
-            border-radius: 6px;
+            border-radius: 8px;
             background: rgba(255, 255, 255, 0.2);
             color: white;
             font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
             outline: none;
+        }
+        
+        .preview-controls select {
+            padding: 0 15px;
         }
         
         .preview-controls select option {
@@ -288,14 +297,10 @@
         }
         
         .preview-controls button {
-            padding: 8px 20px;
-            border: 2px solid white;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s ease;
         }
         
@@ -453,7 +458,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        let map, config, currentDistrict;
+        let map, currentDistrict;
         
         // Get district from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -732,6 +737,28 @@
         let allLocalBodiesData = [];
         let allWardsData = [];
 
+        function toMultiPolygon(geometries) {
+            if (!geometries || geometries.length === 0) return null;
+            const coordinates = geometries.map(g => {
+                if (!g || !g.type) return null;
+                if (g.type === 'Polygon') return [g.coordinates];
+                if (g.type === 'MultiPolygon') return g.coordinates;
+                return null;
+            }).filter(Boolean).flat();
+            if (!coordinates.length) return null;
+            return { type: 'MultiPolygon', coordinates };
+        }
+
+        function getLocalBodyGeometry(lb) {
+            if (!lb) return null;
+            if (lb.geometry) return lb.geometry;
+            if (lb.wards && lb.wards.length > 0) {
+                const wardGeoms = lb.wards.map(w => w.geometry).filter(Boolean);
+                return toMultiPolygon(wardGeoms);
+            }
+            return null;
+        }
+
         function showPreview() {
             const modal = document.getElementById('previewModal');
             modal.classList.add('active');
@@ -773,12 +800,21 @@
             const level = document.getElementById('boundaryLevel').value;
             
             if (previewMap) {
-                previewMap.eachLayer(layer => {
-                    if (layer instanceof L.GeoJSON) {
-                        previewMap.removeLayer(layer);
-                    }
-                });
+                if (previewMap._previewLayerGroup) {
+                    previewMap._previewLayerGroup.clearLayers();
+                } else {
+                    previewMap.eachLayer(layer => {
+                        if (layer instanceof L.GeoJSON) {
+                            previewMap.removeLayer(layer);
+                        }
+                    });
+                }
             }
+
+            // Reset cached preview data to avoid stale tables
+            allACsData = [];
+            allLocalBodiesData = [];
+            allWardsData = [];
 
             if (level === 'district') {
                 renderPreviewDistrict();
@@ -847,6 +883,7 @@
         function renderPreviewACs() {
             const dataGrid = document.getElementById('previewDataGrid');
             dataGrid.innerHTML = '';
+            allACsData = [];
             
             // Use already loaded district data
             if (!currentDistrict || !currentDistrict.acs) {
@@ -882,6 +919,12 @@
                     <span>${totalMandals} Mandals, ${totalLBs} LBs, ${totalWards} Wards</span>
                 `;
                 dataGrid.appendChild(div);
+
+                allACsData.push({
+                    name: ac.name,
+                    color,
+                    data: ac
+                });
             });
 
             // Render ACs on map with proper bounds - WITH GEOMETRY AGGREGATION
@@ -942,7 +985,7 @@
                                 color: '#ffffff',
                                 fillOpacity: 0.85
                             }
-                        }).addTo(previewMap);
+                        }).addTo(previewMap._previewLayerGroup);
                         allBounds.push(layer.getBounds());
                     }
                 });
@@ -956,6 +999,7 @@
         function renderPreviewLocalBodies() {
             const dataGrid = document.getElementById('previewDataGrid');
             dataGrid.innerHTML = '';
+            allLocalBodiesData = [];
             
             if (!currentDistrict || !currentDistrict.acs) {
                 dataGrid.innerHTML = '<div class="data-item"><span>No data available</span></div>';
@@ -963,9 +1007,16 @@
             }
 
             let totalLBs = 0;
-            currentDistrict.acs.forEach(ac => ac.mandals.forEach(mandal => totalLBs += mandal.local_bodies.length));
+            currentDistrict.acs.forEach(ac => {
+                if (!ac.mandals) return;
+                ac.mandals.forEach(mandal => {
+                    if (!mandal.local_bodies) return;
+                    totalLBs += mandal.local_bodies.length;
+                });
+            });
             const lbColors = getVibrantColors(totalLBs);
             let lbIndex = 0;
+            const lbPreviewItems = [];
             
             currentDistrict.acs.forEach(ac => {
                 if (ac.mandals) {
@@ -975,6 +1026,11 @@
                                 const color = lbColors[lbIndex % lbColors.length];
                                 lbIndex++;
                                 
+                                lbPreviewItems.push({
+                                    color,
+                                    geometry: getLocalBodyGeometry(lb)
+                                });
+                                
                                 const div = document.createElement('div');
                                 div.className = 'data-item';
                                 div.innerHTML = `
@@ -983,33 +1039,48 @@
                                     <span>${mandal.name} | ${ac.name}</span>
                                 `;
                                 dataGrid.appendChild(div);
+
+                                allLocalBodiesData.push({
+                                    name: lb.name,
+                                    mandal: mandal.name,
+                                    ac: ac.name,
+                                    color
+                                });
                             });
                         }
                     });
                 }
             });
 
-            // Show district boundary for context (guard config)
-            if (previewMap && typeof config !== 'undefined' && config && config.geojson) {
-                const districtLayer = L.geoJSON(config.geojson, {
-                    style: {
-                        fillColor: 'transparent',
-                        weight: 2,
-                        opacity: 0.6,
-                        color: '#2c3e50',
-                        fillOpacity: 0
-                    }
+            if (previewMap) {
+                const target = previewMap._previewLayerGroup || previewMap;
+                const bounds = [];
+                
+                lbPreviewItems.forEach(item => {
+                    if (!item.geometry) return;
+                    const layer = L.geoJSON(item.geometry, {
+                        style: {
+                            fillColor: item.color,
+                            weight: 2,
+                            color: '#ffffff',
+                            opacity: 1,
+                            fillOpacity: 0.85
+                        }
+                    }).addTo(target);
+                    bounds.push(layer.getBounds());
                 });
-                previewMap._previewLayerGroup.addLayer(districtLayer);
-                previewMap.fitBounds(districtLayer.getBounds(), { padding: [20, 20] });
-            } else {
-                console.warn('No config.geojson available for district preview');
+                
+                if (bounds.length) {
+                    const group = L.featureGroup(bounds.map(b => L.rectangle(b)));
+                    previewMap.fitBounds(group.getBounds(), { padding: [20, 20] });
+                }
             }
         }
 
         function renderPreviewWards() {
             const dataGrid = document.getElementById('previewDataGrid');
             dataGrid.innerHTML = '';
+            allWardsData = [];
             
             if (!currentDistrict || !currentDistrict.acs) {
                 dataGrid.innerHTML = '<div class="data-item"><span>No data available</span></div>';
@@ -1017,9 +1088,19 @@
             }
 
             let totalWards = 0;
-            currentDistrict.acs.forEach(ac => ac.mandals.forEach(mandal => mandal.local_bodies.forEach(lb => totalWards += lb.wards.length)));
+            currentDistrict.acs.forEach(ac => {
+                if (!ac.mandals) return;
+                ac.mandals.forEach(mandal => {
+                    if (!mandal.local_bodies) return;
+                    mandal.local_bodies.forEach(lb => {
+                        if (!lb.wards) return;
+                        totalWards += lb.wards.length;
+                    });
+                });
+            });
             const wardColors = getVibrantColors(totalWards);
             let wardIndex = 0;
+            const wardPreviewItems = [];
             
             currentDistrict.acs.forEach(ac => {
                 if (ac.mandals) {
@@ -1031,6 +1112,11 @@
                                         const color = wardColors[wardIndex % wardColors.length];
                                         wardIndex++;
                                         
+                                            wardPreviewItems.push({
+                                                color,
+                                                geometry: ward.geometry
+                                            });
+                                            
                                         const div = document.createElement('div');
                                         div.className = 'data-item';
                                         div.innerHTML = `
@@ -1039,6 +1125,13 @@
                                             <span>${lb.name} | ${mandal.name}</span>
                                         `;
                                         dataGrid.appendChild(div);
+
+                                        allWardsData.push({
+                                            name: ward.ward_name || ward.name || `Ward ${wardIndex}`,
+                                            lb: lb.name,
+                                            mandal: mandal.name,
+                                            color
+                                        });
                                     });
                                 }
                             });
@@ -1047,21 +1140,28 @@
                 }
             });
 
-            // Show district boundary for context (guard config)
-            if (previewMap && typeof config !== 'undefined' && config && config.geojson) {
-                const districtLayer = L.geoJSON(config.geojson, {
-                    style: {
-                        fillColor: 'transparent',
-                        weight: 2,
-                        opacity: 0.6,
-                        color: '#2c3e50',
-                        fillOpacity: 0
-                    }
+            if (previewMap) {
+                const target = previewMap._previewLayerGroup || previewMap;
+                const bounds = [];
+                
+                wardPreviewItems.forEach(item => {
+                    if (!item.geometry) return;
+                    const layer = L.geoJSON(item.geometry, {
+                        style: {
+                            fillColor: item.color,
+                            weight: 1,
+                            color: '#ffffff',
+                            opacity: 0.9,
+                            fillOpacity: 0.85
+                        }
+                    }).addTo(target);
+                    bounds.push(layer.getBounds());
                 });
-                previewMap._previewLayerGroup.addLayer(districtLayer);
-                previewMap.fitBounds(districtLayer.getBounds(), { padding: [20, 20] });
-            } else {
-                console.warn('No config.geojson available for district preview');
+                
+                if (bounds.length) {
+                    const group = L.featureGroup(bounds.map(b => L.rectangle(b)));
+                    previewMap.fitBounds(group.getBounds(), { padding: [20, 20] });
+                }
             }
         }
 
@@ -1083,8 +1183,9 @@
             let title = '';
 
             if (level === 'district') {
+                const acCount = currentDistrict?.acs?.length || 0;
                 title = `District: ${districtNames[districtId] || districtId}`;
-                tableData = [[districtNames[districtId] || districtId, config.assemblies.length + ' ACs']];
+                tableData = [[districtNames[districtId] || districtId, `${acCount} ACs`]];
                 pdf.autoTable({
                     head: [['District', 'Assembly Constituencies']],
                     body: tableData,

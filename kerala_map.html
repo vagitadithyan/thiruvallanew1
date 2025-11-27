@@ -565,6 +565,13 @@
         let allLSGDsData = [];
         let allWardsData = [];
         let currentPreviewLayer = null;
+        let corporationMandalsData = null;
+        let corporationMandalsByAC = {};
+        let kovalamCorporationGeoJSON = null;
+
+        function cleanId(text = '') {
+            return text.toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
 
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -602,6 +609,144 @@
             'kannur': 'Kannur',
             'kasaragod': 'Kasaragod'
         };
+        
+        async function loadCorporationMandalsData() {
+            if (corporationMandalsData) {
+                return corporationMandalsData;
+            }
+            try {
+                const response = await fetch('data/corporation_mandals.json');
+                if (!response.ok) {
+                    console.warn('Corporation mandals file missing');
+                    corporationMandalsData = { features: [] };
+                    corporationMandalsByAC = {};
+                    return corporationMandalsData;
+                }
+                corporationMandalsData = await response.json();
+                corporationMandalsByAC = {};
+                (corporationMandalsData.features || []).forEach(feature => {
+                    const acKey = feature?.properties?.ac_id;
+                    if (!acKey) return;
+                    if (!corporationMandalsByAC[acKey]) {
+                        corporationMandalsByAC[acKey] = [];
+                    }
+                    corporationMandalsByAC[acKey].push(feature);
+                });
+            } catch (error) {
+                console.warn('Unable to load corporation mandals data', error);
+                corporationMandalsData = { features: [] };
+                corporationMandalsByAC = {};
+            }
+            return corporationMandalsData;
+        }
+        
+        async function loadKovalamCorporationData() {
+            if (kovalamCorporationGeoJSON) {
+                return kovalamCorporationGeoJSON;
+            }
+            try {
+                const response = await fetch('data/thiruvananthapuram_south/kovalam/kovalam/tvm_corporation_kovalam.geojson');
+                if (!response.ok) {
+                    kovalamCorporationGeoJSON = null;
+                    return null;
+                }
+                kovalamCorporationGeoJSON = await response.json();
+            } catch (error) {
+                console.warn('Unable to load TVM Corporation (Kovalam) data', error);
+                kovalamCorporationGeoJSON = null;
+            }
+            return kovalamCorporationGeoJSON;
+        }
+        
+        async function enhanceDistrictData(districtData) {
+            const acs = districtData.assembly_constituencies || districtData.acs || [];
+            if (!Array.isArray(acs) || !acs.length) return;
+            await applyCorporationMandalsToACs(acs);
+            await injectKovalamCorporationSlice(acs);
+        }
+        
+        async function applyCorporationMandalsToACs(acs) {
+            await loadCorporationMandalsData();
+            acs.forEach(ac => {
+                const acKey = cleanId(ac.name);
+                const corpFeatures = corporationMandalsByAC[acKey];
+                if (!corpFeatures || !corpFeatures.length) return;
+                
+                ac.mandals = ac.mandals || [];
+                corpFeatures.forEach(feature => {
+                    const props = feature.properties || {};
+                    const mandalKey = cleanId(props.mandal_id || props.mandal_name || props.corporation_name || '');
+                    if (!mandalKey) return;
+                    
+                    let mandal = ac.mandals.find(m => cleanId(m.name) === mandalKey);
+                    if (!mandal) {
+                        mandal = {
+                            name: props.mandal_name || props.corporation_name || 'Corporation Mandal',
+                            local_bodies: []
+                        };
+                        ac.mandals.push(mandal);
+                    }
+                    
+                    mandal.geometry = {
+                        type: 'Feature',
+                        properties: {
+                            source: 'corporation_mandal',
+                            corporation_name: props.corporation_name || mandal.name
+                        },
+                        geometry: feature.geometry
+                    };
+                    mandal.isCorporationMandal = true;
+                });
+            });
+        }
+        
+        async function injectKovalamCorporationSlice(acs) {
+            const kovalamAC = acs.find(ac => cleanId(ac.name) === 'kovalam');
+            if (!kovalamAC) return;
+            kovalamAC.mandals = kovalamAC.mandals || [];
+            const kovalamMandal = kovalamAC.mandals.find(m => cleanId(m.name) === 'kovalam');
+            if (!kovalamMandal) return;
+            kovalamMandal.local_bodies = kovalamMandal.local_bodies || [];
+            const exists = kovalamMandal.local_bodies.some(lb => cleanId(lb.name) === 'tvm_corporation_kovalam');
+            if (exists) return;
+            
+            const geojson = await loadKovalamCorporationData();
+            if (!geojson || !geojson.features || !geojson.features.length) return;
+            
+            const wards = geojson.features.map((feature, index) => ({
+                ward_number: feature?.properties?.ward_number || feature?.properties?.Ward_No || `${index + 1}`,
+                ward_name: feature?.properties?.ward_name || feature?.properties?.Ward_Name || `Ward ${index + 1}`,
+                geometry: feature.geometry
+            }));
+            
+            const lbGeometry = {
+                type: 'FeatureCollection',
+                features: geojson.features.map(feature => ({
+                    type: 'Feature',
+                    properties: feature.properties,
+                    geometry: feature.geometry
+                }))
+            };
+            
+            kovalamMandal.local_bodies.push({
+                name: 'TVM Corporation (Kovalam)',
+                id: 'tvm_corporation_kovalam',
+                code: 'C01001',
+                type: 'C',
+                wards,
+                geometry: lbGeometry
+            });
+        }
+        
+        async function fetchEnhancedDistrictData(districtId) {
+            const response = await fetch(`data/14_districts/${districtId}.json`);
+            if (!response.ok) {
+                throw new Error(`Failed to load data for ${districtId}`);
+            }
+            const data = await response.json();
+            await enhanceDistrictData(data);
+            return data;
+        }
         
         // Initialize map WITHOUT background tiles
         map = L.map('map', {
@@ -893,8 +1038,7 @@
                         select.appendChild(option);
                     });
                 } else {
-                    const response = await fetch(`data/14_districts/${districtId}.json`);
-                    const data = await response.json();
+                    const data = await fetchEnhancedDistrictData(districtId);
                     const acs = data.assembly_constituencies || data.acs || [];
                     select.innerHTML = '<option value="all">All ACs</option>';
                     acs.forEach(ac => {
@@ -1059,8 +1203,7 @@
             const districtIds = Object.keys(districtNames);
             for (const districtId of districtIds) {
                 try {
-                    const response = await fetch(`data/14_districts/${districtId}.json`);
-                    const data = await response.json();
+                    const data = await fetchEnhancedDistrictData(districtId);
                     const acs = data.assembly_constituencies || data.acs || [];
                     acs.forEach(ac => {
                         if (ac.geometry) {
@@ -1083,8 +1226,7 @@
             const districtIds = Object.keys(districtNames);
             for (const districtId of districtIds) {
                 try {
-                    const response = await fetch(`data/14_districts/${districtId}.json`);
-                    const data = await response.json();
+                    const data = await fetchEnhancedDistrictData(districtId);
                     const acs = data.assembly_constituencies || data.acs || [];
                     acs.forEach(ac => {
                         if (ac.mandals) {
@@ -1112,8 +1254,7 @@
             const districtIds = Object.keys(districtNames);
             for (const districtId of districtIds) {
                 try {
-                    const response = await fetch(`data/14_districts/${districtId}.json`);
-                    const data = await response.json();
+                    const data = await fetchEnhancedDistrictData(districtId);
                     const acs = data.assembly_constituencies || data.acs || [];
                     acs.forEach(ac => {
                         if (ac.mandals) {
@@ -1177,8 +1318,7 @@
             const districtIds = Object.keys(districtNames);
             for (const districtId of districtIds) {
                 try {
-                    const response = await fetch(`data/14_districts/${districtId}.json`);
-                    const data = await response.json();
+                    const data = await fetchEnhancedDistrictData(districtId);
                     const acs = data.assembly_constituencies || data.acs || [];
                     acs.forEach(ac => {
                         if (ac.mandals) {

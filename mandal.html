@@ -239,20 +239,29 @@
         
         .preview-controls {
             display: flex;
-            gap: 15px;
-            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: stretch;
+            justify-content: center;
             position: relative;
             z-index: 1001;
         }
         
+        .preview-controls select,
+        .preview-controls button {
+            min-width: 180px;
+            height: 48px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
         .preview-controls select {
-            padding: 8px 15px;
+            padding: 0 18px;
             border: 2px solid white;
-            border-radius: 6px;
             background: white;
             color: #333;
-            font-size: 14px;
-            cursor: pointer;
             outline: none;
             appearance: auto;
             -webkit-appearance: menulist;
@@ -297,16 +306,27 @@
         }
         
         .preview-controls button {
-            padding: 10px 24px;
+            padding: 0 24px;
             border: 2px solid white;
-            border-radius: 6px;
             background: white;
             color: #667eea;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .preview-controls .download-action {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+        }
+
+        .preview-controls .download-action:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.45);
         }
         
         .preview-controls button:hover {
@@ -338,35 +358,7 @@
         }
         
         .preview-download-section {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .download-center-btn {
-            padding: 15px 40px;
-            border: 3px solid white;
-            border-radius: 10px;
-            background: white;
-            color: #667eea;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .download-center-btn:hover {
-            background: #667eea;
-            color: white;
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            display: none;
         }
         
         .preview-body {
@@ -692,6 +684,47 @@
     <script>
     let map, currentMandal, currentAC;
     let currentDistrictName = '';
+    let corpMandalsCache = null;
+    let kovalamCorpCache = null;
+
+    function toMultiPolygon(geometries) {
+        if (!geometries || !geometries.length) return null;
+        const coordinates = geometries.map(geom => {
+            if (!geom) return null;
+            if (geom.type === 'Polygon') return [geom.coordinates];
+            if (geom.type === 'MultiPolygon') return geom.coordinates;
+            if (geom.type === 'Feature') {
+                return geom.geometry ? (geom.geometry.type === 'Polygon' ? [geom.geometry.coordinates] : geom.geometry.coordinates) : null;
+            }
+            return null;
+        }).filter(Boolean).flat();
+        if (!coordinates.length) return null;
+        return { type: 'MultiPolygon', coordinates };
+    }
+
+    function getLocalBodyGeometry(lb) {
+        if (!lb) return null;
+        if (lb.geometry) {
+            if (lb.geometry.type) return lb.geometry;
+            if (lb.geometry.features) {
+                return { type: 'FeatureCollection', features: lb.geometry.features };
+            }
+        }
+        if (lb.wards && lb.wards.length) {
+            const wardGeoms = lb.wards.map(w => w.geometry).filter(Boolean);
+            if (wardGeoms.length) return toMultiPolygon(wardGeoms);
+        }
+        return null;
+    }
+
+    function getMandalLocalBodies() {
+        if (!currentMandal) return [];
+        if (Array.isArray(currentMandal.local_bodies) && currentMandal.local_bodies.length) return currentMandal.local_bodies;
+        if (Array.isArray(currentMandal.localBodies) && currentMandal.localBodies.length) return currentMandal.localBodies;
+        if (Array.isArray(currentMandal.local_bodies)) return currentMandal.local_bodies;
+        if (Array.isArray(currentMandal.localBodies)) return currentMandal.localBodies;
+        return [];
+    }
         
         // Vibrant color palette for distinct polygon colors
         const vibrantColors = [
@@ -732,6 +765,74 @@
             return name.toLowerCase().replace(/[^a-z0-9]/g, '');
         }
         
+        async function loadCorporationMandalsData() {
+            if (corpMandalsCache) {
+                return corpMandalsCache;
+            }
+            try {
+                const response = await fetch('data/corporation_mandals.json');
+                if (!response.ok) {
+                    corpMandalsCache = { features: [] };
+                    return corpMandalsCache;
+                }
+                corpMandalsCache = await response.json();
+            } catch (error) {
+                console.warn('Unable to load corporation mandals data', error);
+                corpMandalsCache = { features: [] };
+            }
+            return corpMandalsCache;
+        }
+
+        async function getCorporationMandalFeature(districtId, acId, mandalId) {
+            const data = await loadCorporationMandalsData();
+            const targetDistrict = cleanId(districtId || '');
+            const targetAc = cleanId(acId || '');
+            const targetMandal = cleanId(mandalId || '');
+            return (data.features || []).find(feature => {
+                const props = feature.properties || {};
+                return cleanId(props.district_id || '') === targetDistrict &&
+                       cleanId(props.ac_id || '') === targetAc &&
+                       cleanId(props.mandal_id || props.mandal_name || '') === targetMandal;
+            });
+        }
+
+        function buildCorporationMandal(feature) {
+            const props = feature.properties || {};
+            const wardFeatures = (props.ward_features || []).map(ward => ({
+                type: 'Feature',
+                properties: {
+                    ward_number: ward?.properties?.ward_number || ward?.ward_number,
+                    ward_name: ward?.properties?.ward_name || ward?.ward_name
+                },
+                geometry: ward.geometry
+            }));
+
+            const lbId = `corp_${props.mandal_id || cleanId(props.mandal_name || '')}`;
+            const syntheticLB = {
+                id: lbId,
+                name: props.mandal_name || props.corporation_name,
+                type: 'Corporation Mandal',
+                code: props.corporation_id || '',
+                wards: wardFeatures.map(ward => ({
+                    ward_number: ward.properties?.ward_number,
+                    ward_name: ward.properties?.ward_name,
+                    geometry: ward.geometry
+                })),
+                geometry: {
+                    type: 'FeatureCollection',
+                    features: wardFeatures
+                }
+            };
+
+            return {
+                name: props.mandal_name || props.corporation_name,
+                id: props.mandal_id,
+                isCorporationMandal: true,
+                geometry: feature,
+                local_bodies: [syntheticLB]
+            };
+        }
+
         async function init() {
             try {
                 // Load consolidated 14-district data
@@ -750,13 +851,20 @@
                     return;
                 }
                 
+                await ensureKovalamCorporationSlice(currentAC);
+                
                 // Find Mandal
                 currentMandal = currentAC.mandals.find(m => cleanId(m.name) === mandalId);
                 if (!currentMandal) {
-                    alert('Mandal not found!');
-                    console.log('Looking for:', mandalId);
-                    console.log('Available:', currentAC.mandals.map(m => cleanId(m.name)));
-                    return;
+                    const corpFeature = await getCorporationMandalFeature(districtId, acId, mandalId);
+                    if (corpFeature) {
+                        currentMandal = buildCorporationMandal(corpFeature);
+                    } else {
+                        alert('Mandal not found!');
+                        console.log('Looking for:', mandalId);
+                        console.log('Available:', currentAC.mandals.map(m => cleanId(m.name)));
+                        return;
+                    }
                 }
                 
                 // Update header
@@ -777,16 +885,26 @@
                 currentDistrictName = districtData.name || districtId;
                 
                 // Update info
+                if (!currentMandal.local_bodies && currentMandal.localBodies) {
+                    currentMandal.local_bodies = currentMandal.localBodies;
+                } else if (!currentMandal.localBodies && currentMandal.local_bodies) {
+                    currentMandal.localBodies = currentMandal.local_bodies;
+                } else if (!currentMandal.local_bodies && !currentMandal.localBodies) {
+                    currentMandal.local_bodies = [];
+                    currentMandal.localBodies = currentMandal.local_bodies;
+                }
+                const mandalLocalBodies = getMandalLocalBodies();
+
                 let totalWards = 0;
-                currentMandal.local_bodies.forEach(lb => {
-                    totalWards += lb.wards.length;
+                mandalLocalBodies.forEach(lb => {
+                    totalWards += lb.wards ? lb.wards.length : 0;
                 });
                 
-                document.getElementById('totalLBs').textContent = currentMandal.local_bodies.length;
+                document.getElementById('totalLBs').textContent = mandalLocalBodies.length;
                 document.getElementById('totalWards').textContent = totalWards;
                 
                 // Render LB list
-                renderLBList(currentMandal.local_bodies);
+                renderLBList(mandalLocalBodies);
                 
                 // Load local body boundaries
                 await loadLocalBodyBoundaries();
@@ -795,6 +913,67 @@
                 console.error('Error:', error);
                 alert('Error loading mandal data.');
             }
+        }
+
+        async function loadKovalamCorpData() {
+            if (kovalamCorpCache !== null) {
+                return kovalamCorpCache;
+            }
+            try {
+                const response = await fetch('data/thiruvananthapuram_south/kovalam/kovalam/tvm_corporation_kovalam.geojson');
+                if (!response.ok) {
+                    kovalamCorpCache = null;
+                    return null;
+                }
+                kovalamCorpCache = await response.json();
+            } catch (error) {
+                console.warn('Unable to load TVM Corporation (Kovalam) data', error);
+                kovalamCorpCache = null;
+            }
+            return kovalamCorpCache;
+        }
+
+        async function ensureKovalamCorporationSlice(acReference) {
+            if (!(districtId === 'thiruvananthapuram_south' && acId === 'kovalam')) {
+                return;
+            }
+            if (!acReference) return;
+            
+            const mandal = acReference.mandals.find(m => cleanId(m.name) === 'kovalam');
+            if (!mandal) return;
+            
+            const exists = mandal.local_bodies.some(lb => cleanId(lb.name) === 'tvm_corporation_kovalam');
+            if (exists) return;
+            
+            const geojson = await loadKovalamCorpData();
+            if (!geojson) return;
+            
+            const wards = (geojson.features || []).map((feature, index) => ({
+                ward_number: feature?.properties?.ward_number || feature?.properties?.Ward_No || `${index + 1}`,
+                ward_name: feature?.properties?.ward_name || feature?.properties?.Ward_Name || `Ward ${index + 1}`,
+                geometry: feature.geometry
+            }));
+            
+            const lbGeometry = {
+                type: 'FeatureCollection',
+                features: (geojson.features || []).map(feature => ({
+                    type: 'Feature',
+                    properties: {
+                        ward_number: feature?.properties?.ward_number || feature?.properties?.Ward_No || '',
+                        ward_name: feature?.properties?.ward_name || feature?.properties?.Ward_Name || ''
+                    },
+                    geometry: feature.geometry
+                }))
+            };
+            
+            mandal.local_bodies.push({
+                name: 'TVM Corporation (Kovalam)',
+                id: 'tvm_corporation_kovalam',
+                code: 'C01001',
+                type: 'C',
+                wards,
+                geometry: lbGeometry
+            });
         }
         
         function renderLBList(localBodies) {
@@ -813,7 +992,8 @@
                 `;
                 
                 item.addEventListener('click', function() {
-                    window.location.href = `localbody.html?district=${districtId}&ac=${acId}&mandal=${mandalId}&lb=${cleanId(lb.name)}`;
+                    const lbParam = lb.id ? encodeURIComponent(lb.id) : cleanId(lb.name);
+                    window.location.href = `localbody.html?district=${districtId}&ac=${acId}&mandal=${mandalId}&lb=${lbParam}`;
                 });
                 
                 list.appendChild(item);
@@ -822,15 +1002,18 @@
         
         async function loadLocalBodyBoundaries() {
             try {
-                const lbColors = getVibrantColors(currentMandal.local_bodies.length);
+                const localBodies = getMandalLocalBodies();
+                const lbColors = getVibrantColors(localBodies.length);
                 
                 let allBounds = [];
                 
-                currentMandal.local_bodies.forEach((lb, index) => {
-                    if (!lb.geometry) return;
+                localBodies.forEach((lb, index) => {
+                    const geometry = getLocalBodyGeometry(lb);
+                    if (!geometry) return;
+                    if (!lb.geometry) lb.geometry = geometry;
                     
                     const color = lbColors[index % lbColors.length];
-                    const layer = L.geoJSON(lb.geometry, {
+                    const layer = L.geoJSON(geometry, {
                         style: {
                             fillColor: color,
                             fillOpacity: 0.5,
@@ -897,12 +1080,15 @@
         function renderPreviewWards() {
             const dataGrid = document.getElementById('previewDataGrid');
             dataGrid.innerHTML = '';
-            if (!currentMandal || !currentMandal.local_bodies) {
+            const localBodies = getMandalLocalBodies();
+            if (!localBodies.length) {
                 dataGrid.innerHTML = '<div class="data-item"><span>No data available</span></div>';
                 return;
             }
             let totalWards = 0;
-            currentMandal.local_bodies.forEach(lb => totalWards += lb.wards.length);
+            localBodies.forEach(lb => {
+                if (lb.wards) totalWards += lb.wards.length;
+            });
             const wardColors = getVibrantColors(totalWards);
             let wardIndex = 0;
             let allBounds = [];
@@ -910,7 +1096,7 @@
             // To avoid duplicate rendering of fallback geometries
             const renderedLBs = new Set();
             const renderedMandals = new Set();
-            currentMandal.local_bodies.forEach((lb, lbIdx) => {
+            localBodies.forEach((lb, lbIdx) => {
                 if (lb.wards) {
                     lb.wards.forEach((ward, wIdx) => {
                         const color = wardColors[wardIndex % wardColors.length];
@@ -967,6 +1153,10 @@
                             } catch (error) {
                                 console.error('    ❌ Error rendering ward:', ward.ward_name, error);
                             }
+                        }
+                        if (!rendered && previewMap) {
+                            const lbGeometry = getLocalBodyGeometry(lb);
+                            if (lbGeometry && !lb.geometry) lb.geometry = lbGeometry;
                         }
                         if (!rendered && previewMap && lb.geometry && !renderedLBs.has(lbIdx)) {
                             try {
@@ -1057,15 +1247,18 @@
                 
                 let tableData = [];
                 let tableHeaders = [];
-                const lbColors = getVibrantColors(currentMandal.local_bodies.length);
+                const localBodies = getMandalLocalBodies();
+                const lbColors = getVibrantColors(localBodies.length);
                 let totalWards = 0;
-                currentMandal.local_bodies.forEach(lb => totalWards += lb.wards.length);
+                localBodies.forEach(lb => {
+                    if (lb.wards) totalWards += lb.wards.length;
+                });
                 const wardColors = getVibrantColors(totalWards);
                 
                 if (level === 'localbody') {
                     tableHeaders = [['Color', 'Local Body Name', 'Mandal', 'Wards Count']];
                     
-                    currentMandal.local_bodies.forEach((lb, index) => {
+                    localBodies.forEach((lb, index) => {
                         const color = lbColors[index % lbColors.length];
                         const row = [
                             '',
@@ -1081,7 +1274,7 @@
                     tableHeaders = [['Color', 'Ward No', 'Ward Name', 'Local Body', 'Mandal']];
                     
                     let wardIndex = 0;
-                    currentMandal.local_bodies.forEach(lb => {
+                    localBodies.forEach(lb => {
                         if (lb.wards) {
                             lb.wards.forEach(ward => {
                                 const color = wardColors[wardIndex % wardColors.length];
@@ -1103,12 +1296,12 @@
                     // Mandal level
                     tableHeaders = [['Mandal Name', 'Local Bodies', 'Total Wards']];
                     let totalWards = 0;
-                    currentMandal.local_bodies.forEach(lb => {
+                    localBodies.forEach(lb => {
                         if (lb.wards) totalWards += lb.wards.length;
                     });
                     tableData = [[
                         currentMandal.name,
-                        currentMandal.local_bodies.length.toString(),
+                        localBodies.length.toString(),
                         totalWards.toString()
                     ]];
                 }
@@ -1222,8 +1415,6 @@
                     attributionControl: false,
                     preferCanvas: true
                 }).setView([10.8505, 76.2711], 10);
-                
-                // Create layer group for preview
                 previewMap._previewLayerGroup = L.layerGroup().addTo(previewMap);
                 
                 // Wait a bit more for the map container to be fully sized
@@ -1263,6 +1454,7 @@
 
         function renderPreviewMandal() {
             const dataGrid = document.getElementById('previewDataGrid');
+            const localBodies = getMandalLocalBodies();
             dataGrid.innerHTML = `
                 <div class="data-item">
                     <strong>Mandal</strong>
@@ -1270,7 +1462,7 @@
                 </div>
                 <div class="data-item">
                     <strong>Total Local Bodies</strong>
-                    <span>${currentMandal.local_bodies.length}</span>
+                    <span>${localBodies.length}</span>
                 </div>
             `;
 
@@ -1294,16 +1486,21 @@
         function renderPreviewLocalBodies() {
             const dataGrid = document.getElementById('previewDataGrid');
             dataGrid.innerHTML = '';
+            const localBodies = getMandalLocalBodies();
             
-            if (!currentMandal || !currentMandal.local_bodies) {
+            if (!localBodies.length) {
                 dataGrid.innerHTML = '<div class="data-item"><span>No data available</span></div>';
                 return;
             }
 
-            const lbColors = getVibrantColors(currentMandal.local_bodies.length);
+            const lbColors = getVibrantColors(localBodies.length);
+            const lbPreviewItems = [];
             
-            currentMandal.local_bodies.forEach((lb, index) => {
+            localBodies.forEach((lb, index) => {
                 const color = lbColors[index % lbColors.length];
+                const geometry = getLocalBodyGeometry(lb);
+                if (geometry && !lb.geometry) lb.geometry = geometry;
+                lbPreviewItems.push({ color, geometry });
                 
                 const div = document.createElement('div');
                 div.className = 'data-item';
@@ -1316,23 +1513,21 @@
             });
 
             // Render local bodies on map
-            if (previewMap && currentMandal.local_bodies.length > 0) {
-                let allBounds = [];
-                currentMandal.local_bodies.forEach((lb, index) => {
-                    const color = lbColors[index % lbColors.length];
-                    if (lb.geometry) {
-                        const layer = L.geoJSON(lb.geometry, {
-                            style: {
-                                fillColor: color,
-                                fillOpacity: 0.85,
-                                color: '#ffffff',
-                                weight: 3,
-                                opacity: 1
-                            }
-                        });
-                        previewMap._previewLayerGroup.addLayer(layer);
-                        allBounds.push(layer.getBounds());
-                    }
+            if (previewMap) {
+                const allBounds = [];
+                lbPreviewItems.forEach(item => {
+                    if (!item.geometry) return;
+                    const layer = L.geoJSON(item.geometry, {
+                        style: {
+                            fillColor: item.color,
+                            fillOpacity: 0.85,
+                            color: '#ffffff',
+                            weight: 3,
+                            opacity: 1
+                        }
+                    });
+                    previewMap._previewLayerGroup.addLayer(layer);
+                    allBounds.push(layer.getBounds());
                 });
                 if (allBounds.length > 0) {
                     const group = L.featureGroup(allBounds.map(b => L.rectangle(b)));
@@ -1432,10 +1627,11 @@
             }
             
             selector.innerHTML = '<option value="">Select Specific Local Body</option>';
+            const localBodies = getMandalLocalBodies();
             
-            if (currentMandal && currentMandal.localBodies) {
-                console.log('✅ Found', currentMandal.localBodies.length, 'local bodies');
-                currentMandal.localBodies.forEach((lb, index) => {
+            if (localBodies.length) {
+                console.log('✅ Found', localBodies.length, 'local bodies');
+                localBodies.forEach((lb, index) => {
                     const option = document.createElement('option');
                     option.value = index;
                     option.textContent = `${lb.name} (${lb.wards ? lb.wards.length : 0} wards)`;
@@ -1461,7 +1657,8 @@
                 return;
             }
             
-            selectedLocalBodyForPreview = currentMandal.localBodies[selectedIndex];
+            const localBodies = getMandalLocalBodies();
+            selectedLocalBodyForPreview = localBodies[selectedIndex];
             console.log('Selected local body:', selectedLocalBodyForPreview.name);
             currentPreviewLevel = 'specific';
             
@@ -1646,11 +1843,18 @@
         function openLocalBodySelector() {
             console.log('🏢 Opening local body selector modal');
             
-            // Show modal with local body list
-            if (!currentMandal || !currentMandal.local_bodies) {
+            const localBodies = getMandalLocalBodies();
+            if (!localBodies.length) {
                 alert('No local body data available');
                 return;
             }
+            
+            const listMarkup = localBodies.map((lb, index) => `
+                <div onclick="redirectToLocalBody(${index})" style="padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s; background: white;">
+                    <div style="font-weight: 600; font-size: 16px; color: #2c3e50; margin-bottom: 5px;">${lb.name}</div>
+                    <div style="font-size: 13px; color: #7f8c8d;">${lb.wards ? lb.wards.length : 0} wards</div>
+                </div>
+            `).join('');
             
             // Create a selection modal
             const modalHTML = `
@@ -1659,12 +1863,7 @@
                         <h2 style="margin: 0 0 20px 0; color: #667eea; font-size: 24px;">🏢 Select Local Body</h2>
                         <p style="margin-bottom: 20px; color: #666;">Choose a local body to view detailed map with ward boundaries:</p>
                         <div id="lbSelectList" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                            ${currentMandal.local_bodies.map((lb, index) => `
-                                <div onclick="redirectToLocalBody(${index})" style="padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s; background: white;">
-                                    <div style="font-weight: 600; font-size: 16px; color: #2c3e50; margin-bottom: 5px;">${lb.name}</div>
-                                    <div style="font-size: 13px; color: #7f8c8d;">${lb.wards ? lb.wards.length : 0} wards</div>
-                                </div>
-                            `).join('')}
+                            ${listMarkup}
                         </div>
                         <button onclick="closeLBSelectModal()" style="width: 100%; padding: 12px; background: #e0e0e0; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancel</button>
                     </div>
@@ -1732,7 +1931,8 @@
         
         function selectLocalBody(index) {
             console.log('Selected local body index:', index);
-            selectedLBForDownload = currentMandal.localBodies[index];
+            const localBodies = getMandalLocalBodies();
+            selectedLBForDownload = localBodies[index];
             
             // Update active state
             document.querySelectorAll('.lb-item').forEach((item, idx) => {
@@ -1788,6 +1988,9 @@
             });
             
             // Add local body boundary
+            if (!selectedLBForDownload.geometry) {
+                selectedLBForDownload.geometry = getLocalBodyGeometry(selectedLBForDownload);
+            }
             if (selectedLBForDownload.geometry) {
                 const lbLayer = L.geoJSON(selectedLBForDownload.geometry, {
                     style: {
@@ -1978,12 +2181,10 @@
                         <option value="localbody" selected>Local Bodies</option>
                         <option value="ward">Wards</option>
                     </select>
+                    <button class="download-action" onclick="downloadPreviewPDF()">📥 Download PDF</button>
                     <button onclick="openLocalBodySelector()">🏢 Select Local Body</button>
                 </div>
                 <button class="preview-close" onclick="closePreview()">×</button>
-            </div>
-            <div class="preview-download-section">
-                <button class="download-center-btn" onclick="downloadPreviewPDF()">📥 Download PDF</button>
             </div>
             <div class="preview-body">
                 <div class="preview-map" id="previewMap"></div>

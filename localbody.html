@@ -244,19 +244,28 @@
         
         .preview-controls {
             display: flex;
-            gap: 15px;
-            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: stretch;
+            justify-content: center;
         }
         
-        .preview-controls select {
-            padding: 8px 15px;
+        .preview-controls select,
+        .preview-controls button {
+            min-width: 170px;
+            height: 44px;
             border: 2px solid white;
-            border-radius: 6px;
+            border-radius: 8px;
             background: rgba(255, 255, 255, 0.2);
             color: white;
             font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
             outline: none;
+        }
+        
+        .preview-controls select {
+            padding: 0 15px;
         }
         
         .preview-controls select option {
@@ -265,14 +274,10 @@
         }
         
         .preview-controls button {
-            padding: 8px 20px;
-            border: 2px solid white;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s ease;
         }
         
@@ -430,7 +435,9 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        let map, currentLB, wardLayers = {};
+        let map, currentMandal, currentLB, wardLayers = {};
+        let corpMandalsCache = null;
+        let kovalamCorpCache = null;
         
         const urlParams = new URLSearchParams(window.location.search);
         const districtId = urlParams.get('district');
@@ -474,6 +481,64 @@
             return name.toLowerCase().replace(/[^a-z0-9]/g, '');
         }
         
+        async function loadCorporationMandalsData() {
+            if (corpMandalsCache) return corpMandalsCache;
+            try {
+                const response = await fetch('data/corporation_mandals.json');
+                if (!response.ok) {
+                    corpMandalsCache = { features: [] };
+                    return corpMandalsCache;
+                }
+                corpMandalsCache = await response.json();
+            } catch (error) {
+                console.warn('Unable to load corporation mandals data', error);
+                corpMandalsCache = { features: [] };
+            }
+            return corpMandalsCache;
+        }
+
+        async function getCorporationMandalFeature(districtId, acId, mandalId) {
+            const data = await loadCorporationMandalsData();
+            const targetDistrict = cleanId(districtId || '');
+            const targetAc = cleanId(acId || '');
+            const targetMandal = cleanId(mandalId || '');
+            return (data.features || []).find(feature => {
+                const props = feature.properties || {};
+                return cleanId(props.district_id || '') === targetDistrict &&
+                       cleanId(props.ac_id || '') === targetAc &&
+                       cleanId(props.mandal_id || props.mandal_name || '') === targetMandal;
+            });
+        }
+
+        function buildSyntheticMandal(feature) {
+            const props = feature.properties || {};
+            const wardFeatures = (props.ward_features || []).map(ward => ({
+                ward_number: ward?.properties?.ward_number || ward?.ward_number,
+                ward_name: ward?.properties?.ward_name || ward?.ward_name,
+                geometry: ward.geometry
+            }));
+            const lbId = `corp_${props.mandal_id || cleanId(props.mandal_name || '')}`;
+            const syntheticLB = {
+                id: lbId,
+                name: props.mandal_name || props.corporation_name,
+                type: 'Corporation Mandal',
+                code: props.corporation_id || '',
+                wards: wardFeatures,
+                geometry: {
+                    type: 'FeatureCollection',
+                    features: (props.ward_features || [])
+                },
+                isCorporationLocalBody: true
+            };
+            return {
+                name: props.mandal_name || props.corporation_name,
+                id: props.mandal_id,
+                isCorporationMandal: true,
+                geometry: feature,
+                local_bodies: [syntheticLB]
+            };
+        }
+
         async function init() {
             try {
                 // Load consolidated 14-district data
@@ -492,19 +557,38 @@
                     return;
                 }
                 
+                await ensureKovalamCorporationSlice(ac);
+                
                 // Find Mandal
-                const mandal = ac.mandals.find(m => cleanId(m.name) === mandalId);
-                if (!mandal) {
+                let mandal = ac.mandals.find(m => cleanId(m.name) === mandalId);
+                currentMandal = mandal;
+                if (!currentMandal) {
+                    const corpFeature = await getCorporationMandalFeature(districtId, acId, mandalId);
+                    if (corpFeature) {
+                        currentMandal = buildSyntheticMandal(corpFeature);
+                    }
+                }
+                
+                if (!currentMandal) {
                     alert('Mandal not found!');
                     return;
                 }
                 
                 // Find Local Body
-                currentLB = mandal.local_bodies.find(lb => cleanId(lb.name) === lbId);
+                const normalizedLbId = lbId || (currentMandal.isCorporationMandal ? currentMandal.local_bodies[0]?.id : null);
+                currentLB = currentMandal.local_bodies.find(lb => {
+                    if (lb.id && normalizedLbId) return lb.id === normalizedLbId;
+                    if (normalizedLbId) return cleanId(lb.name) === normalizedLbId;
+                    return false;
+                });
+                if (!currentLB && currentMandal.isCorporationMandal) {
+                    currentLB = currentMandal.local_bodies[0];
+                }
+
                 if (!currentLB) {
                     alert('Local Body not found!');
                     console.log('Looking for:', lbId);
-                    console.log('Available:', mandal.local_bodies.map(lb => cleanId(lb.name)));
+                    console.log('Available:', currentMandal.local_bodies.map(lb => lb.id || cleanId(lb.name)));
                     return;
                 }
                 
@@ -530,6 +614,67 @@
                 console.error('Error:', error);
                 alert('Error loading local body data.');
             }
+        }
+
+        async function loadKovalamCorpData() {
+            if (kovalamCorpCache !== null) {
+                return kovalamCorpCache;
+            }
+            try {
+                const response = await fetch('data/thiruvananthapuram_south/kovalam/kovalam/tvm_corporation_kovalam.geojson');
+                if (!response.ok) {
+                    kovalamCorpCache = null;
+                    return null;
+                }
+                kovalamCorpCache = await response.json();
+            } catch (error) {
+                console.warn('Unable to load TVM Corporation (Kovalam) data', error);
+                kovalamCorpCache = null;
+            }
+            return kovalamCorpCache;
+        }
+
+        async function ensureKovalamCorporationSlice(acReference) {
+            if (!(districtId === 'thiruvananthapuram_south' && acId === 'kovalam')) {
+                return;
+            }
+            if (!acReference) return;
+            
+            const mandal = acReference.mandals.find(m => cleanId(m.name) === 'kovalam');
+            if (!mandal) return;
+            
+            const exists = mandal.local_bodies.some(lb => cleanId(lb.name) === 'tvm_corporation_kovalam');
+            if (exists) return;
+            
+            const geojson = await loadKovalamCorpData();
+            if (!geojson) return;
+            
+            const wards = (geojson.features || []).map((feature, index) => ({
+                ward_number: feature?.properties?.ward_number || feature?.properties?.Ward_No || `${index + 1}`,
+                ward_name: feature?.properties?.ward_name || feature?.properties?.Ward_Name || `Ward ${index + 1}`,
+                geometry: feature.geometry
+            }));
+            
+            const lbGeometry = {
+                type: 'FeatureCollection',
+                features: (geojson.features || []).map(feature => ({
+                    type: 'Feature',
+                    properties: {
+                        ward_number: feature?.properties?.ward_number || feature?.properties?.Ward_No || '',
+                        ward_name: feature?.properties?.ward_name || feature?.properties?.Ward_Name || ''
+                    },
+                    geometry: feature.geometry
+                }))
+            };
+            
+            mandal.local_bodies.push({
+                name: 'TVM Corporation (Kovalam)',
+                id: 'tvm_corporation_kovalam',
+                code: 'C01001',
+                type: 'C',
+                wards,
+                geometry: lbGeometry
+            });
         }
         
         async function loadWardBoundaries() {
@@ -653,8 +798,7 @@
                     attributionControl: false,
                     preferCanvas: true
                 }).setView([10.8505, 76.2711], 10);
-                
-                // NO background map - only colored polygons will show
+                previewMap._previewLayerGroup = L.layerGroup().addTo(previewMap);
                 
                 // Wait for map container to be fully sized
                 setTimeout(() => {
@@ -675,12 +819,8 @@
         function updatePreviewBoundary() {
             const level = document.getElementById('boundaryLevel').value;
             
-            if (previewMap) {
-                previewMap.eachLayer(layer => {
-                    if (layer instanceof L.GeoJSON) {
-                        previewMap.removeLayer(layer);
-                    }
-                });
+            if (previewMap && previewMap._previewLayerGroup) {
+                previewMap._previewLayerGroup.clearLayers();
             }
 
             if (level === 'localbody') {
@@ -702,6 +842,40 @@
                     <span>${currentLocalBody.wards ? currentLocalBody.wards.length : 0}</span>
                 </div>
             `;
+
+            if (previewMap) {
+                const layerTarget = previewMap._previewLayerGroup || previewMap;
+                const color = '#7C3AED';
+                const bounds = [];
+
+                const drawGeometry = (geometry) => {
+                    const layer = L.geoJSON(geometry, {
+                        style: {
+                            fillColor: color,
+                            fillOpacity: 0.85,
+                            color: '#ffffff',
+                            weight: 3,
+                            opacity: 1
+                        }
+                    }).addTo(layerTarget);
+                    bounds.push(layer.getBounds());
+                };
+
+                if (currentLocalBody.geometry) {
+                    drawGeometry(currentLocalBody.geometry);
+                } else if (currentLocalBody.wards) {
+                    currentLocalBody.wards.forEach(ward => {
+                        if (ward.geometry) {
+                            drawGeometry(ward.geometry);
+                        }
+                    });
+                }
+
+                if (bounds.length > 0) {
+                    const group = L.featureGroup(bounds.map(b => L.rectangle(b)));
+                    previewMap.fitBounds(group.getBounds(), { padding: [20, 20] });
+                }
+            }
         }
 
         function renderPreviewWards() {
@@ -741,7 +915,7 @@
                                 weight: 3,
                                 opacity: 1
                             }
-                        }).addTo(previewMap);
+                        }).addTo(previewMap._previewLayerGroup || previewMap);
                         allBounds.push(layer.getBounds());
                     }
                 });
